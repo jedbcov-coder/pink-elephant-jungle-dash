@@ -51,6 +51,7 @@ This creates a production-ready `dist/` folder.
 
 - This repo is configured for **GitHub Pages**.
 - Vite is configured with the GitHub Pages base path (`/pink-elephant-jungle-dash/`) in `vite.config.js`.
-- GitHub Actions workflow `.github/workflows/static.yml` installs dependencies, builds the app, uploads `dist/`, and deploys to Pages.
+- GitHub Actions workflow `.github/workflows/static.yml` runs on pushes to `main` and manual dispatch, installs dependencies, type-checks, builds the app, verifies Pages asset paths in `dist/index.html`, uploads `dist/`, and deploys to Pages.
+- The loading screen now includes a startup diagnostic that reports when the game bundle failed to load (instead of implying JavaScript is disabled).
 - The known sandbox preview error below is benign and can be ignored:
   - `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`

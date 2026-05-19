@@ -1,3 +1,8 @@
+window.__PEJD_BOOT__ = {
+  ...(window.__PEJD_BOOT__ || {}),
+  moduleStarted: true,
+};
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 

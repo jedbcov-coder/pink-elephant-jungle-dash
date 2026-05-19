@@ -102,6 +102,20 @@
     <noscript>
       <style>.boot-status::before { content: "JavaScript is required to play. "; }</style>
     </noscript>
+    <script>
+      window.__PEJD_BOOT__ = {
+        moduleStarted: false,
+        mounted: false,
+      };
+
+      window.setTimeout(() => {
+        const bootStatus = document.querySelector(".boot-status");
+        if (!window.__PEJD_BOOT__?.moduleStarted && bootStatus) {
+          bootStatus.textContent =
+            "Game bundle did not load. This is likely a GitHub Pages deployment or asset path problem.";
+        }
+      }, 5000);
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
