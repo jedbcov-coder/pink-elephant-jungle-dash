@@ -47,11 +47,23 @@ npm run build
 
 This creates a production-ready `dist/` folder.
 
+## Build for GitHub Pages (`/docs`)
+
+```bash
+npm run build:pages
+```
+
+This creates a static `docs/` folder that is ready for GitHub Pages branch deployment.
+
 ## Deployment notes
 
-- This repo is configured for **GitHub Pages**.
+- This repo uses **GitHub Pages** with **Deploy from a branch**.
+- In GitHub repository settings, choose:
+  - **Source:** Deploy from a branch
+  - **Branch:** `main`
+  - **Folder:** `/docs`
 - Vite is configured with the GitHub Pages base path (`/pink-elephant-jungle-dash/`) in `vite.config.js`.
-- GitHub Actions workflow `.github/workflows/static.yml` runs on pushes to `main` and manual dispatch, installs dependencies, type-checks, builds the app, verifies Pages asset paths in `dist/index.html`, uploads `dist/`, and deploys to Pages.
-- The loading screen now includes a startup diagnostic that reports when the game bundle failed to load (instead of implying JavaScript is disabled).
+- The `docs/index.html` file is built output (not raw source), and references bundled assets under `/pink-elephant-jungle-dash/assets/`.
+- Add and keep `docs/.nojekyll` so GitHub Pages serves the built files directly.
 - The known sandbox preview error below is benign and can be ignored:
   - `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`
