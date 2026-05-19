@@ -51,6 +51,6 @@ This creates a production-ready `dist/` folder.
 
 - This repo is configured for **GitHub Pages**.
 - Vite uses the repository base path (`/pink-elephant-jungle-dash/`) during build in `vite.config.js`.
-- GitHub Actions workflows in `.github/workflows/deploy-pages.yml` and `.github/workflows/static.yml` run checks/build and deploy the `dist/` output for Pages.
+- GitHub Actions workflow `.github/workflows/deploy-pages.yml` installs dependencies, runs project checks, builds the app, uploads `dist/`, and deploys to Pages.
 - The known sandbox preview error below is benign and can be ignored:
   - `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`
