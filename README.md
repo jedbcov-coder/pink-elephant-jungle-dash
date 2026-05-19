@@ -31,6 +31,7 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 - **React** for the game shell and HUD overlays.
 - **Three.js** for the 3D scene, player, track, obstacles, pickups, and camera.
 - **Vite** for local development, production builds, and static output.
+- **Plain CSS entrypoint (`src/styles.css`)** for global app styles and utility classes used by the React HUD/title overlays.
 - **GitHub Actions + GitHub Pages** for deployment.
 
 ## Install Dependencies
