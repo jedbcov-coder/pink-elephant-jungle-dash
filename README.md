@@ -57,6 +57,8 @@ This creates a static `docs/` folder that is ready for GitHub Pages branch deplo
 
 ## Deployment notes
 
+> Note: In restricted environments where npm packages cannot be installed, `docs/index.html` may be a temporary placeholder until `npm run build:pages` can run with dependencies available.
+
 - This repo uses **GitHub Pages** with **Deploy from a branch**.
 - In GitHub repository settings, choose:
   - **Source:** Deploy from a branch
