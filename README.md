@@ -94,7 +94,7 @@ If the game stays on **"Loading game…"** on GitHub Pages, it usually means Jav
 
 ## Deployment
 
-Deployment is handled by `.github/workflows/deploy-pages.yml`.
+Deployment uses two workflows: `.github/workflows/deploy-pages.yml` for the production game build, and `.github/workflows/static.yml` as the single master static Pages workflow (combined from the previous duplicate static files).
 
 The same workflow validates pull requests into `main`, pushes to `main`, and manual dispatches with the scripts currently defined in `package.json`:
 
@@ -112,7 +112,8 @@ Vite is configured with a relative base path in `vite.config.js`, so the built g
 ```text
 .
 ├── .github/workflows/
-│   └── deploy-pages.yml       # GitHub Pages build and deploy workflow
+│   ├── deploy-pages.yml       # GitHub Pages build and deploy workflow
+│   └── static.yml             # Master static Pages workflow
 ├── index.html                 # Vite HTML entrypoint
 ├── src/
 │   ├── App.jsx                # Main React game component and game loop
