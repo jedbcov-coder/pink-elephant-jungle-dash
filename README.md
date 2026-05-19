@@ -4,7 +4,7 @@ Pink Elephant Jungle Runner is a playable browser game prototype built with Reac
 
 ## Play the game
 
-Live playable version: https://jedcov.github.io/pink-elephant-jungle-runner/
+Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash/
 
 ## Controls
 
@@ -24,7 +24,7 @@ Live playable version: https://jedcov.github.io/pink-elephant-jungle-runner/
 - Hidden development-only texture preview flag in `src/App.jsx` for checking generated texture thumbnails while keeping normal gameplay clean.
 - Stacked HUD counters for fruit, lives, next extra life progress, score, combo multiplier, timer, and crates.
 - Pause/settings overlay, local self-tests for scoring, fruit-life rewards, combos, collision helpers, and optional leaderboard support.
-- GitHub Pages deployment through the included workflow.
+- GitHub Pages deployment through the included workflow at `.github/workflows/deploy-pages.yml`.
 
 ## Tech Stack
 
@@ -86,6 +86,11 @@ VITE_SUPABASE_LEADERBOARD_TABLE=leaderboard
 ```
 
 Do not collect full names. The UI and database reject empty or malformed initials, and the client submits only the safe leaderboard fields. If those variables are missing, the same GitHub Pages game still works and saves scores only in the current browser as a fallback.
+
+
+## Troubleshooting
+
+If the game stays on **"Loading game…"** on GitHub Pages, it usually means JavaScript files did not load from the right URL path. This project uses a relative Vite base path (`./`) in `vite.config.js` so it works on normal GitHub Pages project URLs.
 
 ## Deployment
 
