@@ -99,6 +99,9 @@ Vite is configured with a relative base path in `vite.config.js`, so the built g
 ├── .github/workflows/
 │   ├── deploy-pages.yml       # GitHub Pages build and deploy workflow
 │   └── static.yml             # Master static Pages workflow
+├── docs/                      # Planning notes and follow-up issue drafts
+│   ├── codex-task-prompts.md  # One-task Codex prompt templates
+│   └── follow-up-issues.md    # Scoped next-step issue drafts
 ├── index.html                 # Vite HTML entrypoint
 ├── src/
 │   ├── App.jsx                # Main React game component and game loop
@@ -153,3 +156,8 @@ GitHub-ready follow-up issue drafts live in `docs/follow-up-issues.md`. Codex-re
 ## Notes for Future Cleanup
 
 The refactor keeps gameplay conservative: the main scene and update loop remain in `src/App.jsx`, while decorative jungle prop builders live in `src/game/rendering/` to avoid changing behaviour accidentally. Future work can gradually extract larger systems, such as player physics, obstacle collision handling, audio playback, and enemy updates, once there are automated browser-level regression checks.
+
+
+## Repository housekeeping
+
+Imported workspace leftovers were removed so the repo only keeps files used by the active Vite app and project docs.
