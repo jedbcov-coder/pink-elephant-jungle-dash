@@ -115,3 +115,12 @@ This project publishes to **GitHub Pages from `main` / `docs`**.
 - Add and keep `docs/.nojekyll` so GitHub Pages serves the built files directly.
 - The known sandbox preview error below is benign and can be ignored:
   - `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`
+
+
+## Deployment
+
+- GitHub Pages deploys from **`main` branch / `docs` folder**.
+- To publish changes, run `npm run build:pages`.
+- Commit and push the updated `docs` folder.
+- `.github/workflows/static.yml` was removed because this repo blocks external GitHub Actions.
+- `docs/.nojekyll` must remain present so Pages serves Vite files directly.
