@@ -676,9 +676,13 @@ export default function App() {
       treeLeaves: new THREE.DodecahedronGeometry(1, 0),
       bushClump: new THREE.DodecahedronGeometry(1, 0),
       canopy: new THREE.DodecahedronGeometry(1, 0),
-      fruit: new THREE.OctahedronGeometry(0.38, 0),
+      fruit: new THREE.SphereGeometry(0.36, 14, 12),
+      fruitLeaf: new THREE.ConeGeometry(0.11, 0.2, 5),
+      fruitStem: new THREE.CylinderGeometry(0.018, 0.02, 0.16, 5),
       unitBox: new THREE.BoxGeometry(1, 1, 1),
-      cane: new THREE.CylinderGeometry(0.22, 0.22, 1.4, 8),
+      cane: new THREE.CylinderGeometry(0.15, 0.2, 1.4, 10),
+      caneNode: new THREE.TorusGeometry(0.16, 0.032, 8, 12),
+      caneLeaf: new THREE.ConeGeometry(0.09, 0.44, 5),
       monkeyBody: new THREE.SphereGeometry(0.72, 14, 10),
       monkeyHead: new THREE.SphereGeometry(0.52, 14, 10),
       monkeyEar: new THREE.SphereGeometry(0.24, 10, 8),
@@ -686,7 +690,9 @@ export default function App() {
       monkeyEye: new THREE.SphereGeometry(0.11, 10, 8),
       monkeyTailSegment: new THREE.CylinderGeometry(0.065, 0.075, 0.44, 8),
       monkeySpike: new THREE.ConeGeometry(0.14, 0.45, 5),
-      pineapple: new THREE.TorusKnotGeometry(0.38, 0.12, 80, 14),
+      pineappleBody: new THREE.SphereGeometry(0.38, 12, 10),
+      pineappleScale: new THREE.TetrahedronGeometry(0.08, 0),
+      pineappleLeaf: new THREE.ConeGeometry(0.09, 0.34, 5),
       cueLeaf: new THREE.DodecahedronGeometry(1, 0),
       cueRipple: new THREE.TorusGeometry(1, 0.035, 5, 14),
       cueGlint: new THREE.OctahedronGeometry(0.18, 0),
@@ -1164,23 +1170,52 @@ export default function App() {
       });
     }
 
-    const fruitMat = makeMaterial("#ffd34a", { map: textures.collectibleGlow, roughness: 0.34, metalness: 0.15, emissive: "#ffd34a", emissiveIntensity: 0.82, envMapIntensity: 1.25 });
+    const fruitMat = makeMaterial("#ffb17d", { map: textures.collectibleGlow, roughness: 0.45, metalness: 0.05, emissive: "#ffc470", emissiveIntensity: 0.58, envMapIntensity: 1.05 });
+    const fruitBlushMat = makeMaterial("#ff7f8d", { roughness: 0.5, emissive: "#ffb36f", emissiveIntensity: 0.26 });
+    const fruitLeafMat = makeMaterial("#4daa52", { roughness: 0.58, emissive: "#d4b54d", emissiveIntensity: 0.24 });
+    const fruitStemMat = makeMaterial("#8a4f22", { roughness: 0.82 });
     activeLevelRef.current.fruits.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
-      const fruit = new THREE.Mesh(sharedGeometries.fruit, fruitMat);
+      const fruit = new THREE.Group();
       fruit.position.set(posOnPath.x, pos.y || 1.05, posOnPath.z);
-      fruit.castShadow = true;
+      const peach = new THREE.Mesh(sharedGeometries.fruit, fruitMat);
+      peach.castShadow = true;
+      peach.scale.set(1, 0.96, 1);
+      const blush = new THREE.Mesh(sharedGeometries.fruit, fruitBlushMat);
+      blush.position.set(0.08, -0.02, 0.18);
+      blush.scale.set(0.55, 0.42, 0.44);
+      const leaf = new THREE.Mesh(sharedGeometries.fruitLeaf, fruitLeafMat);
+      leaf.position.set(0.15, 0.31, 0.06);
+      leaf.rotation.set(-0.25, 0, -0.72);
+      const stem = new THREE.Mesh(sharedGeometries.fruitStem, fruitStemMat);
+      stem.position.set(0, 0.31, 0);
+      fruit.add(peach, blush, leaf, stem);
       scene.add(fruit);
       pickups.push({ type: "fruit", mesh: fruit, active: true, x: posOnPath.x, y: pos.y || 1.05, z: posOnPath.z, radius: PICKUPS.fruitRadius });
     });
 
-    const caneMat = new THREE.MeshStandardMaterial({ color: "#52e879", roughness: 0.45, emissive: "#154d24", emissiveIntensity: 0.7 });
+    const caneMat = makeMaterial("#9adf61", { roughness: 0.6, emissive: "#ffda74", emissiveIntensity: 0.26 });
+    const caneNodeMat = makeMaterial("#e9cb72", { roughness: 0.45, emissive: "#ffd778", emissiveIntensity: 0.35 });
+    const caneLeafMat = makeMaterial("#4f9f43", { roughness: 0.58, emissive: "#d6b85f", emissiveIntensity: 0.2 });
     activeLevelRef.current.health.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
       const group = new THREE.Group();
       group.position.set(posOnPath.x, 1.25, posOnPath.z);
       const cane = new THREE.Mesh(sharedGeometries.cane, caneMat);
-      cane.rotation.z = 0.35;
+      cane.rotation.z = 0.2;
+      cane.castShadow = true;
+      [-0.42, 0.06, 0.5].forEach((yOffset) => {
+        const node = new THREE.Mesh(sharedGeometries.caneNode, caneNodeMat);
+        node.position.y = yOffset;
+        node.rotation.x = Math.PI / 2;
+        group.add(node);
+      });
+      [-0.06, 0.22].forEach((xOffset, i) => {
+        const leaf = new THREE.Mesh(sharedGeometries.caneLeaf, caneLeafMat);
+        leaf.position.set(xOffset, 0.3 + i * 0.24, 0);
+        leaf.rotation.z = i === 0 ? -1.1 : 1.05;
+        group.add(leaf);
+      });
       const glow = createLimitedPickupLight("#54ff83", 1.6, 7);
       group.add(cane);
       if (glow) group.add(glow);
@@ -1512,14 +1547,33 @@ export default function App() {
       enemies.push({ mesh: group, active: true, baseLocalX: en.baseLocalX, z: posOnPath.z, x: posOnPath.x, patrolRange: en.patrolRange, patrolSpeed: en.patrolSpeed, w: 1.5, h: 1.5, d: 1.5 });
     });
 
-    // Golden pineapple collectibles — torus knot shape, orange glow
-    const pineappleMat = makeMaterial("#f5a623", { map: textures.collectibleGlow, emissive: "#f5a623", emissiveIntensity: 1.35, metalness: 0.8, roughness: 0.12, envMapIntensity: 1.35 });
+    // Golden pineapple collectibles — recognizable pineapple silhouette with warm collectible glow
+    const pineappleMat = makeMaterial("#f2b436", { map: textures.collectibleGlow, emissive: "#f4c34d", emissiveIntensity: 0.95, metalness: 0.16, roughness: 0.34, envMapIntensity: 1.2 });
+    const pineappleScaleMat = makeMaterial("#de9427", { roughness: 0.45, emissive: "#f0bc54", emissiveIntensity: 0.42 });
+    const pineappleLeafMat = makeMaterial("#4f9f43", { roughness: 0.58, emissive: "#dcbf58", emissiveIntensity: 0.24 });
     activeLevelRef.current.collectibles.forEach((col) => {
       const posOnPath = worldPosition(col.localX, col.z);
       const group = new THREE.Group();
       group.position.set(posOnPath.x, col.y, posOnPath.z);
-      const knot = new THREE.Mesh(sharedGeometries.pineapple, pineappleMat);
-      knot.castShadow = true;
+      const knot = new THREE.Group();
+      const body = new THREE.Mesh(sharedGeometries.pineappleBody, pineappleMat);
+      body.scale.set(1, 1.12, 1);
+      body.castShadow = true;
+      knot.add(body);
+      for (let i = 0; i < 10; i++) {
+        const scale = new THREE.Mesh(sharedGeometries.pineappleScale, pineappleScaleMat);
+        const angle = (i / 10) * Math.PI * 2;
+        scale.position.set(Math.cos(angle) * 0.3, -0.08 + ((i % 2) * 0.14), Math.sin(angle) * 0.3);
+        scale.rotation.set(0.25, angle, 0);
+        knot.add(scale);
+      }
+      for (let i = 0; i < 6; i++) {
+        const leaf = new THREE.Mesh(sharedGeometries.pineappleLeaf, pineappleLeafMat);
+        const angle = (i / 6) * Math.PI * 2;
+        leaf.position.set(Math.cos(angle) * 0.08, 0.48, Math.sin(angle) * 0.08);
+        leaf.rotation.set(-0.08, angle, 0.1);
+        knot.add(leaf);
+      }
       const glow = createLimitedPickupLight("#f5a623", 2.2, 7);
       group.add(knot);
       if (glow) group.add(glow);
