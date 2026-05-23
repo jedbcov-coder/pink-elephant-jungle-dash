@@ -114,3 +114,19 @@ body {
   .sm\:grid-cols-3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .sm\:col-span-3 { grid-column: span 3 / span 3; }
 }
+
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+  overscroll-behavior: none;
+}
+
+body.immersive-playing {
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+main.immersive-ready {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

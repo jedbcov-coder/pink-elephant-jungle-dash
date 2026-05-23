@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { Icon } from "./components/Icon.jsx";
@@ -49,6 +49,15 @@ import {
 } from "./game/movement.js";
 import { applyComboScore, applyFruitLifeCounter } from "./game/fruitLife.js";
 import { runSelfTests } from "./game/selfTests.js";
+import {
+  exportSaveData,
+  importSaveData,
+  initSaveSystem,
+  loadProfileSnapshot,
+  loadSettings,
+  resetAllSaveData,
+  saveSettings,
+} from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
 
 const nl = String.fromCharCode(10);
@@ -162,11 +171,30 @@ function createTexturePreviewPanel(textures) {
 function TouchControls({ visible, onControlChange }) {
   if (!visible) return null;
 
+  const activePointersByCodeRef = useRef(new Map());
+
+  const addPointerPress = (code, pointerId) => {
+    const activePointers = activePointersByCodeRef.current.get(code) ?? new Set();
+    activePointers.add(pointerId);
+    activePointersByCodeRef.current.set(code, activePointers);
+    onControlChange(code, true);
+  };
+
+  const removePointerPress = (code, pointerId) => {
+    const activePointers = activePointersByCodeRef.current.get(code);
+    if (!activePointers) return;
+    activePointers.delete(pointerId);
+    if (activePointers.size === 0) {
+      activePointersByCodeRef.current.delete(code);
+      onControlChange(code, false);
+    }
+  };
+
   const handlePointerDown = (event, code) => {
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    onControlChange(code, true);
+    addPointerPress(code, event.pointerId);
   };
   const handlePointerUp = (event, code) => {
     event.preventDefault();
@@ -174,12 +202,12 @@ function TouchControls({ visible, onControlChange }) {
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    onControlChange(code, false);
+    removePointerPress(code, event.pointerId);
   };
   const handlePointerCancel = (event, code) => {
     event.preventDefault();
     event.stopPropagation();
-    onControlChange(code, false);
+    removePointerPress(code, event.pointerId);
   };
 
   return (
@@ -207,6 +235,7 @@ function TouchControls({ visible, onControlChange }) {
 
 
 function requestImmersiveMobileMode() {
+  // Tries browser APIs that can hide system UI on mobile during gameplay.
   if (typeof document === "undefined" || typeof window === "undefined") return;
   const root = document.documentElement;
 
@@ -225,6 +254,19 @@ function requestImmersiveMobileMode() {
 
   requestFullscreen();
   lockLandscape();
+}
+
+
+
+function getVisualViewportHeight() {
+  if (typeof window === "undefined") return null;
+  return window.visualViewport?.height ?? window.innerHeight ?? null;
+}
+function getIsPortraitViewport() {
+  if (typeof window === "undefined") return false;
+  const orientationType = window.screen?.orientation?.type;
+  if (orientationType) return orientationType.startsWith("portrait");
+  return window.innerHeight > window.innerWidth;
 }
 
 function createBroadBananaLeafGeometry() {
@@ -258,6 +300,9 @@ function createRuinBlockClusterGeometry() {
 function readStoredAudioState() {
   if (typeof window === "undefined") return { ...DEFAULT_AUDIO_STATE };
   try {
+    const savedSettings = loadSettings();
+    const fromSaveManager = savedSettings?.audio;
+    if (fromSaveManager) return normalizeAudioState(fromSaveManager);
     const stored = window.localStorage.getItem(AUDIO_PREFS_KEY);
     return stored ? normalizeAudioState(JSON.parse(stored)) : { ...DEFAULT_AUDIO_STATE };
   } catch {
@@ -265,10 +310,14 @@ function readStoredAudioState() {
   }
 }
 
-function writeStoredAudioState(state) {
+function writeStoredAudioState(state, canPersist = true) {
   if (typeof window === "undefined") return;
+  if (!canPersist) return;
   try {
-    window.localStorage.setItem(AUDIO_PREFS_KEY, JSON.stringify(normalizeAudioState(state)));
+    const normalized = normalizeAudioState(state);
+    window.localStorage.setItem(AUDIO_PREFS_KEY, JSON.stringify(normalized));
+    const existingSettings = loadSettings() ?? {};
+    saveSettings({ ...existingSettings, audio: normalized });
   } catch {
     // Storage may be unavailable in private browsing or embedded previews.
   }
@@ -389,6 +438,14 @@ export default function App() {
   const stampedeRef = useRef({ nextStepTime: 0 });
   const gameStartTimeRef = useRef(null);
   const touchInputDetectedRef = useRef(false);
+  const immersiveRequestedRef = useRef(false);
+
+  const tryImmersiveMode = useCallback(() => {
+    immersiveRequestedRef.current = true;
+    requestImmersiveMobileMode();
+    setImmersiveReady(true);
+  }, []);
+
   const pendingLevelStartRef = useRef(null);
 
   const [started, setStarted] = useState(false);
@@ -397,6 +454,7 @@ export default function App() {
   const [debug, setDebug] = useState(false);
   const [paused, setPaused] = useState(false);
   const [sceneError, setSceneError] = useState(null);
+  const [showSaveDebugTools, setShowSaveDebugTools] = useState(false);
   const testSummaryRef = useRef("Self-tests pending");
   const [finalResults, setFinalResults] = useState(null);
   const [audioState, setAudioState] = useState(readStoredAudioState);
@@ -404,10 +462,17 @@ export default function App() {
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
   const [showInstallCard, setShowInstallCard] = useState(false);
+  const [immersiveReady, setImmersiveReady] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
+  const [showRotateOverlay, setShowRotateOverlay] = useState(false);
   const activeLevelRef = useRef(buildLevelById("level-1"));
+  const profileSnapshotRef = useRef(null);
+  const saveSystemReadyRef = useRef(false);
+  const [saveSystemReady, setSaveSystemReady] = useState(false);
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfig(nextLevelId) : null;
+  const isGameplayActive = started && !paused && !complete && !gameOver;
 
   const ui = {
     health: useRef(null),
@@ -460,6 +525,55 @@ export default function App() {
     resetGameRef.current?.({ start: true });
   }
 
+  async function handleResetSaveData() {
+    if (!window.confirm("Reset all saved data? This cannot be undone.")) return;
+    try {
+      await resetAllSaveData();
+      window.alert("Save data reset complete. The game will now reload.");
+      window.location.reload();
+    } catch (error) {
+      console.warn("Failed to reset save data.", error);
+      window.alert("Reset failed. Check the console for details.");
+    }
+  }
+
+  async function handleExportSaveData() {
+    try {
+      const payload = await exportSaveData();
+      if (!payload) throw new Error("Export payload was empty.");
+      const blob = new Blob([payload], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `pink-elephant-save-${Date.now()}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.warn("Failed to export save data.", error);
+      window.alert("Export failed. Check the console for details.");
+    }
+  }
+
+  function handleImportSaveData() {
+    try {
+      const filePicker = document.createElement("input");
+      filePicker.type = "file";
+      filePicker.accept = "application/json,.json";
+      filePicker.onchange = async (event) => {
+        const file = event.target?.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        await importSaveData(text);
+        window.alert("Import complete. The game will now reload.");
+        window.location.reload();
+      };
+      filePicker.click();
+    } catch (error) {
+      console.warn("Failed to import save data.", error);
+      window.alert("Import failed. Check the console for details.");
+    }
+  }
+
   function startAudio() {
     return audioManagerRef.current?.startAudio() ?? null;
   }
@@ -476,12 +590,9 @@ export default function App() {
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
-    let immersiveApplied = false;
-    const tryImmersiveMode = (event) => {
-      if (immersiveApplied) return;
+    const handlePointerForImmersive = (event) => {
       if (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen") return;
-      immersiveApplied = true;
-      requestImmersiveMobileMode();
+      if (!immersiveRequestedRef.current) tryImmersiveMode();
     };
 
     const query = window.matchMedia("(hover: none) and (pointer: coarse)");
@@ -500,18 +611,151 @@ export default function App() {
     updateVisibility();
     query.addEventListener?.("change", updateVisibility);
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
-    window.addEventListener("pointerdown", tryImmersiveMode, { passive: true });
+    window.addEventListener("pointerdown", handlePointerForImmersive, { passive: true });
     window.addEventListener("touchstart", showForTouchStart, { passive: true });
     window.addEventListener("touchstart", tryImmersiveMode, { passive: true });
 
     return () => {
       query.removeEventListener?.("change", updateVisibility);
       window.removeEventListener("pointerdown", showForTouchInput);
-      window.removeEventListener("pointerdown", tryImmersiveMode);
+      window.removeEventListener("pointerdown", handlePointerForImmersive);
       window.removeEventListener("touchstart", showForTouchStart);
       window.removeEventListener("touchstart", tryImmersiveMode);
     };
+  }, [tryImmersiveMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const refreshImmersiveMode = () => {
+      if (!immersiveRequestedRef.current || !startedRef.current || pausedRef.current || completeRef.current || gameOverRef.current) return;
+      window.setTimeout(() => {
+        tryImmersiveMode();
+      }, 120);
+    };
+
+    const updateViewportHeight = () => setViewportHeight(getVisualViewportHeight());
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") refreshImmersiveMode();
+      updateViewportHeight();
+    };
+
+    const viewport = window.visualViewport;
+
+    window.addEventListener("focus", refreshImmersiveMode);
+    window.addEventListener("pageshow", refreshImmersiveMode);
+    window.addEventListener("orientationchange", refreshImmersiveMode);
+    window.addEventListener("resize", updateViewportHeight);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    viewport?.addEventListener?.("resize", updateViewportHeight);
+
+    return () => {
+      window.removeEventListener("focus", refreshImmersiveMode);
+      window.removeEventListener("pageshow", refreshImmersiveMode);
+      window.removeEventListener("orientationchange", refreshImmersiveMode);
+      window.removeEventListener("resize", updateViewportHeight);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      viewport?.removeEventListener?.("resize", updateViewportHeight);
+    };
+  }, [tryImmersiveMode]);
+
+  useEffect(() => {
+    if (started && !paused && !complete && !gameOver) {
+      tryImmersiveMode();
+    }
+  }, [complete, gameOver, paused, started, tryImmersiveMode]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const body = document.body;
+    const isPlaying = started && !paused && !complete && !gameOver;
+    if (isPlaying) body.classList.add("immersive-playing");
+    else body.classList.remove("immersive-playing");
+    return () => body.classList.remove("immersive-playing");
+  }, [complete, gameOver, paused, started]);
+
+  useEffect(() => {
+    setViewportHeight(getVisualViewportHeight());
   }, []);
+
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const pointerQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
+    const updateRotateOverlay = () => {
+      const isLikelyMobile = pointerQuery.matches || touchInputDetectedRef.current;
+      setShowRotateOverlay(isLikelyMobile && getIsPortraitViewport());
+    };
+
+    const onOrientationChange = () => updateRotateOverlay();
+    const onResize = () => updateRotateOverlay();
+    const onTouchStart = () => {
+      touchInputDetectedRef.current = true;
+      updateRotateOverlay();
+    };
+
+    updateRotateOverlay();
+    pointerQuery.addEventListener?.("change", updateRotateOverlay);
+    window.addEventListener("orientationchange", onOrientationChange);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+
+    return () => {
+      pointerQuery.removeEventListener?.("change", updateRotateOverlay);
+      window.removeEventListener("orientationchange", onOrientationChange);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("touchstart", onTouchStart);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (started && !paused && !complete && !gameOver && immersiveRequestedRef.current) setImmersiveReady(true);
+    if (!started || paused || complete || gameOver) setImmersiveReady(false);
+  }, [complete, gameOver, paused, started]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const mount = mountRef.current;
+    if (!mount) return undefined;
+    mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh";
+    return undefined;
+  }, [viewportHeight]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !isGameplayActive) return undefined;
+
+    let lastTouchStartAt = 0;
+    const blockTouchGesture = (event) => {
+      event.preventDefault();
+    };
+    const blockDoubleTapZoom = (event) => {
+      const now = performance.now();
+      if (now - lastTouchStartAt < 320) event.preventDefault();
+      lastTouchStartAt = now;
+    };
+
+    mount.addEventListener("touchmove", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchend", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchcancel", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchstart", blockDoubleTapZoom, { passive: false });
+
+    return () => {
+      mount.removeEventListener("touchmove", blockTouchGesture);
+      mount.removeEventListener("touchend", blockTouchGesture);
+      mount.removeEventListener("touchcancel", blockTouchGesture);
+      mount.removeEventListener("touchstart", blockDoubleTapZoom);
+    };
+  }, [isGameplayActive]);
+
+  useEffect(() => {
+    if (!started || paused || complete || gameOver) return;
+    const reapply = () => tryImmersiveMode();
+    const timer = window.setInterval(reapply, 5000);
+    return () => window.clearInterval(timer);
+  }, [complete, gameOver, paused, started, tryImmersiveMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -576,7 +820,7 @@ export default function App() {
   function applyAudioState(nextState) {
     const normalized = normalizeAudioState(nextState);
     audioManagerRef.current?.setAudioState(normalized);
-    writeStoredAudioState(normalized);
+    writeStoredAudioState(normalized, saveSystemReadyRef.current);
     return normalized;
   }
 
@@ -605,8 +849,34 @@ export default function App() {
 
   useEffect(() => {
     audioManagerRef.current?.setAudioState(audioState);
-    writeStoredAudioState(audioState);
+    writeStoredAudioState(audioState, saveSystemReadyRef.current);
   }, [audioState]);
+
+  useEffect(() => {
+    let disposed = false;
+
+    const initializeSaveSystem = async () => {
+      try {
+        await initSaveSystem();
+        const savedSettings = loadSettings();
+        const savedAudioState = savedSettings?.audio;
+        if (savedAudioState) setAudioState(normalizeAudioState(savedAudioState));
+        profileSnapshotRef.current = loadProfileSnapshot();
+      } catch (error) {
+        console.warn("Save system init failed. Continuing with defaults.", error);
+      } finally {
+        if (!disposed) {
+          saveSystemReadyRef.current = true;
+          setSaveSystemReady(true);
+        }
+      }
+    };
+
+    initializeSaveSystem();
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   useEffect(() => {
     function beginTitleThemeFromGesture() {
@@ -624,6 +894,7 @@ export default function App() {
 
 
   useEffect(() => {
+    if (!saveSystemReady) return undefined;
     const mount = mountRef.current;
     if (!mount) return undefined;
 
@@ -3122,7 +3393,7 @@ export default function App() {
       if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
       audioManagerRef.current?.dispose();
     };
-  }, [currentLevelId]);
+  }, [currentLevelId, saveSystemReady]);
 
   const startNewGame = () => {
     stopTitleTheme(0.18);
@@ -3154,8 +3425,8 @@ export default function App() {
   };
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      <div ref={mountRef} className="absolute inset-0" />
+    <main className={`relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
+      <div ref={mountRef} className={`absolute inset-0 ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
       {sceneError && (
         <section className="app-fallback-screen absolute inset-0 z-30 flex items-center justify-center px-6">
@@ -3187,7 +3458,7 @@ export default function App() {
         </div>
       )}
       {started && !complete && !gameOver && (
-        <div className="hud-top-strip pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
+        <div className="hud-top-strip hud-safe-top pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
           <div className="hud-counter-stack flex flex-col gap-2">
             <div className="hud-icon-row hud-panel-dark">
               <span className="hud-icon-bubble" aria-hidden="true">🍋</span>
@@ -3244,7 +3515,7 @@ export default function App() {
 
       {/* SIDE HUD PANELS — energy + depth */}
       {started && !complete && !gameOver && (
-        <div className="hud-side-panels-row pointer-events-none absolute left-3 right-3 top-12 z-20">
+        <div className="hud-side-panels-row hud-safe-inline pointer-events-none absolute left-3 right-3 top-12 z-20">
           <div className="hud-primary-panel">
             <div className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
               <Icon label="⚡" size={12} /> Energy
@@ -3466,6 +3737,58 @@ export default function App() {
                 {audioState.muted ? "Unmute" : "Mute"}
               </button>
             </div>
+            <div className="mt-5 border-t border-amber-100/20 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowSaveDebugTools((value) => !value)}
+                className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-amber-100 transition hover:bg-white/20"
+              >
+                {showSaveDebugTools ? "Hide Save Tools" : "Show Save Tools"}
+              </button>
+              {showSaveDebugTools && (
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportSaveData}
+                    className="rounded-full bg-emerald-200 px-4 py-2 text-xs font-black text-emerald-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Export Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleImportSaveData}
+                    className="rounded-full bg-sky-200 px-4 py-2 text-xs font-black text-sky-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Import Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetSaveData}
+                    className="rounded-full bg-rose-300 px-4 py-2 text-xs font-black text-rose-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Reset All Save
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {showRotateOverlay && (
+        <section
+          className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-6"
+          style={{ background: "rgba(3, 10, 6, 0.82)", backdropFilter: "blur(3px)" }}
+          role="status"
+          aria-live="polite"
+        >
+          <div
+            className="rounded-[1.5rem] p-6 text-center text-emerald-50"
+            style={{ background: "rgba(12,20,10,0.92)", border: "1px solid rgba(134,239,172,0.32)", maxWidth: "22rem" }}
+          >
+            <div className="text-4xl" aria-hidden="true">📱↻</div>
+            <h2 className="display-title mt-2 text-2xl font-black text-emerald-200">Rotate your device</h2>
+            <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">This game plays best in landscape mode. Turn your device sideways to continue.</p>
           </div>
         </section>
       )}

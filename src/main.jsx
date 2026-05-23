@@ -120,6 +120,7 @@ if ("serviceWorker" in navigator) {
     try {
       const swUrl = `${import.meta.env.BASE_URL}service-worker.js?build=${__APP_VERSION__}`;
       const registration = await navigator.serviceWorker.register(swUrl, { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register(swUrl);
 
       const promptForUpdate = () => {
         showUpdateBanner(() => {

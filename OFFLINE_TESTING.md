@@ -17,3 +17,19 @@ If you still see stale files:
 - DevTools → Application → **Service Workers**: click **Unregister**.
 - DevTools → Application → **Storage**: click **Clear site data**.
 - Reopen the game online once, then retest offline.
+
+If you still see stale files:
+- DevTools → Application → **Service Workers**: click **Unregister**.
+- DevTools → Application → **Storage**: click **Clear site data**.
+- Reopen the game online once, then retest offline.
+
+
+## Save Data QA
+
+1. Change a setting, refresh, confirm it persists.
+2. Complete a run, refresh, confirm best score persists.
+3. Unlock/select a skin, refresh, confirm unlock + selection persist.
+4. Trigger an achievement, refresh, confirm it still appears.
+5. Clear save with reset utility, confirm defaults restore correctly.
+6. Private/incognito mode note: some browsers limit storage, so persistence can behave differently.
+

@@ -21,6 +21,15 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 ## Recent update
 
 - Improved service-worker update reliability by registering with `updateViaCache: "none"`, which helps browsers fetch fresh worker code during new deployments.
+- Added save utility controls for debugging: reset all save data, export save JSON (settings/profile/IndexedDB records), and import save JSON with schema validation + migration before safe replacement.
+- App startup now initializes the save system before gameplay loops begin, safely loads settings/profile snapshot, applies saved audio preferences through the save manager path, and falls back to defaults if loading fails.
+- Added explicit mobile UI breakpoints (small phone / large phone / tablet) and switched touch control + HUD sizing to responsive scale variables with capped font/icon sizes so gameplay UI stays readable without becoming tiny or oversized.
+- Enforced larger minimum touch target sizes for on-screen controls (44px+ baseline, larger on phones/tablets) and adjusted landscape safe-area placement so control clusters and side badges sit farther from thumb conflict zones and notches.
+- Added a manual multi-device mobile playtest checklist for readability and touch comfort validation across small phones, large phones, and tablets.
+- Added notch/cutout-safe HUD inset rules for top counters, pause controls, side panels, and touch controls so landscape-left and landscape-right keep critical UI inside tappable safe zones on Android phones.
+- Scoped touch gesture blocking to gameplay area only, added stronger double-tap/pinch/scroll prevention on the game canvas container, and improved multi-touch button tracking so movement + action combos work reliably.
+- Improved mobile immersive gameplay handling: the game now requests fullscreen on first touch/start, re-applies immersive mode after resume/app-switch/orientation changes, hides non-essential debug chrome while actively playing, and uses a safe viewport-height fallback so HUD elements stay visible on browsers that refuse full immersive mode.
+- Added a portrait fallback overlay ("Rotate your device") for phones/tablets that ignore orientation lock, while desktop windowed play remains unchanged.
 - Improved offline reliability: service worker now uses navigation fallback + broader asset caching and shows an in-app update banner so players can refresh to new deployments without being stuck on stale cache.
 - Added a professional in-game **Install Game** card on the start screen that only appears when `beforeinstallprompt` is available, hides after install or dismissal, and stores a `pwaInstallDismissed` local setting so players are not nagged.
 - Tuned peach collectible colors/glow so they read as soft pastel orange with a red blush instead of bright white glowing orbs.
@@ -54,6 +63,100 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 - Rebuilt river crocodiles into a clearer low-poly silhouette (longer snout, raised eye bumps, dorsal scutes, tapered bent tail, and leg stubs) and added subtle head-bob motion so they read better from the gameplay chase camera.
 
 - Recalibrated the Snake Gate belly-slide clearance slightly upward so proper belly-slides pass reliably again while standing still collides.
+
+
+- Added a new `src/game/save/saveManager.js` persistence entry point with safe localStorage JSON handling plus IndexedDB stores for scores, achievements, and progression events.
+
+- Added a centralized save schema (`saveSchema.js`) with versioned defaults and safe migration so old or partial local save data is auto-completed without deleting unknown fields.
+
+## Mobile touch regression checklist
+
+
+## Save Data QA
+
+Quick beginner-friendly checks for save persistence:
+
+1. Start the game, change one setting, refresh the page, and confirm the setting stayed changed.
+2. Finish a run, refresh the page, and confirm your best score is still there.
+3. Unlock a skin, refresh the page, and confirm the skin is still unlocked and still selected.
+4. Trigger an achievement, refresh the page, and confirm the achievement still appears.
+5. Use the reset/clear save utility, then confirm the game returns to default settings and default progress.
+6. Repeat one quick save test in a browser private/incognito window and note that storage can be limited by browser rules.
+
+Use this quick checklist after gameplay input changes:
+
+- Tap controls: each touch button responds instantly.
+- Hold controls: charge/slide stay active while your finger stays down.
+- Swipe across controls: no stuck input after finger leaves a button.
+- Multi-touch combo: hold movement + tap Jump/Smash at the same time.
+- Virtual joystick/buttons area: no page scroll, pull-to-refresh, pinch zoom, or double-tap zoom while playing.
+- Pause/resume: pausing clears held inputs; resuming does not keep phantom movement.
+- Menus/settings: when not actively playing, UI panels can still scroll if content grows.
+
+Device validation target:
+
+- Android Chrome (latest stable)
+- iOS Safari (latest stable)
+
+UI readability and comfort playtest sizes:
+
+- Small phone (example width: ~360px)
+- Large phone (example width: ~414px)
+- Tablet (example width: ~768px)
+
+
+## Mobile Experience
+
+This section is the release checklist for mobile quality. Use it before publishing updates.
+
+### Short checklist
+
+- [ ] Orientation: game is playable in landscape, and portrait shows the rotate-device helper when needed.
+- [ ] Fullscreen persistence: immersive/fullscreen mode returns after app switching, notifications, or resume.
+- [ ] Touch reliability: taps, holds, and multi-touch combos are stable with no stuck inputs.
+- [ ] Notch safety: HUD and controls stay inside safe areas on cutout/notch devices.
+- [ ] UI readability: score, energy, and control labels are readable on small phone, large phone, and tablet sizes.
+
+### Key flow test sequence
+
+Run this exact flow on each test device:
+
+1. Cold launch the game from a closed state.
+2. Start a run and restart the level.
+3. Put the app/browser in background, then return to foreground.
+4. Rotate the device (landscape-left and landscape-right).
+5. Receive a notification while the game is open (or simulate interruption), then return to the game.
+6. Confirm controls still respond correctly and HUD is still visible/readable.
+
+### Glitch log format (required)
+
+Log every visual or input glitch in this format:
+
+- Device model:
+- OS version:
+- Browser or app-wrapper version (for example: Chrome 125, Safari 18, WebView build):
+- Flow step where issue happened:
+- What happened:
+- How often (always / sometimes / once):
+- Screenshot or short recording captured: yes/no
+
+### Fix order (priority)
+
+Fix items in this order:
+
+1. Input mistakes (missed taps, stuck buttons, wrong action triggers).
+2. Hidden or blocked controls/HUD (safe-area or overlap issues).
+3. Fullscreen/orientation recovery issues.
+4. Cosmetic polish (spacing, non-blocking visual tweaks).
+
+### Re-test gate before release
+
+Before release, re-test every fixed mobile issue on at least **two real devices** (not only desktop emulation), then confirm no regressions in the key flow sequence above.
+
+### Known mobile limits
+
+- Some browsers can ignore fullscreen or orientation lock requests because of platform policy; the game falls back to a safe in-game layout and rotate guidance when needed.
+- Small UI differences can happen between standalone PWA mode and normal browser-tab mode.
 
 ## Repo safety settings (recommended)
 
