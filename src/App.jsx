@@ -3362,7 +3362,7 @@ export default function App() {
         </div>
       )}
       {started && !complete && !gameOver && (
-        <div className="hud-top-strip pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
+        <div className="hud-top-strip hud-safe-top pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
           <div className="hud-counter-stack flex flex-col gap-2">
             <div className="hud-icon-row hud-panel-dark">
               <span className="hud-icon-bubble" aria-hidden="true">🍋</span>
@@ -3419,7 +3419,7 @@ export default function App() {
 
       {/* SIDE HUD PANELS — energy + depth */}
       {started && !complete && !gameOver && (
-        <div className="hud-side-panels-row pointer-events-none absolute left-3 right-3 top-12 z-20">
+        <div className="hud-side-panels-row hud-safe-inline pointer-events-none absolute left-3 right-3 top-12 z-20">
           <div className="hud-primary-panel">
             <div className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
               <Icon label="⚡" size={12} /> Energy
