@@ -7,6 +7,17 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
+
+## Install as an app (PWA)
+
+This game can now be installed from Chrome/Edge using the browser install button when opened from GitHub Pages.
+
+- Manifest file: `manifest.webmanifest`
+- Service worker: `service-worker.js`
+- Install icons: all manifest icon entries now reuse the existing `favicon.png` file (no extra image files needed)
+
+If you publish updates and a browser shows an older cached version, follow `PWA_TESTING.md` to clear cache/service worker data.
+
 ## Recent update
 
 - Reworked the in-game side HUD into one responsive row that wraps safely and stacks on smaller screens, so Energy and Trail Depth cards stay readable and never overlap Time/Score center HUD elements.

@@ -51,3 +51,10 @@ if (!rootElement) {
 createRoot(rootElement).render(
   React.createElement(React.StrictMode, null, React.createElement(AppErrorBoundary, null, React.createElement(App))),
 );
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+      console.warn("Service worker registration failed", error);
+    });
+  });
+}
