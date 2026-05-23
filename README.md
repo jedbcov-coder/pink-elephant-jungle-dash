@@ -85,28 +85,10 @@ npm run build
 
 This creates a production-ready `dist/` folder.
 
-## Build for GitHub Pages
-
-```bash
-npm run build
-```
-
-This creates a static `dist/` folder. The GitHub Actions workflow uploads this folder and deploys it to GitHub Pages.
-
-## Deployment notes
-
-> Note: In restricted environments where npm packages cannot be installed, production assets may be stale until `npm run build` can run with dependencies available.
-
-- This repo uses **GitHub Pages GitHub Actions deployment** (`.github/workflows/deploy-pages.yml`).
-- The workflow runs `npm run build`, uploads `dist/`, then deploys with `actions/deploy-pages`.
-- Vite is configured with the GitHub Pages base path (`/pink-elephant-jungle-dash/`) in `vite.config.js`.
-- Built output references bundled assets under `/pink-elephant-jungle-dash/assets/`.
-- The known sandbox preview error below is benign and can be ignored:
-  - `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`
-
-
 ## Deployment
 
-- GitHub Pages deploys from the **Deploy to GitHub Pages** workflow.
-- To publish changes, push to `main` (or run the workflow manually from the Actions tab).
-- The workflow installs dependencies, runs `npm run build`, uploads `dist`, and deploys it to Pages.
+- GitHub Pages deploys from **main / docs**.
+- To publish changes, run `npm run build:pages`.
+- Commit and push the updated `docs/` folder.
+- `.github/workflows/static.yml` was removed because this repository blocks external GitHub Actions runs.
+- `docs/.nojekyll` must remain present as an empty file so GitHub Pages serves the Vite output correctly.
