@@ -1,0 +1,194 @@
+const SETTINGS_STORAGE_KEY = 'pinkElephant.settings';
+const PROFILE_STORAGE_KEY = 'pinkElephant.profile';
+const META_STORAGE_KEY = 'pinkElephant.meta';
+
+const DB_NAME = 'pinkElephantGameDB';
+const DB_VERSION = 1;
+
+let dbPromise = null;
+
+function safeParseJSON(rawValue, fallbackValue) {
+  if (!rawValue) return fallbackValue;
+
+  try {
+    return JSON.parse(rawValue);
+  } catch (error) {
+    console.warn('Failed to parse saved JSON. Falling back to default data.', error);
+    return fallbackValue;
+  }
+}
+
+function safeStringifyJSON(value) {
+  try {
+    return JSON.stringify(value);
+  } catch (error) {
+    console.warn('Failed to serialize save data.', error);
+    return null;
+  }
+}
+
+export function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return safeParseJSON(raw, null);
+  } catch (error) {
+    console.warn('Failed to read settings from localStorage.', error);
+    return null;
+  }
+}
+
+export function saveSettings(settings) {
+  try {
+    const serialized = safeStringifyJSON(settings);
+    if (serialized === null) return false;
+    localStorage.setItem(SETTINGS_STORAGE_KEY, serialized);
+    return true;
+  } catch (error) {
+    console.warn('Failed to save settings to localStorage.', error);
+    return false;
+  }
+}
+
+export function loadProfileSnapshot() {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    return safeParseJSON(raw, null);
+  } catch (error) {
+    console.warn('Failed to read profile snapshot from localStorage.', error);
+    return null;
+  }
+}
+
+export function saveProfileSnapshot(profileSnapshot) {
+  try {
+    const serialized = safeStringifyJSON(profileSnapshot);
+    if (serialized === null) return false;
+    localStorage.setItem(PROFILE_STORAGE_KEY, serialized);
+    return true;
+  } catch (error) {
+    console.warn('Failed to save profile snapshot to localStorage.', error);
+    return false;
+  }
+}
+
+function openDatabase() {
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+
+      if (!db.objectStoreNames.contains('scores')) {
+        const scoreStore = db.createObjectStore('scores', { keyPath: 'id', autoIncrement: true });
+        scoreStore.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+
+      if (!db.objectStoreNames.contains('achievements')) {
+        const achievementStore = db.createObjectStore('achievements', { keyPath: 'id' });
+        achievementStore.createIndex('achievementId', 'achievementId', { unique: true });
+      }
+
+      if (!db.objectStoreNames.contains('progressionEvents')) {
+        db.createObjectStore('progressionEvents', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Failed to open IndexedDB.'));
+  });
+
+  return dbPromise;
+}
+
+function runTransaction(storeName, mode, operation) {
+  return openDatabase().then((db) =>
+    new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, mode);
+      const store = transaction.objectStore(storeName);
+
+      let operationResult;
+      try {
+        operationResult = operation(store, resolve, reject);
+      } catch (error) {
+        reject(error);
+        return;
+      }
+
+      transaction.onerror = () => reject(transaction.error || new Error('IndexedDB transaction failed.'));
+
+      if (operationResult && typeof operationResult.onsuccess === 'function') {
+        operationResult.onsuccess = () => resolve(operationResult.result);
+        operationResult.onerror = () => reject(operationResult.error || new Error('IndexedDB request failed.'));
+      }
+    })
+  );
+}
+
+export async function initSaveSystem() {
+  await openDatabase();
+
+  // Keep a small metadata heartbeat so future migrations can inspect app-level info.
+  const meta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), {});
+  const nextMeta = {
+    ...meta,
+    lastInitAt: Date.now(),
+    saveSystemVersion: 1,
+  };
+
+  const serialized = safeStringifyJSON(nextMeta);
+  if (serialized !== null) {
+    localStorage.setItem(META_STORAGE_KEY, serialized);
+  }
+}
+
+export async function addScoreEntry(scoreEntry) {
+  const entry = {
+    ...scoreEntry,
+    createdAt: scoreEntry?.createdAt || Date.now(),
+  };
+
+  return runTransaction('scores', 'readwrite', (store) => store.add(entry));
+}
+
+export async function getTopScores(limit = 10) {
+  const max = Math.max(1, Number(limit) || 10);
+
+  return runTransaction('scores', 'readonly', (store, resolve, reject) => {
+    const index = store.index('createdAt');
+    const request = index.openCursor(null, 'prev');
+    const rows = [];
+
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor || rows.length >= max) {
+        resolve(rows);
+        return;
+      }
+
+      rows.push(cursor.value);
+      cursor.continue();
+    };
+
+    request.onerror = () => reject(request.error || new Error('Failed to load scores.'));
+  });
+}
+
+export async function unlockAchievement(achievementRecord) {
+  return runTransaction('achievements', 'readwrite', (store) => store.put(achievementRecord));
+}
+
+export async function listAchievements() {
+  return runTransaction('achievements', 'readonly', (store) => store.getAll());
+}
+
+export async function addProgressionEvent(event) {
+  return runTransaction('progressionEvents', 'readwrite', (store) => store.add(event));
+}
+
+export {
+  SETTINGS_STORAGE_KEY,
+  PROFILE_STORAGE_KEY,
+  META_STORAGE_KEY,
+};

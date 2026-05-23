@@ -62,6 +62,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 - Recalibrated the Snake Gate belly-slide clearance slightly upward so proper belly-slides pass reliably again while standing still collides.
 
 
+- Added a new `src/game/save/saveManager.js` persistence entry point with safe localStorage JSON handling plus IndexedDB stores for scores, achievements, and progression events.
+
 ## Mobile touch regression checklist
 
 Use this quick checklist after gameplay input changes:
