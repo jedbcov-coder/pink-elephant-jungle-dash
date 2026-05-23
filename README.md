@@ -20,6 +20,9 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Added explicit mobile UI breakpoints (small phone / large phone / tablet) and switched touch control + HUD sizing to responsive scale variables with capped font/icon sizes so gameplay UI stays readable without becoming tiny or oversized.
+- Enforced larger minimum touch target sizes for on-screen controls (44px+ baseline, larger on phones/tablets) and adjusted landscape safe-area placement so control clusters and side badges sit farther from thumb conflict zones and notches.
+- Added a manual multi-device mobile playtest checklist for readability and touch comfort validation across small phones, large phones, and tablets.
 - Added notch/cutout-safe HUD inset rules for top counters, pause controls, side panels, and touch controls so landscape-left and landscape-right keep critical UI inside tappable safe zones on Android phones.
 - Scoped touch gesture blocking to gameplay area only, added stronger double-tap/pinch/scroll prevention on the game canvas container, and improved multi-touch button tracking so movement + action combos work reliably.
 - Improved mobile immersive gameplay handling: the game now requests fullscreen on first touch/start, re-applies immersive mode after resume/app-switch/orientation changes, hides non-essential debug chrome while actively playing, and uses a safe viewport-height fallback so HUD elements stay visible on browsers that refuse full immersive mode.
@@ -75,6 +78,12 @@ Device validation target:
 
 - Android Chrome (latest stable)
 - iOS Safari (latest stable)
+
+UI readability and comfort playtest sizes:
+
+- Small phone (example width: ~360px)
+- Large phone (example width: ~414px)
+- Tablet (example width: ~768px)
 
 ## Repo safety settings (recommended)
 
