@@ -21,6 +21,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 ## Recent update
 
 - Upgraded offline mode so the service worker automatically caches Vite build assets from `.vite/manifest.json`, keeps GitHub Pages subfolder paths working, and prompts players to reload when a new version is ready.
+- Added an in-app **Update available** banner with **Refresh** or **Later**, so players can safely move to new deployments without being stuck on old cached files.
 - Added a short `OFFLINE_TESTING.md` checklist for verifying install, offline play, and update behavior.
 
 - Simplified PWA icon setup to reuse the existing `public/favicon.png` directly in the manifest and service worker cache, so no generated PNG files are required in Codex workflows.
