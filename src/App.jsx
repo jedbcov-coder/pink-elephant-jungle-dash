@@ -204,6 +204,28 @@ function TouchControls({ visible, onControlChange }) {
   );
 }
 
+
+function requestImmersiveMobileMode() {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  const root = document.documentElement;
+
+  const requestFullscreen = async () => {
+    if (!document.fullscreenElement && root.requestFullscreen) {
+      await root.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+    }
+  };
+
+  const lockLandscape = async () => {
+    const orientation = window.screen?.orientation;
+    if (orientation?.lock) {
+      await orientation.lock("landscape").catch(() => {});
+    }
+  };
+
+  requestFullscreen();
+  lockLandscape();
+}
+
 function createBroadBananaLeafGeometry() {
   const shape = new THREE.Shape();
   shape.moveTo(0, 1.28);
@@ -451,6 +473,14 @@ export default function App() {
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
+    let immersiveApplied = false;
+    const tryImmersiveMode = (event) => {
+      if (immersiveApplied) return;
+      if (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen") return;
+      immersiveApplied = true;
+      requestImmersiveMobileMode();
+    };
+
     const query = window.matchMedia("(hover: none) and (pointer: coarse)");
     const updateVisibility = () => setTouchControlsVisible(query.matches || touchInputDetectedRef.current);
     const showForTouchInput = (event) => {
@@ -467,12 +497,16 @@ export default function App() {
     updateVisibility();
     query.addEventListener?.("change", updateVisibility);
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
+    window.addEventListener("pointerdown", tryImmersiveMode, { passive: true });
     window.addEventListener("touchstart", showForTouchStart, { passive: true });
+    window.addEventListener("touchstart", tryImmersiveMode, { passive: true });
 
     return () => {
       query.removeEventListener?.("change", updateVisibility);
       window.removeEventListener("pointerdown", showForTouchInput);
+      window.removeEventListener("pointerdown", tryImmersiveMode);
       window.removeEventListener("touchstart", showForTouchStart);
+      window.removeEventListener("touchstart", tryImmersiveMode);
     };
   }, []);
 

@@ -72,6 +72,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Main features
 
+- Mobile-native tuning: landscape orientation lock attempt, immersive fullscreen request on first touch, notch/safe-area padding, and zoom-disabled viewport for stable game controls
 - 3D jungle runner gameplay with a pink elephant character
 - Softer monkey enemy look (removed banana-like hand shapes for a friendlier silhouette)
 - Animated crocodiles that snap open and closed with visible white teeth when you get close

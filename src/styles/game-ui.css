@@ -9,6 +9,23 @@ body {
   background: #0c2217;
 }
 
+html,
+body,
+#root {
+  overscroll-behavior: none;
+}
+
+body {
+  padding-top: env(safe-area-inset-top, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
+}
+
+canvas {
+  touch-action: none;
+}
+
 /* Local Tailwind-style utility subset used by the game UI.
    Keeping these styles local makes the GitHub Pages preview render
    correctly without requiring a Tailwind build step or CDN script. */
