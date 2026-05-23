@@ -3,14 +3,15 @@ import { CONFIG, MOVEMENT } from "../config.js";
 export const LEVEL_3 = {
   id: "level-3",
   name: "Night Run",
-  background: "dusk-temple-run",
+  background: "sunset-temple-run",
   theme: {
-    fog: "#2a1638",
-    ambient: "#5a2a74",
-    key: "#ff9d57",
-    fill: "#ff6fa8",
-    accent: "#b58bff",
-    uiGlow: "#ffb574",
+    background: "#ff8a3d",
+    fog: "#ff9a4e",
+    ambient: "#ffbf7a",
+    key: "#ff6fb4",
+    fill: "#ff9ccf",
+    accent: "#ffd2eb",
+    uiGlow: "#ff8fc4",
   },
   speed: { ...MOVEMENT, maxSpeed: 42 },
   course: {
