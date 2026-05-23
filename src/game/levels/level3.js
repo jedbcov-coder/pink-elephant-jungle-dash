@@ -1,18 +1,11 @@
 import { CONFIG, MOVEMENT } from "../config.js";
+import { LEVEL_2 } from "./level2.js";
 
 export const LEVEL_3 = {
   id: "level-3",
   name: "Night Run",
   background: "sunset-temple-run",
-  theme: {
-    background: "#7a56c9",
-    fog: "#8f73d9",
-    ambient: "#b19ce8",
-    key: "#f7f3ff",
-    fill: "#ded6ff",
-    accent: "#ffffff",
-    uiGlow: "#f3eeff",
-  },
+  theme: LEVEL_2.theme,
   speed: { ...MOVEMENT, maxSpeed: 42 },
   course: {
     floorLength: 1500,

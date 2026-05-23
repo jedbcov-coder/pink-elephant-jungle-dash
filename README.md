@@ -72,7 +72,7 @@ If you publish updates and a browser shows an older cached version, follow `PWA_
 - Hazard dodging and life-based runs
 - Fruit collection, hazard dodging, and life-based runs with fallen-tree jump obstacles wrapped in vines and moss
 - Multiple levels with increasing distance and speed
-- Level 2 now uses an orange sunset sky with pink highlights, and Level 3 (Night Run) carries the purple moonlit color set
+- Level 2 and Level 3 now share the same sunset color palette for a consistent look
 - Keyboard and touch controls for desktop and mobile
 - Pause/settings overlay and audio controls
 
