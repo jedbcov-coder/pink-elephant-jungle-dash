@@ -1,7 +1,6 @@
 import { CONFIG, MOVEMENT } from "../config.js";
 
-// Add Level 2 by creating `level2.js` with the same shape.
-// Keep gameplay identical by reusing the same keys and units.
+// Level 1 gameplay values are intentionally fixed; only progression uses `nextLevel`.
 export const LEVEL_1 = {
   id: "level-1",
   name: "Level 1",
