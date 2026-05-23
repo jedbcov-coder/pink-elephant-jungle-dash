@@ -1991,6 +1991,12 @@ export default function App() {
         ny = body.y;
       }
 
+      const groundY = CONFIG.playerSize / 2;
+      if (body.grounded) {
+        ny = groundY;
+        body.yVelocity = 0;
+      }
+
       const pBox = playerBox(nx, ny, nz, body.slideTimer > 0, playerAabb);
       const currentBox = playerBox(body.x, body.y, body.z, body.slideTimer > 0, currentAabb);
       const isReversing = playing && body.speed < 0 && nz > body.z;
