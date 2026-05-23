@@ -49,7 +49,15 @@ import {
 } from "./game/movement.js";
 import { applyComboScore, applyFruitLifeCounter } from "./game/fruitLife.js";
 import { runSelfTests } from "./game/selfTests.js";
-import { initSaveSystem, loadProfileSnapshot, loadSettings, saveSettings } from "./game/save/saveManager.js";
+import {
+  exportSaveData,
+  importSaveData,
+  initSaveSystem,
+  loadProfileSnapshot,
+  loadSettings,
+  resetAllSaveData,
+  saveSettings,
+} from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
 
 const nl = String.fromCharCode(10);
@@ -446,6 +454,7 @@ export default function App() {
   const [debug, setDebug] = useState(false);
   const [paused, setPaused] = useState(false);
   const [sceneError, setSceneError] = useState(null);
+  const [showSaveDebugTools, setShowSaveDebugTools] = useState(false);
   const testSummaryRef = useRef("Self-tests pending");
   const [finalResults, setFinalResults] = useState(null);
   const [audioState, setAudioState] = useState(readStoredAudioState);
@@ -514,6 +523,55 @@ export default function App() {
 
   function restartGame() {
     resetGameRef.current?.({ start: true });
+  }
+
+  async function handleResetSaveData() {
+    if (!window.confirm("Reset all saved data? This cannot be undone.")) return;
+    try {
+      await resetAllSaveData();
+      window.alert("Save data reset complete. The game will now reload.");
+      window.location.reload();
+    } catch (error) {
+      console.warn("Failed to reset save data.", error);
+      window.alert("Reset failed. Check the console for details.");
+    }
+  }
+
+  async function handleExportSaveData() {
+    try {
+      const payload = await exportSaveData();
+      if (!payload) throw new Error("Export payload was empty.");
+      const blob = new Blob([payload], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `pink-elephant-save-${Date.now()}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.warn("Failed to export save data.", error);
+      window.alert("Export failed. Check the console for details.");
+    }
+  }
+
+  function handleImportSaveData() {
+    try {
+      const filePicker = document.createElement("input");
+      filePicker.type = "file";
+      filePicker.accept = "application/json,.json";
+      filePicker.onchange = async (event) => {
+        const file = event.target?.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        await importSaveData(text);
+        window.alert("Import complete. The game will now reload.");
+        window.location.reload();
+      };
+      filePicker.click();
+    } catch (error) {
+      console.warn("Failed to import save data.", error);
+      window.alert("Import failed. Check the console for details.");
+    }
   }
 
   function startAudio() {
@@ -3678,6 +3736,40 @@ export default function App() {
                 style={{ background: audioState.muted ? "rgba(248,113,113,0.92)" : "rgba(134,239,172,0.92)", color: "#082f1a" }}>
                 {audioState.muted ? "Unmute" : "Mute"}
               </button>
+            </div>
+            <div className="mt-5 border-t border-amber-100/20 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowSaveDebugTools((value) => !value)}
+                className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-amber-100 transition hover:bg-white/20"
+              >
+                {showSaveDebugTools ? "Hide Save Tools" : "Show Save Tools"}
+              </button>
+              {showSaveDebugTools && (
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportSaveData}
+                    className="rounded-full bg-emerald-200 px-4 py-2 text-xs font-black text-emerald-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Export Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleImportSaveData}
+                    className="rounded-full bg-sky-200 px-4 py-2 text-xs font-black text-sky-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Import Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetSaveData}
+                    className="rounded-full bg-rose-300 px-4 py-2 text-xs font-black text-rose-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Reset All Save
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </section>

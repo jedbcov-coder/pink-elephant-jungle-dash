@@ -221,6 +221,114 @@ export async function addProgressionEvent(event) {
   return runTransaction('progressionEvents', 'readwrite', (store) => store.add(event));
 }
 
+function getAllRecordsFromStore(storeName) {
+  return runTransaction(storeName, 'readonly', (store) => store.getAll());
+}
+
+function clearStore(storeName) {
+  return runTransaction(storeName, 'readwrite', (store) => store.clear());
+}
+
+export async function resetAllSaveData() {
+  localStorage.removeItem(SETTINGS_STORAGE_KEY);
+  localStorage.removeItem(PROFILE_STORAGE_KEY);
+  localStorage.removeItem(META_STORAGE_KEY);
+
+  await Promise.all([
+    clearStore('scores'),
+    clearStore('achievements'),
+    clearStore('progressionEvents'),
+  ]);
+
+  dbPromise = null;
+}
+
+export async function exportSaveData() {
+  const rawSettings = safeParseJSON(localStorage.getItem(SETTINGS_STORAGE_KEY), null);
+  const rawProfile = safeParseJSON(localStorage.getItem(PROFILE_STORAGE_KEY), null);
+  const rawMeta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), null);
+
+  const migrated = migrateSaveIfNeeded({
+    settings: rawSettings,
+    profile: rawProfile,
+    meta: rawMeta,
+  });
+
+  const [scores, achievements, progressionEvents] = await Promise.all([
+    getAllRecordsFromStore('scores'),
+    getAllRecordsFromStore('achievements'),
+    getAllRecordsFromStore('progressionEvents'),
+  ]);
+
+  return safeStringifyJSON({
+    version: migrated.version,
+    settings: migrated.settings,
+    profile: migrated.profile,
+    meta: migrated.meta,
+    indexedDb: {
+      scores,
+      achievements,
+      progressionEvents,
+    },
+    exportedAt: Date.now(),
+  });
+}
+
+function isArray(value) {
+  return Array.isArray(value);
+}
+
+function validateImportShape(payload) {
+  if (!payload || typeof payload !== 'object') return false;
+  if (!payload.settings || typeof payload.settings !== 'object') return false;
+  if (!payload.profile || typeof payload.profile !== 'object') return false;
+  if (!payload.meta || typeof payload.meta !== 'object') return false;
+  if (!payload.indexedDb || typeof payload.indexedDb !== 'object') return false;
+  if (!isArray(payload.indexedDb.scores)) return false;
+  if (!isArray(payload.indexedDb.achievements)) return false;
+  if (!isArray(payload.indexedDb.progressionEvents)) return false;
+  return true;
+}
+
+export async function importSaveData(json) {
+  const parsed = typeof json === 'string' ? safeParseJSON(json, null) : json;
+  if (!validateImportShape(parsed)) {
+    throw new Error('Invalid save import format.');
+  }
+
+  const migrated = migrateSaveIfNeeded({
+    version: parsed.version,
+    settings: parsed.settings,
+    profile: parsed.profile,
+    meta: parsed.meta,
+  });
+
+  const settingsSerialized = safeStringifyJSON(migrated.settings);
+  const profileSerialized = safeStringifyJSON(migrated.profile);
+  const metaSerialized = safeStringifyJSON({
+    ...migrated.meta,
+    importedAt: Date.now(),
+  });
+
+  if (settingsSerialized === null || profileSerialized === null || metaSerialized === null) {
+    throw new Error('Failed to serialize imported save data.');
+  }
+
+  await Promise.all([
+    clearStore('scores'),
+    clearStore('achievements'),
+    clearStore('progressionEvents'),
+  ]);
+
+  await Promise.all(parsed.indexedDb.scores.map((entry) => runTransaction('scores', 'readwrite', (store) => store.put(entry))));
+  await Promise.all(parsed.indexedDb.achievements.map((entry) => runTransaction('achievements', 'readwrite', (store) => store.put(entry))));
+  await Promise.all(parsed.indexedDb.progressionEvents.map((entry) => runTransaction('progressionEvents', 'readwrite', (store) => store.put(entry))));
+
+  localStorage.setItem(SETTINGS_STORAGE_KEY, settingsSerialized);
+  localStorage.setItem(PROFILE_STORAGE_KEY, profileSerialized);
+  localStorage.setItem(META_STORAGE_KEY, metaSerialized);
+}
+
 export {
   SETTINGS_STORAGE_KEY,
   PROFILE_STORAGE_KEY,

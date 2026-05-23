@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Added save utility controls for debugging: reset all save data, export save JSON (settings/profile/IndexedDB records), and import save JSON with schema validation + migration before safe replacement.
 - App startup now initializes the save system before gameplay loops begin, safely loads settings/profile snapshot, applies saved audio preferences through the save manager path, and falls back to defaults if loading fails.
 - Added explicit mobile UI breakpoints (small phone / large phone / tablet) and switched touch control + HUD sizing to responsive scale variables with capped font/icon sizes so gameplay UI stays readable without becoming tiny or oversized.
 - Enforced larger minimum touch target sizes for on-screen controls (44px+ baseline, larger on phones/tablets) and adjusted landscape safe-area placement so control clusters and side badges sit farther from thumb conflict zones and notches.
