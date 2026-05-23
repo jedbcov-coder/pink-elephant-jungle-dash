@@ -2,6 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { Icon } from "./components/Icon.jsx";
+import { PwaInstallCard } from "./components/game-ui/PwaInstallCard.jsx";
+import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
+import { SaveDebugTools } from "./components/game-ui/SaveDebugTools.jsx";
+import { TouchControls } from "./components/game-ui/TouchControls.jsx";
 import { CAMERA_FEEDBACK, CONFIG, HUD_TIMING, MOVEMENT, PARTICLES, PICKUPS, SCORING } from "./game/config.js";
 import {
   canRetreatFromObstacle,
@@ -69,170 +73,6 @@ const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
 const PWA_INSTALL_DISMISSED_KEY = "pwaInstallDismissed";
 
 // Before adding Level 2, ensure Level 1 is loaded from level config (this is that checkpoint).
-
-const TOUCH_CONTROL_BUTTONS = [
-  { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" },
-  { code: "ArrowLeft", label: "Left", icon: "◀", hint: "Steer" },
-  { code: "ArrowRight", label: "Right", icon: "▶", hint: "Steer" },
-  { code: "Space", label: "Jump", icon: "🐘", hint: "Tap" },
-  { code: "Space", label: "Slide", icon: "↧", hint: "Hold" },
-  { code: "KeyF", label: "Smash", icon: "💥", hint: "Hit" },
-];
-
-
-function createTexturePreviewPanel(textures) {
-  if (!SHOW_TEXTURE_PREVIEW || typeof document === "undefined") return null;
-
-  const panel = document.createElement("aside");
-  panel.setAttribute("aria-label", "Development texture preview");
-  Object.assign(panel.style, {
-    position: "absolute",
-    right: "12px",
-    top: "12px",
-    zIndex: "40",
-    width: "min(360px, calc(100vw - 24px))",
-    maxHeight: "calc(100vh - 24px)",
-    overflow: "auto",
-    padding: "12px",
-    border: "1px solid rgba(253, 230, 138, 0.42)",
-    borderRadius: "18px",
-    background: "rgba(10, 20, 12, 0.82)",
-    boxShadow: "0 18px 42px rgba(0, 0, 0, 0.34)",
-    color: "#fef3c7",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    pointerEvents: "none",
-  });
-
-  const title = document.createElement("div");
-  title.textContent = "Texture Preview (dev only)";
-  Object.assign(title.style, {
-    marginBottom: "10px",
-    fontSize: "11px",
-    fontWeight: "900",
-    letterSpacing: "0.18em",
-    textTransform: "uppercase",
-  });
-  panel.appendChild(title);
-
-  const grid = document.createElement("div");
-  Object.assign(grid.style, {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(92px, 1fr))",
-    gap: "10px",
-  });
-
-  Object.entries(textures).forEach(([name, texture]) => {
-    const source = texture?.image;
-    if (!source) return;
-
-    const card = document.createElement("figure");
-    Object.assign(card.style, { margin: "0" });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 96;
-    canvas.height = 96;
-    Object.assign(canvas.style, {
-      display: "block",
-      width: "96px",
-      height: "96px",
-      borderRadius: "12px",
-      border: "1px solid rgba(255, 255, 255, 0.18)",
-      background: "rgba(255, 255, 255, 0.08)",
-      imageRendering: "auto",
-    });
-
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-    }
-
-    const label = document.createElement("figcaption");
-    label.textContent = name;
-    Object.assign(label.style, {
-      marginTop: "4px",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      color: "rgba(254, 243, 199, 0.74)",
-      fontSize: "10px",
-      fontWeight: "800",
-      textAlign: "center",
-    });
-
-    card.append(canvas, label);
-    grid.appendChild(card);
-  });
-
-  panel.appendChild(grid);
-  return panel;
-}
-
-function TouchControls({ visible, onControlChange }) {
-  if (!visible) return null;
-
-  const activePointersByCodeRef = useRef(new Map());
-
-  const addPointerPress = (code, pointerId) => {
-    const activePointers = activePointersByCodeRef.current.get(code) ?? new Set();
-    activePointers.add(pointerId);
-    activePointersByCodeRef.current.set(code, activePointers);
-    onControlChange(code, true);
-  };
-
-  const removePointerPress = (code, pointerId) => {
-    const activePointers = activePointersByCodeRef.current.get(code);
-    if (!activePointers) return;
-    activePointers.delete(pointerId);
-    if (activePointers.size === 0) {
-      activePointersByCodeRef.current.delete(code);
-      onControlChange(code, false);
-    }
-  };
-
-  const handlePointerDown = (event, code) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    addPointerPress(code, event.pointerId);
-  };
-  const handlePointerUp = (event, code) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    removePointerPress(code, event.pointerId);
-  };
-  const handlePointerCancel = (event, code) => {
-    event.preventDefault();
-    event.stopPropagation();
-    removePointerPress(code, event.pointerId);
-  };
-
-  return (
-    <div className="touch-controls" aria-label="Touch game controls">
-      {TOUCH_CONTROL_BUTTONS.map(({ code, label, icon, hint }) => (
-        <button
-          key={`${code}-${label}`}
-          type="button"
-          className={`touch-control-button touch-control-${label.toLowerCase()}`}
-          aria-label={`${label} control`}
-          onContextMenu={(event) => event.preventDefault()}
-          onPointerDown={(event) => handlePointerDown(event, code)}
-          onPointerUp={(event) => handlePointerUp(event, code)}
-          onPointerCancel={(event) => handlePointerCancel(event, code)}
-          onPointerLeave={(event) => handlePointerCancel(event, code)}
-        >
-          <span className="touch-control-icon" aria-hidden="true">{icon}</span>
-          <span className="touch-control-label">{label}</span>
-          <span className="touch-control-hint">{hint}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 
 function requestImmersiveMobileMode() {
   // Tries browser APIs that can hide system UI on mobile during gameplay.
@@ -3596,30 +3436,12 @@ export default function App() {
               Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
             </p>
             <AudioControls audioState={audioState} onToggle={toggleAudioState} />
-            {showInstallCard && deferredInstallPrompt && (
-              <div className="title-install-card mx-auto mt-5 max-w-xl rounded-2xl px-4 py-4 text-left">
-                <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Install Game</h3>
-                <p className="mt-2 text-xs leading-relaxed text-amber-50/80">
-                  Add this game to your desktop for quick access and a cleaner full-screen experience.
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleInstallGame}
-                    className="rounded-full bg-emerald-200 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-950 transition hover:scale-105 active:scale-95"
-                  >
-                    Install
-                  </button>
-                  <button
-                    type="button"
-                    onClick={dismissInstallCard}
-                    className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-50 transition hover:scale-105 active:scale-95"
-                  >
-                    Not Now
-                  </button>
-                </div>
-              </div>
-            )}
+            <PwaInstallCard
+              visible={showInstallCard}
+              canInstall={Boolean(deferredInstallPrompt)}
+              onInstall={handleInstallGame}
+              onDismiss={dismissInstallCard}
+            />
             <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
@@ -3737,61 +3559,18 @@ export default function App() {
                 {audioState.muted ? "Unmute" : "Mute"}
               </button>
             </div>
-            <div className="mt-5 border-t border-amber-100/20 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowSaveDebugTools((value) => !value)}
-                className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-amber-100 transition hover:bg-white/20"
-              >
-                {showSaveDebugTools ? "Hide Save Tools" : "Show Save Tools"}
-              </button>
-              {showSaveDebugTools && (
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleExportSaveData}
-                    className="rounded-full bg-emerald-200 px-4 py-2 text-xs font-black text-emerald-950 transition hover:scale-105 active:scale-95"
-                  >
-                    Export Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleImportSaveData}
-                    className="rounded-full bg-sky-200 px-4 py-2 text-xs font-black text-sky-950 transition hover:scale-105 active:scale-95"
-                  >
-                    Import Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResetSaveData}
-                    className="rounded-full bg-rose-300 px-4 py-2 text-xs font-black text-rose-950 transition hover:scale-105 active:scale-95"
-                  >
-                    Reset All Save
-                  </button>
-                </div>
-              )}
-            </div>
+            <SaveDebugTools
+              visible={showSaveDebugTools}
+              onToggle={() => setShowSaveDebugTools((value) => !value)}
+              onExport={handleExportSaveData}
+              onImport={handleImportSaveData}
+              onReset={handleResetSaveData}
+            />
           </div>
         </section>
       )}
 
-      {showRotateOverlay && (
-        <section
-          className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-6"
-          style={{ background: "rgba(3, 10, 6, 0.82)", backdropFilter: "blur(3px)" }}
-          role="status"
-          aria-live="polite"
-        >
-          <div
-            className="rounded-[1.5rem] p-6 text-center text-emerald-50"
-            style={{ background: "rgba(12,20,10,0.92)", border: "1px solid rgba(134,239,172,0.32)", maxWidth: "22rem" }}
-          >
-            <div className="text-4xl" aria-hidden="true">📱↻</div>
-            <h2 className="display-title mt-2 text-2xl font-black text-emerald-200">Rotate your device</h2>
-            <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">This game plays best in landscape mode. Turn your device sideways to continue.</p>
-          </div>
-        </section>
-      )}
+      <RotateOverlay visible={showRotateOverlay} />
 
       {/* DEBUG PANEL */}
       {debug && (
