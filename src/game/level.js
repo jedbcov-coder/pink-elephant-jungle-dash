@@ -108,8 +108,8 @@ export function buildLevel(levelConfig) {
 
     logs.push({ localX: plan.log.localX, z: o - plan.log.z, width: plan.log.width, height: 1.15, depth: 1.25, section: LEVEL_SECTIONS.JUMP_LOG, difficulty });
 
-    // Low enough for a standing elephant to clip, high enough for a belly-slide to clear.
-    branches.push({ localX: plan.branch.localX, z: o - plan.branch.z, width: plan.branch.width, height: 0.75, depth: 1.35, yOffset: 1.95, section: LEVEL_SECTIONS.SLIDE_BRANCH, difficulty });
+    // Belly-slide gate: tall overhead canopy keeps jump/double-jump from bypassing while preserving a low crawl window.
+    branches.push({ localX: plan.branch.localX, z: o - plan.branch.z, width: plan.branch.width, height: 8.4, depth: 2.6, yOffset: 5.9, section: LEVEL_SECTIONS.SLIDE_BRANCH, difficulty });
 
     plan.crates.forEach((crate) => {
       crates.push({ localX: crate.localX, z: o - crate.z, width: 2.15, height: 2.15, depth: 2.15, section: LEVEL_SECTIONS.SMASH_CRATE, difficulty });

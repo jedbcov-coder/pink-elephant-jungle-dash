@@ -1192,8 +1192,11 @@ export default function App() {
     // Gameplay still calls these smashable obstacles "crates", but they render as heavy stone blocks.
     const stoneBlockMat = makeMaterial("#8f8a71", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.94 });
     const stoneBlockBandMat = makeMaterial("#5f5b4a", { roughness: 0.98 });
-    const branchLimbMat = makeMaterial("#452817", { roughness: 0.9 });
-    const branchLeafMat = makeMaterial("#17713d", { map: textures.leafVeins, roughness: 0.86, emissive: "#0b351b", emissiveIntensity: 0.12 });
+    const branchLimbMat = makeMaterial("#4a2a16", { roughness: 0.92 });
+    const branchLeafMat = makeMaterial("#1d7a42", { map: textures.leafVeins, roughness: 0.86, emissive: "#0b351b", emissiveIntensity: 0.12 });
+    const branchVineMat = makeMaterial("#2f5f2d", { roughness: 0.9 });
+    const snakeBodyMat = makeMaterial("#7b8f2b", { roughness: 0.62, emissive: "#2f3f16", emissiveIntensity: 0.2 });
+    const snakeStripeMat = makeMaterial("#1e2e12", { roughness: 0.75 });
     const cueLeafShadowMat = makeMaterial("#0b1b11", { transparent: true, opacity: 0.46, roughness: 1 });
     const cueMudMat = makeMaterial("#3f2616", { roughness: 1 });
     const cueStoneBlockMarkerMat = makeMaterial("#d0c27f", { roughness: 0.9 });
@@ -1355,13 +1358,54 @@ export default function App() {
       const group = new THREE.Group();
       group.position.set(posOnPath.x, branch.yOffset, posOnPath.z);
       group.rotation.y = trackAngle(branch.z);
-      const limb = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
-      limb.scale.set(branch.width, branch.height, branch.depth);
-      const leaves = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
-      leaves.scale.set(branch.width + 0.4, 1.35, 1.8);
-      leaves.position.y = 0.98;
-      limb.castShadow = true; leaves.castShadow = true;
-      group.add(limb, leaves);
+
+      const trunkHeight = 8.6;
+      const trunkWidth = 2.3;
+      const trunkDepth = 2.1;
+      const leftTrunk = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
+      leftTrunk.position.set(-(branch.width * 0.5 + 0.95), -(branch.height * 0.5) + trunkHeight * 0.5, 0);
+      leftTrunk.scale.set(trunkWidth, trunkHeight, trunkDepth);
+      const rightTrunk = leftTrunk.clone();
+      rightTrunk.position.x *= -1;
+
+      const canopyBeam = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
+      canopyBeam.position.set(0, branch.height * 0.5 - 0.25, 0);
+      canopyBeam.scale.set(branch.width + 2.4, 1.5, 2.1);
+
+      const canopyLeaves = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
+      canopyLeaves.position.set(0, branch.height * 0.5 + 0.58, 0.1);
+      canopyLeaves.scale.set(branch.width + 3.25, 1.2, 2.45);
+
+      [leftTrunk, rightTrunk, canopyBeam, canopyLeaves].forEach((mesh) => {
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        group.add(mesh);
+      });
+
+      for (let i = 0; i < 5; i += 1) {
+        const x = -branch.width * 0.32 + i * (branch.width * 0.16);
+        const vineLength = 3.1 + (i % 2) * 0.5;
+        const vine = new THREE.Mesh(sharedGeometries.unitBox, branchVineMat);
+        vine.position.set(x, 0.35 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.5);
+        vine.scale.set(0.22, vineLength, 0.22);
+        vine.rotation.z = (i - 2) * 0.05;
+        vine.castShadow = true;
+        group.add(vine);
+
+        if (i % 2 === 1) {
+          const snakeBody = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
+          snakeBody.position.set(x + 0.06, vine.position.y - 0.22, vine.position.z + 0.12);
+          snakeBody.scale.set(0.36, 0.74, 0.36);
+          snakeBody.rotation.z = (i - 2) * 0.12;
+          snakeBody.castShadow = true;
+          const snakeStripe = new THREE.Mesh(sharedGeometries.unitBox, snakeStripeMat);
+          snakeStripe.position.set(0, 0, 0.18);
+          snakeStripe.scale.set(0.26, 0.62, 0.08);
+          snakeBody.add(snakeStripe);
+          group.add(snakeBody);
+        }
+      }
+
       scene.add(group);
       colliders.push({ type: "branch", active: true, mesh: group, x: posOnPath.x, y: branch.yOffset, z: posOnPath.z, w: branch.width, h: branch.height, d: branch.depth });
     });
