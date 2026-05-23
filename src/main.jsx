@@ -52,7 +52,6 @@ createRoot(rootElement).render(
   React.createElement(React.StrictMode, null, React.createElement(AppErrorBoundary, null, React.createElement(App))),
 );
 if ("serviceWorker" in navigator) {
-  let updatePromptShown = false;
   let updateBannerElement = null;
 
   const removeUpdateBanner = () => {
@@ -63,11 +62,9 @@ if ("serviceWorker" in navigator) {
   };
 
   const showUpdateBanner = (onReload) => {
-    if (updatePromptShown) {
+    if (updateBannerElement) {
       return;
     }
-
-    updatePromptShown = true;
 
     const banner = document.createElement("div");
     banner.className = "sw-update-banner";
@@ -121,7 +118,8 @@ if ("serviceWorker" in navigator) {
 
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./service-worker.js");
+      const swUrl = `${import.meta.env.BASE_URL}service-worker.js?build=${__APP_VERSION__}`;
+      const registration = await navigator.serviceWorker.register(swUrl);
 
       const promptForUpdate = () => {
         showUpdateBanner(() => {
@@ -129,18 +127,6 @@ if ("serviceWorker" in navigator) {
             registration.waiting.postMessage({ type: "SKIP_WAITING" });
           }
         });
-        if (updatePromptShown) {
-          return;
-        }
-        updatePromptShown = true;
-
-        const shouldRefresh = window.confirm(
-          "A new game update is ready. Reload now to get the latest version?",
-        );
-
-        if (shouldRefresh && registration.waiting) {
-          registration.waiting.postMessage({ type: "SKIP_WAITING" });
-        }
       };
 
       if (registration.waiting) {
@@ -149,9 +135,7 @@ if ("serviceWorker" in navigator) {
 
       registration.addEventListener("updatefound", () => {
         const installingWorker = registration.installing;
-        if (!installingWorker) {
-          return;
-        }
+        if (!installingWorker) return;
 
         installingWorker.addEventListener("statechange", () => {
           if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
@@ -162,9 +146,9 @@ if ("serviceWorker" in navigator) {
 
       setInterval(() => {
         registration.update().catch(() => {
-          // Ignore periodic update check errors while offline.
+          // Ignore update check errors while offline.
         });
-      }, 60 * 1000);
+      }, 5 * 60 * 1000);
 
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         window.location.reload();
