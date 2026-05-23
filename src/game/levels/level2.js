@@ -1,18 +1,11 @@
 import { CONFIG, MOVEMENT } from "../config.js";
+import { SUNSET_TEMPLE_RUN_THEME } from "./sharedThemes.js";
 
 export const LEVEL_2 = {
   id: "level-2",
   name: "Sunset Temple Run",
   background: "sunset-temple-run",
-  theme: {
-    background: "#ff8a2f",
-    fog: "#ffad4f",
-    ambient: "#ffd08a",
-    key: "#ff6fa6",
-    fill: "#ff98c2",
-    accent: "#ffd4e8",
-    uiGlow: "#ff84b8",
-  },
+  theme: SUNSET_TEMPLE_RUN_THEME,
   speed: { ...MOVEMENT, maxSpeed: 42 },
   course: {
     floorLength: 1500,

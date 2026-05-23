@@ -21,6 +21,7 @@ If you publish updates and a browser shows an older cached version, follow `PWA_
 ## Recent update
 
 - Simplified PWA icon setup to reuse the existing `public/favicon.png` directly in the manifest and service worker cache, so no generated PNG files are required in Codex workflows.
+- Added a shared level theme constant for the “sunset-temple-run” palette and wired Levels 2 and 3 to reuse it, keeping gameplay behavior unchanged.
 - Reworked the in-game side HUD into one responsive row that wraps safely and stacks on smaller screens, so Energy and Trail Depth cards stay readable and never overlap Time/Score center HUD elements.
 - Fixed Snake Gate accent data so each snake registers only one complete accent object (including tongue/eye/head/segments), and added defensive animation checks to prevent optional mesh errors near branch obstacles.
 - Upgraded the Snake Gate look to better match the target style with denser hanging vines, branch offshoots, snake belly/tongue details, plus animated head bob/eye glow/tongue flick and a one-time proximity warning sting in the slide telegraph window.
@@ -73,7 +74,7 @@ If you publish updates and a browser shows an older cached version, follow `PWA_
 - Hazard dodging and life-based runs
 - Fruit collection, hazard dodging, and life-based runs with fallen-tree jump obstacles wrapped in vines and moss
 - Multiple levels with increasing distance and speed
-- Level 2 now uses an orange sunset sky with pink highlights, and Level 3 (Night Run) carries the purple moonlit color set
+- Level 2 and Level 3 now share the same sunset color palette for a consistent look
 - Keyboard and touch controls for desktop and mobile
 - Pause/settings overlay and audio controls
 
