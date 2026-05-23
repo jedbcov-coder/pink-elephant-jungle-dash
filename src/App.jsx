@@ -49,6 +49,7 @@ import {
 } from "./game/movement.js";
 import { applyComboScore, applyFruitLifeCounter } from "./game/fruitLife.js";
 import { runSelfTests } from "./game/selfTests.js";
+import { initSaveSystem, loadProfileSnapshot, loadSettings, saveSettings } from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
 
 const nl = String.fromCharCode(10);
@@ -291,6 +292,9 @@ function createRuinBlockClusterGeometry() {
 function readStoredAudioState() {
   if (typeof window === "undefined") return { ...DEFAULT_AUDIO_STATE };
   try {
+    const savedSettings = loadSettings();
+    const fromSaveManager = savedSettings?.audio;
+    if (fromSaveManager) return normalizeAudioState(fromSaveManager);
     const stored = window.localStorage.getItem(AUDIO_PREFS_KEY);
     return stored ? normalizeAudioState(JSON.parse(stored)) : { ...DEFAULT_AUDIO_STATE };
   } catch {
@@ -298,10 +302,14 @@ function readStoredAudioState() {
   }
 }
 
-function writeStoredAudioState(state) {
+function writeStoredAudioState(state, canPersist = true) {
   if (typeof window === "undefined") return;
+  if (!canPersist) return;
   try {
-    window.localStorage.setItem(AUDIO_PREFS_KEY, JSON.stringify(normalizeAudioState(state)));
+    const normalized = normalizeAudioState(state);
+    window.localStorage.setItem(AUDIO_PREFS_KEY, JSON.stringify(normalized));
+    const existingSettings = loadSettings() ?? {};
+    saveSettings({ ...existingSettings, audio: normalized });
   } catch {
     // Storage may be unavailable in private browsing or embedded previews.
   }
@@ -449,6 +457,9 @@ export default function App() {
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
   const [showRotateOverlay, setShowRotateOverlay] = useState(false);
   const activeLevelRef = useRef(buildLevelById("level-1"));
+  const profileSnapshotRef = useRef(null);
+  const saveSystemReadyRef = useRef(false);
+  const [saveSystemReady, setSaveSystemReady] = useState(false);
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfig(nextLevelId) : null;
@@ -751,7 +762,7 @@ export default function App() {
   function applyAudioState(nextState) {
     const normalized = normalizeAudioState(nextState);
     audioManagerRef.current?.setAudioState(normalized);
-    writeStoredAudioState(normalized);
+    writeStoredAudioState(normalized, saveSystemReadyRef.current);
     return normalized;
   }
 
@@ -780,8 +791,34 @@ export default function App() {
 
   useEffect(() => {
     audioManagerRef.current?.setAudioState(audioState);
-    writeStoredAudioState(audioState);
+    writeStoredAudioState(audioState, saveSystemReadyRef.current);
   }, [audioState]);
+
+  useEffect(() => {
+    let disposed = false;
+
+    const initializeSaveSystem = async () => {
+      try {
+        await initSaveSystem();
+        const savedSettings = loadSettings();
+        const savedAudioState = savedSettings?.audio;
+        if (savedAudioState) setAudioState(normalizeAudioState(savedAudioState));
+        profileSnapshotRef.current = loadProfileSnapshot();
+      } catch (error) {
+        console.warn("Save system init failed. Continuing with defaults.", error);
+      } finally {
+        if (!disposed) {
+          saveSystemReadyRef.current = true;
+          setSaveSystemReady(true);
+        }
+      }
+    };
+
+    initializeSaveSystem();
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   useEffect(() => {
     function beginTitleThemeFromGesture() {
@@ -799,6 +836,7 @@ export default function App() {
 
 
   useEffect(() => {
+    if (!saveSystemReady) return undefined;
     const mount = mountRef.current;
     if (!mount) return undefined;
 
@@ -3297,7 +3335,7 @@ export default function App() {
       if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
       audioManagerRef.current?.dispose();
     };
-  }, [currentLevelId]);
+  }, [currentLevelId, saveSystemReady]);
 
   const startNewGame = () => {
     stopTitleTheme(0.18);
