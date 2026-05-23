@@ -1229,9 +1229,9 @@ export default function App() {
       });
     }
 
-    const fruitMat = makeMaterial("#ffb57f", { map: textures.collectibleGlow, roughness: 0.35, metalness: 0.05, emissive: "#ffdf88", emissiveIntensity: 0.95, envMapIntensity: 1.2 });
-    const fruitBlushMat = makeMaterial("#ff6f78", { roughness: 0.46, emissive: "#ffbb72", emissiveIntensity: 0.42 });
-    const fruitLobeMat = makeMaterial("#ff9d72", { roughness: 0.5, emissive: "#ffcb80", emissiveIntensity: 0.34 });
+    const fruitMat = makeMaterial("#ffb07a", { map: textures.collectibleGlow, roughness: 0.42, metalness: 0.04, emissive: "#ffb06a", emissiveIntensity: 0.42, envMapIntensity: 1.05 });
+    const fruitBlushMat = makeMaterial("#ff6d6a", { roughness: 0.5, emissive: "#ff8a62", emissiveIntensity: 0.26 });
+    const fruitLobeMat = makeMaterial("#ff9a73", { roughness: 0.54, emissive: "#ff9f6f", emissiveIntensity: 0.22 });
     const fruitLeafMat = makeMaterial("#4f9f46", { roughness: 0.56, emissive: "#e5c76b", emissiveIntensity: 0.36 });
     const fruitStemMat = makeMaterial("#825226", { roughness: 0.82, emissive: "#c79757", emissiveIntensity: 0.14 });
     activeLevelRef.current.fruits.forEach((pos) => {
