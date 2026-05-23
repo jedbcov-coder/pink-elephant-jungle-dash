@@ -18,7 +18,7 @@ import {
   sweptObstaclePlayerBox,
 } from "./game/collisionHelpers.js";
 import { createKeys, isAllowedKey, setKeyState } from "./game/input.js";
-import { LEVEL } from "./game/level.js";
+import { buildLevelById } from "./game/level.js";
 import { promptForZ } from "./game/prompts.js";
 import { aabb, clamp, createSeededRandom, lerp } from "./game/math.js";
 import { DEFAULT_AUDIO_STATE, createAudioManager, normalizeAudioState } from "./game/audio/audioManager.js";
@@ -56,6 +56,9 @@ const SHOW_TEXTURE_PREVIEW = false;
 const JUNGLE_LAYOUT_SEED = 0x5eed2026;
 
 const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
+
+// Before adding Level 2, ensure Level 1 is loaded from level config (this is that checkpoint).
+const LEVEL = buildLevelById("level-1");
 
 const TOUCH_CONTROL_BUTTONS = [
   { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" },
