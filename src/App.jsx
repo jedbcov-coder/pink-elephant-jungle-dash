@@ -2291,6 +2291,9 @@ export default function App() {
 
       if (!blocked) {
         body.localX = nextLocalX; body.x = nx; body.y = ny; body.z = nz;
+      } else if (body.grounded) {
+        body.y = groundY;
+        body.yVelocity = 0;
       }
       if (wasGrounded && !body.grounded && body.yVelocity <= 0) body.coyoteTimer = MOVEMENT.coyoteTime;
 
