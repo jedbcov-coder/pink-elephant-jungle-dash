@@ -1197,3 +1197,10 @@ button:disabled {
     0 2px 0 rgba(74, 48, 14, 0.48),
     0 0 10px rgba(255, 224, 126, 0.25);
 }
+
+.title-favicon-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 164, 218, 0.55));
+}

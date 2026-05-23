@@ -3065,19 +3065,7 @@ export default function App() {
             <div className="mb-2 text-xs font-black uppercase tracking-[0.38em] text-emerald-200/75">Three-Loop Jungle Trial</div>
             <div className="title-elephant-badge mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
               aria-label="Pink elephant mascot" role="img">
-              <span className="title-elephant-mascot" aria-hidden="true">
-                <span className="title-elephant-sunburst" />
-                <span className="title-elephant-shadow" />
-                <span className="title-elephant-tail" />
-                <span className="title-elephant-ear" />
-                <span className="title-elephant-body" />
-                <span className="title-elephant-head" />
-                <span className="title-elephant-trunk" />
-                <span className="title-elephant-tusk" />
-                <span className="title-elephant-leg title-elephant-leg-back" />
-                <span className="title-elephant-leg title-elephant-leg-front" />
-                <span className="title-elephant-crown" />
-              </span>
+              <img src={`${import.meta.env.BASE_URL}favicon.png`} alt="Pink Elephant icon" className="title-favicon-logo" />
             </div>
             <h1 className="display-title title-logo-main text-5xl font-black leading-tight text-pink-300 drop-shadow" style={{ letterSpacing: "0.015em" }}>Pink Elephant</h1>
             <h2 className="display-title title-logo-sub mt-1 text-3xl font-black text-amber-100" style={{ letterSpacing: "0.06em" }}>Jungle Dash</h2>
@@ -3091,7 +3079,7 @@ export default function App() {
               Begin the Trail
             </button>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
-              {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["F", "Smash"], ["M", "Mute"]].map(([key, label]) => (
+              {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Trunk Smash"], ["M", "Mute"]].map(([key, label]) => (
                 <div key={key} className="title-primary-control flex items-center gap-2 rounded-xl px-3 py-2">
                   <span className="title-control-key shrink-0 font-black text-amber-200">{key}</span><span>{label}</span>
                 </div>

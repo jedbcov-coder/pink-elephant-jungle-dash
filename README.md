@@ -29,12 +29,11 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ## Controls
 
-- **Move left/right:** `A` / `D` or `←` / `→`
-- **Run faster (charge):** hold `W` or `↑`
+- **Move left/right:** `←` / `→`
+- **Run faster (charge):** hold `↑`
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
-- **Smash:** `F` (avoids Windows Sticky Keys popup from repeated Shift taps)
-- **Spin (when available):** `E`
+- **Trunk smash:** `Shift`
 - **Touch devices:** use the on-screen control buttons
 
 ## Main features
