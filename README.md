@@ -18,7 +18,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game. You play as a 
 ## Main features
 
 - Playable low-poly 3D jungle runner with a pink elephant character
-- Level 1 data is now organized in a reusable level data file shape for easier future level creation
+- Level loading now uses a beginner-friendly level registry with a safe fallback to Level 1
 - Fruit collection, obstacle dodging, and life-based gameplay
 - Keyboard and touch controls for desktop and mobile play
 - In-game pause/settings overlay and audio controls
