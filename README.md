@@ -20,6 +20,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Cleaned up duplicate PWA install card wiring: `App.jsx` now imports `PwaInstallCard` only once from `src/components/game-ui/PwaInstallCard.jsx`, and removed the old duplicate component file.
+- Separated PWA concerns by moving service-worker update prompt setup into `src/pwa/setupServiceWorkerUpdatePrompt.js` while keeping install-prompt hook logic in `src/hooks/usePwaInstallPrompt.js`.
 - Moved service-worker update prompt and registration logic out of `src/main.jsx` into `src/hooks/usePwaInstallPrompt.js` to keep the main boot file cleaner without changing behavior.
 - Split `App.jsx` UI responsibilities into focused game UI components (`TouchControls`, `PwaInstallCard`, `SaveDebugTools`, `RotateOverlay`) to keep the main app file easier to maintain without changing gameplay behavior.
 - Improved service-worker update reliability by registering with `updateViaCache: "none"`, which helps browsers fetch fresh worker code during new deployments.

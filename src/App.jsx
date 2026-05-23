@@ -6,7 +6,6 @@ import { PwaInstallCard } from "./components/game-ui/PwaInstallCard.jsx";
 import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
 import { SaveDebugTools } from "./components/game-ui/SaveDebugTools.jsx";
 import { TouchControls } from "./components/game-ui/TouchControls.jsx";
-import { PwaInstallCard } from "./components/PwaInstallCard.jsx";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt.js";
 import { CAMERA_FEEDBACK, CONFIG, HUD_TIMING, MOVEMENT, PARTICLES, PICKUPS, SCORING } from "./game/config.js";
 import {
@@ -3389,9 +3388,6 @@ export default function App() {
               onInstall={handleInstallGame}
               onDismiss={dismissInstallCard}
             />
-            {canShowInstallPrompt && !isGameplayActive && (
-              <PwaInstallCard onInstall={installGame} onDismiss={dismissInstallPrompt} />
-            )}
             <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
