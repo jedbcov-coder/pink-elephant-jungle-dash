@@ -1,4 +1,7 @@
 import { CONFIG, MOVEMENT } from "../config.js";
+import { OBSTACLE_LOG_PRESETS, OBSTACLE_VINE_PRESETS, OBSTACLE_CROC_RIVER_PRESETS } from "../level-elements/obstacle-presets.js";
+import { ENEMY_MONKEY_PATROL_LEVEL1_PRESETS } from "../level-elements/enemy-presets.js";
+import { COLLECTIBLE_PINEAPPLE_PRESETS } from "../level-elements/collectible-presets.js";
 
 // Level 1 gameplay values are intentionally fixed; only progression uses `nextLevel`.
 export const LEVEL_1 = {
@@ -22,17 +25,13 @@ export const LEVEL_1 = {
       slideX: 0,
       crateFruitStartX: -0.55,
       crateFruitEndX: 0.55,
-      log: { localX: 0, z: 108, width: 11.25 },
-      branch: { localX: 0, z: 148, width: 12.85 },
+      log: { ...OBSTACLE_LOG_PRESETS[0] },
+      branch: { ...OBSTACLE_VINE_PRESETS[0] },
       crates: [{ localX: 0, z: 184 }],
-      river: {
-        z: 228,
-        depth: 11.5,
-        crocs: [{ localX: -2.6, phase: 0.2 }, { localX: 2.6, phase: 3.1 }],
-      },
+      river: { ...OBSTACLE_CROC_RIVER_PRESETS[0], crocs: [...OBSTACLE_CROC_RIVER_PRESETS[0].crocs] },
       health: { localX: 0, z: 240 },
-      enemies: [{ localX: 0, z: 58, patrolRange: 1.85, patrolSpeed: 1.45 }],
-      pineapples: [{ localX: 3.65, z: 90, y: 1.35 }],
+      enemies: ENEMY_MONKEY_PATROL_LEVEL1_PRESETS[0].map((enemy) => ({ ...enemy })),
+      pineapples: COLLECTIBLE_PINEAPPLE_PRESETS[0].map((pineapple) => ({ ...pineapple })),
     },
     {
       swayWidth: 2.65,
@@ -48,17 +47,13 @@ export const LEVEL_1 = {
       slideX: -1.1,
       crateFruitStartX: 1.6,
       crateFruitEndX: -1.6,
-      log: { localX: -0.75, z: 108, width: 10.4 },
-      branch: { localX: 1.1, z: 148, width: 11.55 },
+      log: { ...OBSTACLE_LOG_PRESETS[1] },
+      branch: { ...OBSTACLE_VINE_PRESETS[1] },
       crates: [{ localX: -1.45, z: 184 }, { localX: 2.85, z: 184 }],
-      river: {
-        z: 228,
-        depth: 12.75,
-        crocs: [{ localX: -2.8, phase: 0.65 }, { localX: 2.45, phase: 2.95 }],
-      },
+      river: { ...OBSTACLE_CROC_RIVER_PRESETS[1], crocs: [...OBSTACLE_CROC_RIVER_PRESETS[1].crocs] },
       health: { localX: -1.8, z: 240 },
-      enemies: [{ localX: 1.45, z: 58, patrolRange: 2.75, patrolSpeed: 2.1 }],
-      pineapples: [{ localX: -3.75, z: 72, y: 1.55 }, { localX: 3.6, z: 166, y: 3.15 }],
+      enemies: ENEMY_MONKEY_PATROL_LEVEL1_PRESETS[1].map((enemy) => ({ ...enemy })),
+      pineapples: COLLECTIBLE_PINEAPPLE_PRESETS[1].map((pineapple) => ({ ...pineapple })),
     },
     {
       swayWidth: 2.95,
@@ -74,17 +69,13 @@ export const LEVEL_1 = {
       slideX: 1.65,
       crateFruitStartX: -2.6,
       crateFruitEndX: 2.6,
-      log: { localX: 1.05, z: 108, width: 10.05 },
-      branch: { localX: -1.35, z: 148, width: 11.05 },
+      log: { ...OBSTACLE_LOG_PRESETS[2] },
+      branch: { ...OBSTACLE_VINE_PRESETS[2] },
       crates: [{ localX: 0, z: 184 }, { localX: -3.05, z: 184 }, { localX: 3.05, z: 184 }],
-      river: {
-        z: 228,
-        depth: 13.35,
-        crocs: [{ localX: -3.05, phase: 1.1 }, { localX: 0, phase: 2.55 }, { localX: 3.05, phase: 3.9 }],
-      },
+      river: { ...OBSTACLE_CROC_RIVER_PRESETS[2], crocs: [...OBSTACLE_CROC_RIVER_PRESETS[2].crocs] },
       health: { localX: 2.2, z: 240 },
-      enemies: [{ localX: -1.6, z: 58, patrolRange: 3.05, patrolSpeed: 2.55 }],
-      pineapples: [{ localX: 4.05, z: 74, y: 1.7 }, { localX: -4.15, z: 170, y: 3.35 }],
+      enemies: ENEMY_MONKEY_PATROL_LEVEL1_PRESETS[2].map((enemy) => ({ ...enemy })),
+      pineapples: COLLECTIBLE_PINEAPPLE_PRESETS[2].map((pineapple) => ({ ...pineapple })),
     },
   ],
   goalDistance: CONFIG.finishLineZ,
