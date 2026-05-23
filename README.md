@@ -93,6 +93,14 @@ npm run build:pages
 
 This creates a static `docs/` folder that is ready for GitHub Pages branch deployment.
 
+## GitHub Pages publishing (manual)
+
+This project publishes to **GitHub Pages from `main` / `docs`**.
+
+1. Run `npm run build:pages`
+2. Commit the updated `docs` folder
+3. Push to `main`
+
 ## Deployment notes
 
 > Note: In restricted environments where npm packages cannot be installed, `docs/index.html` may be a temporary placeholder until `npm run build:pages` can run with dependencies available.
