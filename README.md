@@ -19,6 +19,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game. You play as a 
 ## Main features
 
 - Fixed a movement bug: if you back into a low obstacle and then jump off it, the elephant now always snaps back to normal ground height instead of floating above the track
+- Monkey enemy visuals were refreshed to remove the banana badge shapes that could read like fangs, so they look less scary while keeping gameplay the same
 - Browser tab now shows a simple embedded PNG favicon for easier game tab recognition (no separate binary file needed)
 - Gameplay progression now uses each level's `nextLevel`: finishing Level 1 offers Level 2, and finishing Level 2 shows the final win screen
 - Restart now always restarts the current level, while New Game always returns to Level 1

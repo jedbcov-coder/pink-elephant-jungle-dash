@@ -1338,7 +1338,6 @@ export default function App() {
     const monkeyBodyMat = makeMaterial("#2a1f0e", { roughness: 0.62, metalness: 0.05 });
     const monkeyFaceMat = makeMaterial("#8a5a2a", { roughness: 0.72 });
     const monkeyEarMat = makeMaterial("#c77a3d", { roughness: 0.7 });
-    const monkeyBananaMat = makeMaterial("#ffd84d", { roughness: 0.48, emissive: "#5a3900", emissiveIntensity: 0.28 });
     const monkeyLeafMat = makeMaterial("#4ade80", { map: textures.leafVeins, roughness: 0.64, emissive: "#0f3d1f", emissiveIntensity: 0.16 });
     const monkeyEyeMat = new THREE.MeshStandardMaterial({ color: "#ff2200", emissive: "#ff2200", emissiveIntensity: 2.5 });
 
@@ -1363,18 +1362,6 @@ export default function App() {
       leaf.rotation.set(0.45, 0.15, -0.85);
       leaf.castShadow = true;
       group.add(leaf);
-    }
-
-    function addBananaBadge(group) {
-      [-0.16, 0.16].forEach((xOffset, index) => {
-        const bananaArc = new THREE.Mesh(sharedGeometries.unitBox, monkeyBananaMat);
-        bananaArc.position.set(xOffset, 0.18 + index * 0.03, -0.68);
-        bananaArc.scale.set(0.1, 0.32, 0.06);
-        bananaArc.rotation.z = xOffset < 0 ? -0.55 : 0.55;
-        bananaArc.rotation.x = 0.08;
-        bananaArc.castShadow = true;
-        group.add(bananaArc);
-      });
     }
 
     function addMonkeyArms(group) {
@@ -1442,7 +1429,6 @@ export default function App() {
 
       addMonkeyTail(group);
       addMonkeyArms(group);
-      addBananaBadge(group);
       group.add(body, head, muzzle, eyeLight);
       scene.add(group);
       enemies.push({ mesh: group, active: true, baseLocalX: en.baseLocalX, z: posOnPath.z, x: posOnPath.x, patrolRange: en.patrolRange, patrolSpeed: en.patrolSpeed, w: 1.5, h: 1.5, d: 1.5 });
