@@ -2264,7 +2264,7 @@ export default function App() {
           const result = handleLogCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         } else if (obs.type === "branch") {
           const result = handleBranchCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
@@ -2278,7 +2278,7 @@ export default function App() {
           if (result.breakCrate) breakCrate(obs);
           else if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         }
       }
 
