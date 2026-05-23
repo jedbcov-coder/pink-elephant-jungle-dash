@@ -676,14 +676,15 @@ export default function App() {
       treeLeaves: new THREE.DodecahedronGeometry(1, 0),
       bushClump: new THREE.DodecahedronGeometry(1, 0),
       canopy: new THREE.DodecahedronGeometry(1, 0),
-      fruit: new THREE.SphereGeometry(0.34, 18, 14),
-      fruitLobe: new THREE.SphereGeometry(0.18, 14, 12),
-      fruitLeaf: new THREE.ConeGeometry(0.11, 0.2, 5),
+      fruit: new THREE.SphereGeometry(0.36, 20, 16),
+      fruitLobe: new THREE.SphereGeometry(0.22, 16, 12),
+      fruitLeaf: new THREE.ConeGeometry(0.1, 0.24, 6),
       fruitStem: new THREE.CylinderGeometry(0.018, 0.02, 0.16, 5),
       unitBox: new THREE.BoxGeometry(1, 1, 1),
-      cane: new THREE.CylinderGeometry(0.11, 0.14, 1.35, 12),
-      caneNode: new THREE.TorusGeometry(0.16, 0.032, 8, 12),
-      caneLeaf: new THREE.ConeGeometry(0.09, 0.44, 5),
+      cane: new THREE.CylinderGeometry(0.1, 0.13, 1.45, 12),
+      caneNode: new THREE.TorusGeometry(0.14, 0.026, 8, 14),
+      caneLeaf: new THREE.ConeGeometry(0.08, 0.34, 6),
+      caneFrond: new THREE.CylinderGeometry(0.018, 0.045, 0.44, 6),
       monkeyBody: new THREE.SphereGeometry(0.72, 14, 10),
       monkeyHead: new THREE.SphereGeometry(0.52, 14, 10),
       monkeyEar: new THREE.SphereGeometry(0.24, 10, 8),
@@ -691,9 +692,9 @@ export default function App() {
       monkeyEye: new THREE.SphereGeometry(0.11, 10, 8),
       monkeyTailSegment: new THREE.CylinderGeometry(0.065, 0.075, 0.44, 8),
       monkeySpike: new THREE.ConeGeometry(0.14, 0.45, 5),
-      pineappleBody: new THREE.SphereGeometry(0.38, 12, 10),
-      pineappleScale: new THREE.TetrahedronGeometry(0.08, 0),
-      pineappleLeaf: new THREE.ConeGeometry(0.09, 0.34, 5),
+      pineappleBody: new THREE.SphereGeometry(0.38, 16, 14),
+      pineappleScale: new THREE.ConeGeometry(0.065, 0.11, 4),
+      pineappleLeaf: new THREE.ConeGeometry(0.075, 0.3, 6),
       cueLeaf: new THREE.DodecahedronGeometry(1, 0),
       cueRipple: new THREE.TorusGeometry(1, 0.035, 5, 14),
       cueGlint: new THREE.OctahedronGeometry(0.18, 0),
@@ -1184,10 +1185,10 @@ export default function App() {
       });
     }
 
-    const fruitMat = makeMaterial("#ffbf85", { map: textures.collectibleGlow, roughness: 0.4, metalness: 0.06, emissive: "#ffd878", emissiveIntensity: 0.78, envMapIntensity: 1.1 });
-    const fruitBlushMat = makeMaterial("#ff7690", { roughness: 0.48, emissive: "#ffb26b", emissiveIntensity: 0.35 });
-    const fruitLobeMat = makeMaterial("#ff9e7a", { roughness: 0.5, emissive: "#ffd178", emissiveIntensity: 0.28 });
-    const fruitLeafMat = makeMaterial("#58a94e", { roughness: 0.56, emissive: "#deb95b", emissiveIntensity: 0.3 });
+    const fruitMat = makeMaterial("#ffb57f", { map: textures.collectibleGlow, roughness: 0.35, metalness: 0.05, emissive: "#ffdf88", emissiveIntensity: 0.95, envMapIntensity: 1.2 });
+    const fruitBlushMat = makeMaterial("#ff6f78", { roughness: 0.46, emissive: "#ffbb72", emissiveIntensity: 0.42 });
+    const fruitLobeMat = makeMaterial("#ff9d72", { roughness: 0.5, emissive: "#ffcb80", emissiveIntensity: 0.34 });
+    const fruitLeafMat = makeMaterial("#4f9f46", { roughness: 0.56, emissive: "#e5c76b", emissiveIntensity: 0.36 });
     const fruitStemMat = makeMaterial("#825226", { roughness: 0.82, emissive: "#c79757", emissiveIntensity: 0.14 });
     activeLevelRef.current.fruits.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
@@ -1195,13 +1196,13 @@ export default function App() {
       fruit.position.set(posOnPath.x, pos.y || 1.05, posOnPath.z);
       const peach = new THREE.Mesh(sharedGeometries.fruit, fruitMat);
       peach.castShadow = true;
-      peach.scale.set(1.05, 0.97, 1);
+      peach.scale.set(1.06, 0.94, 1.02);
       const lobe = new THREE.Mesh(sharedGeometries.fruitLobe, fruitLobeMat);
-      lobe.position.set(0, -0.05, -0.19);
-      lobe.scale.set(1.02, 1.12, 0.7);
+      lobe.position.set(0, -0.04, -0.2);
+      lobe.scale.set(0.94, 1.24, 0.64);
       const blush = new THREE.Mesh(sharedGeometries.fruit, fruitBlushMat);
-      blush.position.set(0.09, -0.03, 0.2);
-      blush.scale.set(0.52, 0.43, 0.42);
+      blush.position.set(0.11, -0.04, 0.21);
+      blush.scale.set(0.5, 0.36, 0.38);
       const leaf = new THREE.Mesh(sharedGeometries.fruitLeaf, fruitLeafMat);
       leaf.position.set(0.17, 0.3, 0.03);
       leaf.rotation.set(-0.32, 0.14, -0.84);
@@ -1212,9 +1213,9 @@ export default function App() {
       pickups.push({ type: "fruit", mesh: fruit, active: true, x: posOnPath.x, y: pos.y || 1.05, z: posOnPath.z, radius: PICKUPS.fruitRadius });
     });
 
-    const caneMat = makeMaterial("#9ccf65", { roughness: 0.62, emissive: "#ffd977", emissiveIntensity: 0.2 });
-    const caneNodeMat = makeMaterial("#e8d39a", { roughness: 0.48, emissive: "#ffe08a", emissiveIntensity: 0.24 });
-    const caneLeafMat = makeMaterial("#5cab51", { roughness: 0.56, emissive: "#dbbe62", emissiveIntensity: 0.18 });
+    const caneMat = makeMaterial("#a9d678", { roughness: 0.54, emissive: "#ffde8f", emissiveIntensity: 0.38 });
+    const caneNodeMat = makeMaterial("#ecd9aa", { roughness: 0.42, emissive: "#ffe2a0", emissiveIntensity: 0.4 });
+    const caneLeafMat = makeMaterial("#4b9a42", { roughness: 0.5, emissive: "#dfc56e", emissiveIntensity: 0.26 });
     activeLevelRef.current.health.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
       const group = new THREE.Group();
@@ -1234,7 +1235,14 @@ export default function App() {
         leaf.rotation.z = i === 0 ? -1.1 : 1.05;
         group.add(leaf);
       });
-      const glow = createLimitedPickupLight("#54ff83", 1.6, 7);
+      [-1, 1].forEach((side) => {
+        const frond = new THREE.Mesh(sharedGeometries.caneFrond, caneLeafMat);
+        frond.position.set(0.04 * side, 0.58, 0);
+        frond.rotation.z = side * 0.86;
+        frond.rotation.x = -0.24;
+        group.add(frond);
+      });
+      const glow = createLimitedPickupLight("#ffd86f", 1.9, 8);
       group.add(cane);
       if (glow) group.add(glow);
       scene.add(group);
@@ -1630,9 +1638,9 @@ export default function App() {
     });
 
     // Golden pineapple collectibles — recognizable pineapple silhouette with warm collectible glow
-    const pineappleMat = makeMaterial("#f2b949", { map: textures.collectibleGlow, emissive: "#f7d26f", emissiveIntensity: 1.02, metalness: 0.14, roughness: 0.38, envMapIntensity: 1.2 });
-    const pineappleScaleMat = makeMaterial("#cf8730", { roughness: 0.5, emissive: "#f2c56a", emissiveIntensity: 0.33 });
-    const pineappleLeafMat = makeMaterial("#4f9e48", { roughness: 0.6, emissive: "#dec565", emissiveIntensity: 0.26 });
+    const pineappleMat = makeMaterial("#f4b449", { map: textures.collectibleGlow, emissive: "#ffe08b", emissiveIntensity: 1.14, metalness: 0.1, roughness: 0.35, envMapIntensity: 1.24 });
+    const pineappleScaleMat = makeMaterial("#d18a2a", { roughness: 0.48, emissive: "#f4c56d", emissiveIntensity: 0.44 });
+    const pineappleLeafMat = makeMaterial("#4d9b45", { roughness: 0.56, emissive: "#e2c96e", emissiveIntensity: 0.34 });
     activeLevelRef.current.collectibles.forEach((col) => {
       const posOnPath = worldPosition(col.localX, col.z);
       const group = new THREE.Group();
@@ -1642,14 +1650,15 @@ export default function App() {
       body.scale.set(1, 1.12, 1);
       body.castShadow = true;
       knot.add(body);
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 24; i++) {
         const scale = new THREE.Mesh(sharedGeometries.pineappleScale, pineappleScaleMat);
         const ring = i % 8;
         const layer = Math.floor(i / 8);
-        const angle = (ring / 8) * Math.PI * 2 + (layer * Math.PI) / 8;
-        scale.position.set(Math.cos(angle) * (0.26 + layer * 0.06), -0.2 + layer * 0.24, Math.sin(angle) * (0.26 + layer * 0.06));
-        scale.rotation.set(0.36, angle, 0.08);
-        scale.scale.set(0.95, 1.2, 0.95);
+        const angle = (ring / 8) * Math.PI * 2 + (layer % 2) * (Math.PI / 8);
+        const radius = 0.26 - layer * 0.02;
+        scale.position.set(Math.cos(angle) * radius, -0.2 + layer * 0.2, Math.sin(angle) * radius);
+        scale.rotation.set(Math.PI * 0.5, angle, 0.26);
+        scale.scale.set(1, 1.25, 1);
         knot.add(scale);
       }
       for (let i = 0; i < 8; i++) {

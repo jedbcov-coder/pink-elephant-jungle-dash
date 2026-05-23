@@ -8,7 +8,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ## Recent update
 
-- Fixed the browser tab icon (favicon) path so it loads correctly in both local development and on GitHub Pages.
+- Redesigned collectible fruit visuals so peaches, sugar cane, and pineapples look more like real edible fruit while keeping a bright golden glow that attracts pickup routes.
 
 ## Repo safety settings (recommended)
 
