@@ -1,4 +1,5 @@
 # Pink Elephant Jungle Dash
+<img width="1774" height="887" alt="image" src="https://github.com/user-attachments/assets/16fabdb3-4b1a-458e-aecf-ef68e0ca0bda" />
 
 ## Play the game
 
