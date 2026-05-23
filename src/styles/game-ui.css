@@ -1032,6 +1032,14 @@ button:disabled {
   transform: translateY(3px) scale(0.9);
 }
 
+.hud-ability-favicon {
+  display: block;
+  filter: drop-shadow(0 6px 8px rgba(35, 7, 29, 0.35));
+  height: 3.65rem;
+  transform: translateY(-0.24rem);
+  width: 3.65rem;
+}
+
 .hud-audio-dock {
   filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.24));
   opacity: 0.82;

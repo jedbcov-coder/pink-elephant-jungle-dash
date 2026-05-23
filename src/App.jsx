@@ -3088,19 +3088,12 @@ export default function App() {
       {started && !complete && !gameOver && (
         <div className="hud-elephant-ability-badge pointer-events-none absolute bottom-4 right-4 z-20"
           aria-label="Elephant charge ability status" role="img">
-          <span className="title-elephant-mascot hud-ability-mascot" aria-hidden="true">
-            <span className="title-elephant-sunburst" />
-            <span className="title-elephant-shadow" />
-            <span className="title-elephant-tail" />
-            <span className="title-elephant-ear" />
-            <span className="title-elephant-body" />
-            <span className="title-elephant-head" />
-            <span className="title-elephant-trunk" />
-            <span className="title-elephant-tusk" />
-            <span className="title-elephant-leg title-elephant-leg-back" />
-            <span className="title-elephant-leg title-elephant-leg-front" />
-            <span className="title-elephant-crown" />
-          </span>
+          <img
+            src={`${import.meta.env.BASE_URL}favicon.png`}
+            alt=""
+            className="hud-ability-favicon"
+            aria-hidden="true"
+          />
           <span className="hud-ability-status" aria-hidden="true">Charge</span>
         </div>
       )}
