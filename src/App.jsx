@@ -162,11 +162,30 @@ function createTexturePreviewPanel(textures) {
 function TouchControls({ visible, onControlChange }) {
   if (!visible) return null;
 
+  const activePointersByCodeRef = useRef(new Map());
+
+  const addPointerPress = (code, pointerId) => {
+    const activePointers = activePointersByCodeRef.current.get(code) ?? new Set();
+    activePointers.add(pointerId);
+    activePointersByCodeRef.current.set(code, activePointers);
+    onControlChange(code, true);
+  };
+
+  const removePointerPress = (code, pointerId) => {
+    const activePointers = activePointersByCodeRef.current.get(code);
+    if (!activePointers) return;
+    activePointers.delete(pointerId);
+    if (activePointers.size === 0) {
+      activePointersByCodeRef.current.delete(code);
+      onControlChange(code, false);
+    }
+  };
+
   const handlePointerDown = (event, code) => {
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    onControlChange(code, true);
+    addPointerPress(code, event.pointerId);
   };
   const handlePointerUp = (event, code) => {
     event.preventDefault();
@@ -174,12 +193,12 @@ function TouchControls({ visible, onControlChange }) {
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    onControlChange(code, false);
+    removePointerPress(code, event.pointerId);
   };
   const handlePointerCancel = (event, code) => {
     event.preventDefault();
     event.stopPropagation();
-    onControlChange(code, false);
+    removePointerPress(code, event.pointerId);
   };
 
   return (
@@ -433,6 +452,7 @@ export default function App() {
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfig(nextLevelId) : null;
+  const isGameplayActive = started && !paused && !complete && !gameOver;
 
   const ui = {
     health: useRef(null),
@@ -633,6 +653,33 @@ export default function App() {
     mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh";
     return undefined;
   }, [viewportHeight]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !isGameplayActive) return undefined;
+
+    let lastTouchStartAt = 0;
+    const blockTouchGesture = (event) => {
+      event.preventDefault();
+    };
+    const blockDoubleTapZoom = (event) => {
+      const now = performance.now();
+      if (now - lastTouchStartAt < 320) event.preventDefault();
+      lastTouchStartAt = now;
+    };
+
+    mount.addEventListener("touchmove", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchend", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchcancel", blockTouchGesture, { passive: false });
+    mount.addEventListener("touchstart", blockDoubleTapZoom, { passive: false });
+
+    return () => {
+      mount.removeEventListener("touchmove", blockTouchGesture);
+      mount.removeEventListener("touchend", blockTouchGesture);
+      mount.removeEventListener("touchcancel", blockTouchGesture);
+      mount.removeEventListener("touchstart", blockDoubleTapZoom);
+    };
+  }, [isGameplayActive]);
 
   useEffect(() => {
     if (!started || paused || complete || gameOver) return;
@@ -3283,7 +3330,7 @@ export default function App() {
 
   return (
     <main className={`relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
-      <div ref={mountRef} className="absolute inset-0" />
+      <div ref={mountRef} className={`absolute inset-0 ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
       {sceneError && (
         <section className="app-fallback-screen absolute inset-0 z-30 flex items-center justify-center px-6">
