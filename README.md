@@ -27,6 +27,8 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 - Reworked the Snake Gate branch obstacle to better match the concept art: thicker twisted side trunks, denser overhead branch canopy with snake silhouettes, and a fuller hanging vine curtain that clearly marks the slide zone while staying aligned with collision height.
 
+- Rebuilt river crocodiles into a clearer low-poly silhouette (longer snout, raised eye bumps, dorsal scutes, tapered bent tail, and leg stubs) and added subtle head-bob motion so they read better from the gameplay chase camera.
+
 ## Repo safety settings (recommended)
 
 - GitHub Pages: deploy from `main` branch and `/docs` folder

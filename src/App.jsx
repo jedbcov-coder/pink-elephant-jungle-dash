@@ -844,47 +844,85 @@ export default function App() {
         const crocMat = makeMaterial("#315b2c");
         const mouthMat = makeMaterial("#f8f1cc");
         const toothMat = makeMaterial("#ffffff", { roughness: 0.3, metalness: 0.05, emissive: "#3a3a3a", emissiveIntensity: 0.08 });
-        const crocBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.55, 1.15), crocMat);
-        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.95, 8), crocMat);
-        tail.rotation.x = Math.PI / 2;
-        tail.position.set(0, 0.02, 0.95);
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.44, 1.12), crocMat);
+        torso.position.set(0, 0.06, 0.12);
+        const shoulder = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.36, 1.02), crocMat);
+        shoulder.position.set(0, 0.09, -0.45);
+        const hip = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.33, 0.94), crocMat);
+        hip.position.set(0, 0.03, 0.72);
+        const bodyRidge = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.16, 0.9), crocMat);
+        bodyRidge.position.set(0, 0.28, 0.15);
+
+        const tail = new THREE.Group();
+        tail.position.set(0, 0.03, 1.02);
+        const tailBase = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.86, 6), crocMat);
+        tailBase.rotation.x = Math.PI / 2;
+        tailBase.position.set(0, 0.01, 0.42);
+        const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.72, 6), crocMat);
+        tailTip.rotation.x = Math.PI / 2;
+        tailTip.rotation.y = 0.19;
+        tailTip.position.set(0.08, 0.02, 0.92);
+        tail.add(tailBase, tailTip);
+
+        const legOffsets = [-0.62, 0.62];
+        legOffsets.forEach((xOffset) => {
+          const frontLeg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.32), crocMat);
+          frontLeg.position.set(xOffset, -0.08, -0.35);
+          group.add(frontLeg);
+          const rearLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, 0.3), crocMat);
+          rearLeg.position.set(xOffset * 0.88, -0.1, 0.45);
+          group.add(rearLeg);
+        });
 
         const lowerJaw = new THREE.Group();
-        const lowerSnout = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.9), crocMat);
-        lowerSnout.position.set(0, -0.04, -0.8);
-        const lowerMouth = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.06, 0.72), mouthMat);
-        lowerMouth.position.set(0, 0.08, -0.8);
-        const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
-        lowerTeeth.position.set(0, 0.16, -1.27);
-        lowerJaw.add(lowerSnout, lowerMouth, lowerTeeth);
-        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
-          const localX = -0.42 + toothIndex * 0.12;
-          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
-          bottomTooth.rotation.x = Math.PI;
-          bottomTooth.position.set(localX, 0.18, -1.17);
-          lowerJaw.add(bottomTooth);
-        }
+        const lowerSnout = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.18, 1.2), crocMat);
+        lowerSnout.position.set(0, -0.05, -1.13);
+        const lowerSnoutTip = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.52, 6), crocMat);
+        lowerSnoutTip.rotation.x = Math.PI / 2;
+        lowerSnoutTip.position.set(0, -0.05, -1.95);
+        const lowerMouth = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.05, 1.06), mouthMat);
+        lowerMouth.position.set(0, 0.03, -1.11);
+        lowerJaw.add(lowerSnout, lowerSnoutTip, lowerMouth);
 
         const upperJawPivot = new THREE.Group();
-        upperJawPivot.position.set(0, 0.08, -0.33);
+        upperJawPivot.position.set(0, 0.08, -0.62);
         const upperJaw = new THREE.Group();
-        upperJaw.position.set(0, 0, -0.47);
-        const upperSnout = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.24, 0.9), crocMat);
-        upperSnout.position.set(0, 0.12, -0.33);
-        const upperMouth = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.06, 0.72), mouthMat);
-        upperMouth.position.set(0, -0.03, -0.32);
-        const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
-        upperTeeth.position.set(0, -0.1, -0.78);
-        upperJaw.add(upperSnout, upperMouth, upperTeeth);
-        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
-          const localX = -0.42 + toothIndex * 0.12;
-          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
-          topTooth.position.set(localX, -0.12, -0.67);
-          upperJaw.add(topTooth);
-        }
-        upperJawPivot.add(upperJaw);
+        upperJaw.position.set(0, 0, -0.52);
+        const upperSnout = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.2, 1.16), crocMat);
+        upperSnout.position.set(0, 0.12, -0.72);
+        const upperSnoutTip = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.5, 6), crocMat);
+        upperSnoutTip.rotation.x = Math.PI / 2;
+        upperSnoutTip.position.set(0, 0.11, -1.56);
+        const upperMouth = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.05, 1.02), mouthMat);
+        upperMouth.position.set(0, -0.02, -0.74);
+        upperJaw.add(upperSnout, upperSnoutTip, upperMouth);
 
-        group.add(crocBody, tail, lowerJaw, upperJawPivot);
+        const eyeOffsets = [-0.22, 0.22];
+        eyeOffsets.forEach((xOffset) => {
+          const eyeBump = new THREE.Mesh(new THREE.DodecahedronGeometry(0.07, 0), crocMat);
+          eyeBump.position.set(xOffset, 0.25, -1.22);
+          upperJaw.add(eyeBump);
+
+          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.14, 6), toothMat);
+          topTooth.position.set(xOffset * 1.15, -0.08, -1.59);
+          upperJaw.add(topTooth);
+
+          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.14, 6), toothMat);
+          bottomTooth.rotation.x = Math.PI;
+          bottomTooth.position.set(xOffset * 1.15, 0.11, -1.92);
+          lowerJaw.add(bottomTooth);
+        });
+
+        for (let ridgeIndex = 0; ridgeIndex < 4; ridgeIndex += 1) {
+          const scute = new THREE.Mesh(new THREE.ConeGeometry(0.07 - ridgeIndex * 0.01, 0.12, 5), crocMat);
+          scute.position.set(0, 0.25, -0.15 + ridgeIndex * 0.34);
+          scute.rotation.x = Math.PI;
+          group.add(scute);
+        }
+
+        upperJawPivot.add(upperJaw);
+        group.add(torso, shoulder, hip, bodyRidge, tail, lowerJaw, upperJawPivot);
         const startZ = river.z + Math.sin(croc.phase) * 5;
         const startPos = worldPosition(croc.localX, startZ);
         group.position.set(startPos.x, 0.48, startPos.z);
@@ -2259,7 +2297,9 @@ export default function App() {
         const snapOpen = isThreatened ? snapCycle * (0.25 + closeFactor * 0.75) : 0;
         const idleOpen = (1 - closeFactor) * (0.08 + Math.sin(t * 2.8 + croc.phase) * 0.03);
         const jawOpen = Math.max(0, snapOpen + idleOpen);
-        croc.upperJawPivot.rotation.x = -jawOpen * 1.15;
+        const headBob = Math.sin(t * 5.5 + croc.phase * 1.6) * (0.015 + closeFactor * 0.03);
+        croc.upperJawPivot.position.y = 0.08 + headBob;
+        croc.upperJawPivot.rotation.x = -jawOpen * 1.15 + headBob * 0.7;
         croc.tail.rotation.y = Math.sin(t * (4.8 + closeFactor * 4.2) + croc.phase * 1.7) * (0.2 + closeFactor * 0.38);
       });
     }
