@@ -851,6 +851,13 @@ export default function App() {
         const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         lowerTeeth.position.set(0, 0.16, -1.27);
         lowerJaw.add(lowerSnout, lowerMouth, lowerTeeth);
+        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
+          const localX = -0.36 + toothIndex * 0.145;
+          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+          bottomTooth.rotation.x = Math.PI;
+          bottomTooth.position.set(localX, 0.18, -1.17);
+          lowerJaw.add(bottomTooth);
+        }
 
         const upperJawPivot = new THREE.Group();
         upperJawPivot.position.set(0, 0.08, -0.33);
@@ -863,6 +870,12 @@ export default function App() {
         const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         upperTeeth.position.set(0, -0.1, -0.78);
         upperJaw.add(upperSnout, upperMouth, upperTeeth);
+        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
+          const localX = -0.36 + toothIndex * 0.145;
+          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+          topTooth.position.set(localX, -0.12, -0.67);
+          upperJaw.add(topTooth);
+        }
         upperJawPivot.add(upperJaw);
 
         group.add(crocBody, lowerJaw, upperJawPivot);
@@ -2115,10 +2128,13 @@ export default function App() {
         croc.mesh.rotation.y = trackAngle(croc.z) + Math.sin(t + croc.phase) * 0.35;
 
         const distanceToPlayer = Math.hypot(body.x - croc.x, body.z - croc.z);
-        const closeFactor = clamp(1 - (distanceToPlayer - 3) / 8, 0, 1);
-        const bitePulse = Math.sin(t * (8.5 + closeFactor * 9) + croc.phase * 2.3) > 0 ? 1 : 0;
-        const jawOpen = closeFactor > 0.08 ? bitePulse * closeFactor : 0;
-        croc.upperJawPivot.rotation.x = -jawOpen * 0.82;
+        const closeFactor = clamp(1 - (distanceToPlayer - 2.2) / 9.5, 0, 1);
+        const isThreatened = closeFactor > 0.14;
+        const snapCycle = Math.sin(t * (7.4 + closeFactor * 11.5) + croc.phase * 2.7) > 0 ? 1 : 0;
+        const snapOpen = isThreatened ? snapCycle * closeFactor : 0;
+        const idleOpen = (1 - closeFactor) * (0.06 + Math.sin(t * 2.8 + croc.phase) * 0.025);
+        const jawOpen = Math.max(0, snapOpen + idleOpen);
+        croc.upperJawPivot.rotation.x = -jawOpen * 1.05;
       });
     }
 
