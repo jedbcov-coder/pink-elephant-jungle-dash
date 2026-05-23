@@ -1,3 +1,5 @@
+import { createFreshSave, migrateSaveIfNeeded } from './saveSchema';
+
 const SETTINGS_STORAGE_KEY = 'pinkElephant.settings';
 const PROFILE_STORAGE_KEY = 'pinkElephant.profile';
 const META_STORAGE_KEY = 'pinkElephant.meta';
@@ -29,11 +31,18 @@ function safeStringifyJSON(value) {
 
 export function loadSettings() {
   try {
-    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    return safeParseJSON(raw, null);
+    const rawSettings = safeParseJSON(localStorage.getItem(SETTINGS_STORAGE_KEY), null);
+    const rawProfile = safeParseJSON(localStorage.getItem(PROFILE_STORAGE_KEY), null);
+    const rawMeta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), null);
+
+    return migrateSaveIfNeeded({
+      settings: rawSettings,
+      profile: rawProfile,
+      meta: rawMeta,
+    }).settings;
   } catch (error) {
     console.warn('Failed to read settings from localStorage.', error);
-    return null;
+    return createFreshSave().settings;
   }
 }
 
@@ -51,11 +60,18 @@ export function saveSettings(settings) {
 
 export function loadProfileSnapshot() {
   try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    return safeParseJSON(raw, null);
+    const rawSettings = safeParseJSON(localStorage.getItem(SETTINGS_STORAGE_KEY), null);
+    const rawProfile = safeParseJSON(localStorage.getItem(PROFILE_STORAGE_KEY), null);
+    const rawMeta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), null);
+
+    return migrateSaveIfNeeded({
+      settings: rawSettings,
+      profile: rawProfile,
+      meta: rawMeta,
+    }).profile;
   } catch (error) {
     console.warn('Failed to read profile snapshot from localStorage.', error);
-    return null;
+    return createFreshSave().profile;
   }
 }
 
@@ -130,12 +146,30 @@ export async function initSaveSystem() {
   await openDatabase();
 
   // Keep a small metadata heartbeat so future migrations can inspect app-level info.
-  const meta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), {});
+  const rawSettings = safeParseJSON(localStorage.getItem(SETTINGS_STORAGE_KEY), null);
+  const rawProfile = safeParseJSON(localStorage.getItem(PROFILE_STORAGE_KEY), null);
+  const rawMeta = safeParseJSON(localStorage.getItem(META_STORAGE_KEY), null);
+
+  const migrated = migrateSaveIfNeeded({
+    settings: rawSettings,
+    profile: rawProfile,
+    meta: rawMeta,
+  });
+
   const nextMeta = {
-    ...meta,
+    ...migrated.meta,
     lastInitAt: Date.now(),
-    saveSystemVersion: 1,
   };
+
+  const settingsSerialized = safeStringifyJSON(migrated.settings);
+  if (settingsSerialized !== null) {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, settingsSerialized);
+  }
+
+  const profileSerialized = safeStringifyJSON(migrated.profile);
+  if (profileSerialized !== null) {
+    localStorage.setItem(PROFILE_STORAGE_KEY, profileSerialized);
+  }
 
   const serialized = safeStringifyJSON(nextMeta);
   if (serialized !== null) {

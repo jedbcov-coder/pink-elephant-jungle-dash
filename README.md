@@ -64,6 +64,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 - Added a new `src/game/save/saveManager.js` persistence entry point with safe localStorage JSON handling plus IndexedDB stores for scores, achievements, and progression events.
 
+- Added a centralized save schema (`saveSchema.js`) with versioned defaults and safe migration so old or partial local save data is auto-completed without deleting unknown fields.
+
 ## Mobile touch regression checklist
 
 Use this quick checklist after gameplay input changes:
