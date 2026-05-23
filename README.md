@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Scoped touch gesture blocking to gameplay area only, added stronger double-tap/pinch/scroll prevention on the game canvas container, and improved multi-touch button tracking so movement + action combos work reliably.
 - Improved mobile immersive gameplay handling: the game now requests fullscreen on first touch/start, re-applies immersive mode after resume/app-switch/orientation changes, hides non-essential debug chrome while actively playing, and uses a safe viewport-height fallback so HUD elements stay visible on browsers that refuse full immersive mode.
 - Added a portrait fallback overlay ("Rotate your device") for phones/tablets that ignore orientation lock, while desktop windowed play remains unchanged.
 - Improved offline reliability: service worker now uses navigation fallback + broader asset caching and shows an in-app update banner so players can refresh to new deployments without being stuck on stale cache.
@@ -55,6 +56,24 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 - Rebuilt river crocodiles into a clearer low-poly silhouette (longer snout, raised eye bumps, dorsal scutes, tapered bent tail, and leg stubs) and added subtle head-bob motion so they read better from the gameplay chase camera.
 
 - Recalibrated the Snake Gate belly-slide clearance slightly upward so proper belly-slides pass reliably again while standing still collides.
+
+
+## Mobile touch regression checklist
+
+Use this quick checklist after gameplay input changes:
+
+- Tap controls: each touch button responds instantly.
+- Hold controls: charge/slide stay active while your finger stays down.
+- Swipe across controls: no stuck input after finger leaves a button.
+- Multi-touch combo: hold movement + tap Jump/Smash at the same time.
+- Virtual joystick/buttons area: no page scroll, pull-to-refresh, pinch zoom, or double-tap zoom while playing.
+- Pause/resume: pausing clears held inputs; resuming does not keep phantom movement.
+- Menus/settings: when not actively playing, UI panels can still scroll if content grows.
+
+Device validation target:
+
+- Android Chrome (latest stable)
+- iOS Safari (latest stable)
 
 ## Repo safety settings (recommended)
 
