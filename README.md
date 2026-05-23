@@ -45,6 +45,7 @@ This project uses **one deployment method only**:
 
 - **Source:** `main` branch
 - **Folder:** `/docs`
+- **GitHub Actions deploy workflows:** not used for deployment
 
 Steps:
 
@@ -59,4 +60,5 @@ npm run build:pages
 Notes:
 
 - `build:pages` creates a production build directly in `docs/`.
+- Deployment does **not** use GitHub Actions workflows.
 - `docs/.nojekyll` must stay in the repo as an empty file.
