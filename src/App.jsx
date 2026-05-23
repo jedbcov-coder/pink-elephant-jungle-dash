@@ -57,6 +57,7 @@ const SHOW_TEXTURE_PREVIEW = false;
 const JUNGLE_LAYOUT_SEED = 0x5eed2026;
 
 const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
+const PWA_INSTALL_DISMISSED_KEY = "pwaInstallDismissed";
 
 // Before adding Level 2, ensure Level 1 is loaded from level config (this is that checkpoint).
 
@@ -379,6 +380,8 @@ export default function App() {
   const [audioState, setAudioState] = useState(readStoredAudioState);
   const [touchControlsVisible, setTouchControlsVisible] = useState(false);
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
+  const [showInstallCard, setShowInstallCard] = useState(false);
   const activeLevelRef = useRef(buildLevelById("level-1"));
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
@@ -475,6 +478,58 @@ export default function App() {
       window.removeEventListener("touchstart", showForTouchStart);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (isStandalone) {
+      setShowInstallCard(false);
+      return undefined;
+    }
+
+    const wasDismissed = window.localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) === "true";
+    if (wasDismissed) setShowInstallCard(false);
+
+    // Save the browser install event so our custom UI can trigger it later.
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      if (window.localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) === "true") return;
+      setDeferredInstallPrompt(event);
+      setShowInstallCard(true);
+    };
+
+    // Hide custom install UI once installation succeeds.
+    const handleAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+      setShowInstallCard(false);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const dismissInstallCard = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, "true");
+    }
+    setShowInstallCard(false);
+    setDeferredInstallPrompt(null);
+  };
+
+  const handleInstallGame = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    setDeferredInstallPrompt(null);
+    setShowInstallCard(false);
+    if (result?.outcome === "dismissed" && typeof window !== "undefined") {
+      window.localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, "true");
+    }
+  };
 
   function handleTouchControlChange(code, isPressed) {
     if (pausedRef.current || completeRef.current || gameOverRef.current) {
@@ -3236,6 +3291,30 @@ export default function App() {
               Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
             </p>
             <AudioControls audioState={audioState} onToggle={toggleAudioState} />
+            {showInstallCard && deferredInstallPrompt && (
+              <div className="title-install-card mx-auto mt-5 max-w-xl rounded-2xl px-4 py-4 text-left">
+                <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Install Game</h3>
+                <p className="mt-2 text-xs leading-relaxed text-amber-50/80">
+                  Add this game to your desktop for quick access and a cleaner full-screen experience.
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleInstallGame}
+                    className="rounded-full bg-emerald-200 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-950 transition hover:scale-105 active:scale-95"
+                  >
+                    Install
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismissInstallCard}
+                    className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-50 transition hover:scale-105 active:scale-95"
+                  >
+                    Not Now
+                  </button>
+                </div>
+              </div>
+            )}
             <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
