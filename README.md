@@ -18,6 +18,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game. You play as a 
 
 ## Main features
 
+- First-pass logo polish: improved glow, contrast, and small-size readability for the pink elephant badge in both the title screen and in-game charge icon while keeping the same style
 - HUD layout spacing fix: moved the left/right HUD cards lower so the Energy/Charge panel no longer overlaps the top Fruit/Lives rows on smaller viewports
 - Collectible fruit visuals redesigned to look edible and recognizable: peaches now have stems/leaves and warm blush, sugar cane now looks like cane stalks with nodes/leaves, and golden pineapples now have true pineapple body + crown while keeping attraction glow
 - Belly-slide obstacle redesign: low branch bars are replaced by two giant side trees with interwoven canopy overhead, plus hanging jungle vines and snakes; this now blocks jump/double-jump bypass and enforces belly-slide timing

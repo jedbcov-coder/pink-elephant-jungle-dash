@@ -192,12 +192,12 @@ button {
     radial-gradient(circle at 36% 24%, rgba(255, 244, 201, 0.54), transparent 16%),
     radial-gradient(circle at 48% 48%, rgba(255, 125, 197, 0.32), transparent 58%),
     linear-gradient(145deg, rgba(48, 83, 42, 0.82), rgba(83, 28, 70, 0.78) 58%, rgba(16, 25, 14, 0.92));
-  border: 1px solid rgba(255, 191, 219, 0.88);
+  border: 1px solid rgba(255, 205, 232, 0.94);
   box-shadow:
     inset 0 1px 18px rgba(255, 226, 241, 0.28),
     inset 0 -12px 24px rgba(31, 7, 24, 0.38),
-    0 0 0 4px rgba(244, 114, 182, 0.08),
-    0 0 34px rgba(244, 114, 182, 0.44),
+    0 0 0 4px rgba(244, 114, 182, 0.12),
+    0 0 40px rgba(244, 114, 182, 0.52),
     0 12px 28px rgba(3, 8, 5, 0.34);
 }
 
@@ -227,8 +227,10 @@ button {
   display: block;
   width: 58px;
   height: 48px;
-  filter: drop-shadow(0 7px 7px rgba(31, 5, 20, 0.58));
-  transform: translateY(2px);
+  filter:
+    drop-shadow(0 7px 7px rgba(31, 5, 20, 0.58))
+    drop-shadow(0 0 4px rgba(255, 182, 223, 0.35));
+  transform: translateY(2px) scale(1.02);
 }
 
 .title-elephant-sunburst,
@@ -251,7 +253,7 @@ button {
   background:
     conic-gradient(from 0.08turn, rgba(255, 226, 127, 0.34), transparent 0.08turn 0.15turn, rgba(255, 135, 201, 0.30) 0.2turn, transparent 0.29turn 0.38turn, rgba(107, 255, 179, 0.20) 0.45turn, transparent 0.52turn 0.64turn, rgba(255, 226, 127, 0.28) 0.72turn, transparent 0.8turn),
     radial-gradient(circle, rgba(255, 235, 184, 0.22), transparent 56%);
-  opacity: 0.82;
+  opacity: 0.92;
 }
 
 .title-elephant-shadow {
@@ -948,13 +950,13 @@ button:disabled {
     radial-gradient(circle at 38% 28%, rgba(255, 244, 201, 0.50), transparent 15%),
     radial-gradient(circle at 50% 52%, rgba(255, 125, 197, 0.38), transparent 58%),
     linear-gradient(145deg, rgba(64, 45, 12, 0.92), rgba(90, 28, 72, 0.88) 58%, rgba(16, 25, 14, 0.96));
-  border: 3px solid rgba(255, 219, 97, 0.88);
+  border: 3px solid rgba(255, 219, 97, 0.94);
   border-radius: 9999px;
   box-shadow:
     inset 0 1px 18px rgba(255, 246, 186, 0.28),
     inset 0 -12px 24px rgba(55, 21, 7, 0.38),
     0 0 0 5px rgba(105, 57, 8, 0.24),
-    0 0 30px rgba(255, 195, 69, 0.34),
+    0 0 36px rgba(255, 195, 69, 0.40),
     0 12px 28px rgba(3, 8, 5, 0.34);
   display: flex;
   height: 5.15rem;
@@ -990,7 +992,8 @@ button:disabled {
 }
 
 .hud-ability-mascot {
-  transform: translateY(3px) scale(0.86);
+  filter: drop-shadow(0 0 3px rgba(255, 187, 228, 0.34));
+  transform: translateY(3px) scale(0.9);
 }
 
 .hud-audio-dock {
