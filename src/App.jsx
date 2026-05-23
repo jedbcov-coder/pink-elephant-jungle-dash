@@ -1601,7 +1601,6 @@ export default function App() {
           baseHeadY: head.position.y,
           snakeSegments,
         });
-        branchHazardAccents.push({ type: "snake", snakeIndex, dir: snake.dir, head, eye, baseHeadY: head.position.y, snakeSegments });
       });
 
       // Hanging vines: visual slide zone. Bottom aligns with collider bottom edge.
@@ -2577,12 +2576,12 @@ export default function App() {
 
       branchHazardAccents.forEach((accent, index) => {
         const eyePulse = 2.2 + Math.sin(t * 7.8 + index * 0.75) * 1.3;
-        accent.eye.material.emissiveIntensity = eyePulse;
+        if (accent.eye) accent.eye.material.emissiveIntensity = eyePulse;
         accent.head.position.y = accent.baseHeadY + Math.sin(t * 3.4 + index * 0.6) * 0.08;
         accent.head.rotation.z = Math.sin(t * 2.6 + accent.snakeIndex * 0.9) * 0.06 * accent.dir;
         const tongueScale = 0.12 + Math.max(0, Math.sin(t * 12.5 + index * 0.7)) * 0.16;
-        accent.tongue.scale.x = tongueScale;
-        accent.snakeSegments.forEach(({ body: segment, idx: segmentIndex }) => {
+        if (accent.tongue) accent.tongue.scale.x = tongueScale;
+        accent.snakeSegments?.forEach(({ body: segment, idx: segmentIndex }) => {
           segment.position.y += Math.sin(t * 2.7 + segmentIndex * 0.85 + accent.snakeIndex) * 0.0018;
           segment.rotation.y += Math.sin(t * 1.6 + segmentIndex * 0.35 + accent.snakeIndex) * 0.0009;
         });
