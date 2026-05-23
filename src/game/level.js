@@ -108,8 +108,8 @@ export function buildLevel(levelConfig) {
 
     logs.push({ localX: plan.log.localX, z: o - plan.log.z, width: plan.log.width, height: 1.15, depth: 1.25, section: LEVEL_SECTIONS.JUMP_LOG, difficulty });
 
-    // Belly-slide gate: tall overhead canopy keeps jump/double-jump from bypassing while preserving a low crawl window.
-    branches.push({ localX: plan.branch.localX, z: o - plan.branch.z, width: plan.branch.width, height: 8.4, depth: 2.6, yOffset: 5.9, section: LEVEL_SECTIONS.SLIDE_BRANCH, difficulty });
+    // Belly-slide gate: interwoven canopy starts low enough to force a slide, but extends much higher so jumps cannot clear it.
+    branches.push({ localX: plan.branch.localX, z: o - plan.branch.z, width: plan.branch.width, height: 13.6, depth: 3.6, yOffset: 8.6, section: LEVEL_SECTIONS.SLIDE_BRANCH, difficulty });
 
     plan.crates.forEach((crate) => {
       crates.push({ localX: crate.localX, z: o - crate.z, width: 2.15, height: 2.15, depth: 2.15, section: LEVEL_SECTIONS.SMASH_CRATE, difficulty });
