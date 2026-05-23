@@ -116,7 +116,7 @@ export function buildLevel(levelConfig) {
       width: plan.branch.width + 0.5, // tighter side coverage for consistent center-lane must-slide behavior
       height: 14.8,
       depth: 8.0, // longer front-to-back window so double-jump timing can't phase through
-      yOffset: 8.8, // lower bottom edge a bit more so standing posture consistently catches
+      yOffset: 9.4, // raise clearance slightly so a full belly-slide can cleanly pass under the gate
       section: LEVEL_SECTIONS.SLIDE_BRANCH,
       difficulty,
     });

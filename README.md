@@ -48,6 +48,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 - Rebuilt river crocodiles into a clearer low-poly silhouette (longer snout, raised eye bumps, dorsal scutes, tapered bent tail, and leg stubs) and added subtle head-bob motion so they read better from the gameplay chase camera.
 
+- Recalibrated the Snake Gate belly-slide clearance slightly upward so proper belly-slides pass reliably again while standing still collides.
+
 ## Repo safety settings (recommended)
 
 - GitHub Pages: deploy from `main` branch and `/docs` folder
