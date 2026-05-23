@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Added a unified in-game Settings screen (Title + Pause access) that groups Audio, Controls, Display quality preset (stored only), PWA install/app mode, Save Data tools, and About/version in one place while keeping gameplay logic unchanged.
 - Moved service-worker update prompt and registration logic out of `src/main.jsx` into `src/pwa/setupServiceWorkerUpdatePrompt.js` to keep the main boot file cleaner without changing behavior.
 - Cleaned up duplicate PWA install card wiring: `App.jsx` now imports `PwaInstallCard` only once from `src/components/game-ui/PwaInstallCard.jsx`, and removed the old duplicate component file.
 - Separated PWA concerns by moving service-worker update prompt setup into `src/pwa/setupServiceWorkerUpdatePrompt.js` while keeping install-prompt hook logic in `src/hooks/usePwaInstallPrompt.js`.

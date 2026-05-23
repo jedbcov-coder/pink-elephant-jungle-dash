@@ -2,9 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { Icon } from "./components/Icon.jsx";
-import { PwaInstallCard } from "./components/game-ui/PwaInstallCard.jsx";
 import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
-import { SaveDebugTools } from "./components/game-ui/SaveDebugTools.jsx";
+import { SettingsPanel } from "./components/game-ui/SettingsPanel.jsx";
 import { TouchControls } from "./components/game-ui/TouchControls.jsx";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt.js";
 import { CAMERA_FEEDBACK, CONFIG, HUD_TIMING, MOVEMENT, PARTICLES, PICKUPS, SCORING } from "./game/config.js";
@@ -64,6 +63,7 @@ import {
   saveSettings,
 } from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
+import { APP_VERSION } from "./appInfo.js";
 
 const nl = String.fromCharCode(10);
 // Development-only helper: turn this on locally to inspect generated texture canvases.
@@ -293,7 +293,19 @@ export default function App() {
   const [debug, setDebug] = useState(false);
   const [paused, setPaused] = useState(false);
   const [sceneError, setSceneError] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia?.("(display-mode: standalone)");
+    const update = () => setIsStandaloneApp(Boolean(window.navigator.standalone) || Boolean(media?.matches));
+    update();
+    media?.addEventListener?.("change", update);
+    return () => media?.removeEventListener?.("change", update);
+  }, []);
   const [showSaveDebugTools, setShowSaveDebugTools] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsContext, setSettingsContext] = useState("title");
+  const [isStandaloneApp, setIsStandaloneApp] = useState(false);
   const testSummaryRef = useRef("Self-tests pending");
   const [finalResults, setFinalResults] = useState(null);
   const [audioState, setAudioState] = useState(readStoredAudioState);
@@ -302,6 +314,7 @@ export default function App() {
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
   const [showRotateOverlay, setShowRotateOverlay] = useState(false);
+  const [graphicsQuality, setGraphicsQuality] = useState(() => loadSettings()?.display?.graphicsQuality ?? "balanced");
   const activeLevelRef = useRef(buildLevelById("level-1"));
   const profileSnapshotRef = useRef(null);
   const saveSystemReadyRef = useRef(false);
@@ -2401,7 +2414,9 @@ export default function App() {
       }
       if (e.code === "Escape" || e.code === "KeyP") {
         if (!e.repeat && !wasPressed) {
-          if (startedRef.current && !completeRef.current && !gameOverRef.current) setPausedState(!pausedRef.current);
+          if (settingsOpen) {
+            setSettingsOpen(false);
+          } else if (startedRef.current && !completeRef.current && !gameOverRef.current) setPausedState(!pausedRef.current);
           else keyRef.current = createKeys();
         }
         return;
@@ -3381,18 +3396,14 @@ export default function App() {
             <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-amber-50/75">
               Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
             </p>
-            <AudioControls audioState={audioState} onToggle={toggleAudioState} />
-            <PwaInstallCard
-              visible={showInstallCard}
-              canInstall={Boolean(deferredInstallPrompt)}
-              onInstall={handleInstallGame}
-              onDismiss={dismissInstallCard}
-            />
-            <button onClick={startDemo}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="rounded-full bg-white/10 px-6 py-3 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:scale-105 active:scale-95">Settings</button>
+              <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
               Begin the Trail
-            </button>
+              </button>
+            </div>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
               {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Trunk Smash"], ["M", "Mute"]].map(([key, label]) => (
                 <div key={key} className="title-primary-control flex items-center gap-2 rounded-xl px-3 py-2">
@@ -3498,23 +3509,40 @@ export default function App() {
                 className="rounded-full bg-amber-200 px-5 py-2 text-sm font-black text-slate-950 transition hover:scale-105 active:scale-95">
                 Restart
               </button>
-              <button type="button" onClick={() => toggleAudioState("muted")}
-                className="rounded-full px-5 py-2 text-sm font-black transition hover:scale-105 active:scale-95"
-                aria-pressed={audioState.muted}
-                style={{ background: audioState.muted ? "rgba(248,113,113,0.92)" : "rgba(134,239,172,0.92)", color: "#082f1a" }}>
-                {audioState.muted ? "Unmute" : "Mute"}
+              <button type="button" onClick={() => { setSettingsContext("pause"); setSettingsOpen(true); }}
+                className="rounded-full bg-white/10 px-5 py-2 text-sm font-black text-amber-100 transition hover:scale-105 active:scale-95">
+                Settings
               </button>
             </div>
-            <SaveDebugTools
-              visible={showSaveDebugTools}
-              onToggle={() => setShowSaveDebugTools((value) => !value)}
-              onExport={handleExportSaveData}
-              onImport={handleImportSaveData}
-              onReset={handleResetSaveData}
-            />
           </div>
         </section>
       )}
+
+
+      <SettingsPanel
+        open={settingsOpen}
+        context={settingsContext}
+        onClose={() => setSettingsOpen(false)}
+        audioState={audioState}
+        onToggleAudio={toggleAudioState}
+        graphicsQuality={graphicsQuality}
+        onGraphicsQualityChange={(value) => {
+          const existing = loadSettings() ?? {};
+          saveSettings({ ...existing, display: { ...(existing.display ?? {}), graphicsQuality: value } });
+          setGraphicsQuality(value);
+        }}
+        isStandalone={isStandaloneApp}
+        canInstall={Boolean(deferredInstallPrompt)}
+        showInstallCard={showInstallCard}
+        onInstall={handleInstallGame}
+        onDismissInstall={dismissInstallCard}
+        showSaveTools={showSaveDebugTools}
+        onToggleSaveTools={() => setShowSaveDebugTools((value) => !value)}
+        onExportSave={handleExportSaveData}
+        onImportSave={handleImportSaveData}
+        onResetSave={handleResetSaveData}
+        appVersion={APP_VERSION}
+      />
 
       <RotateOverlay visible={showRotateOverlay} />
 
