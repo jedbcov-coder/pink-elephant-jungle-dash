@@ -676,14 +676,15 @@ export default function App() {
       treeLeaves: new THREE.DodecahedronGeometry(1, 0),
       bushClump: new THREE.DodecahedronGeometry(1, 0),
       canopy: new THREE.DodecahedronGeometry(1, 0),
-      fruit: new THREE.SphereGeometry(0.34, 18, 14),
-      fruitLobe: new THREE.SphereGeometry(0.18, 14, 12),
-      fruitLeaf: new THREE.ConeGeometry(0.11, 0.2, 5),
+      fruit: new THREE.SphereGeometry(0.36, 20, 16),
+      fruitLobe: new THREE.SphereGeometry(0.22, 16, 12),
+      fruitLeaf: new THREE.ConeGeometry(0.1, 0.24, 6),
       fruitStem: new THREE.CylinderGeometry(0.018, 0.02, 0.16, 5),
       unitBox: new THREE.BoxGeometry(1, 1, 1),
-      cane: new THREE.CylinderGeometry(0.11, 0.14, 1.35, 12),
-      caneNode: new THREE.TorusGeometry(0.16, 0.032, 8, 12),
-      caneLeaf: new THREE.ConeGeometry(0.09, 0.44, 5),
+      cane: new THREE.CylinderGeometry(0.1, 0.13, 1.45, 12),
+      caneNode: new THREE.TorusGeometry(0.14, 0.026, 8, 14),
+      caneLeaf: new THREE.ConeGeometry(0.08, 0.34, 6),
+      caneFrond: new THREE.CylinderGeometry(0.018, 0.045, 0.44, 6),
       monkeyBody: new THREE.SphereGeometry(0.72, 14, 10),
       monkeyHead: new THREE.SphereGeometry(0.52, 14, 10),
       monkeyEar: new THREE.SphereGeometry(0.24, 10, 8),
@@ -691,9 +692,9 @@ export default function App() {
       monkeyEye: new THREE.SphereGeometry(0.11, 10, 8),
       monkeyTailSegment: new THREE.CylinderGeometry(0.065, 0.075, 0.44, 8),
       monkeySpike: new THREE.ConeGeometry(0.14, 0.45, 5),
-      pineappleBody: new THREE.SphereGeometry(0.38, 12, 10),
-      pineappleScale: new THREE.TetrahedronGeometry(0.08, 0),
-      pineappleLeaf: new THREE.ConeGeometry(0.09, 0.34, 5),
+      pineappleBody: new THREE.SphereGeometry(0.38, 16, 14),
+      pineappleScale: new THREE.ConeGeometry(0.065, 0.11, 4),
+      pineappleLeaf: new THREE.ConeGeometry(0.075, 0.3, 6),
       cueLeaf: new THREE.DodecahedronGeometry(1, 0),
       cueRipple: new THREE.TorusGeometry(1, 0.035, 5, 14),
       cueGlint: new THREE.OctahedronGeometry(0.18, 0),
@@ -842,6 +843,9 @@ export default function App() {
         const mouthMat = makeMaterial("#f8f1cc");
         const toothMat = makeMaterial("#ffffff", { roughness: 0.3, metalness: 0.05, emissive: "#3a3a3a", emissiveIntensity: 0.08 });
         const crocBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.55, 1.15), crocMat);
+        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.95, 8), crocMat);
+        tail.rotation.x = Math.PI / 2;
+        tail.position.set(0, 0.02, 0.95);
 
         const lowerJaw = new THREE.Group();
         const lowerSnout = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.9), crocMat);
@@ -851,9 +855,9 @@ export default function App() {
         const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         lowerTeeth.position.set(0, 0.16, -1.27);
         lowerJaw.add(lowerSnout, lowerMouth, lowerTeeth);
-        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
-          const localX = -0.36 + toothIndex * 0.145;
-          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
+          const localX = -0.42 + toothIndex * 0.12;
+          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
           bottomTooth.rotation.x = Math.PI;
           bottomTooth.position.set(localX, 0.18, -1.17);
           lowerJaw.add(bottomTooth);
@@ -870,15 +874,15 @@ export default function App() {
         const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         upperTeeth.position.set(0, -0.1, -0.78);
         upperJaw.add(upperSnout, upperMouth, upperTeeth);
-        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
-          const localX = -0.36 + toothIndex * 0.145;
-          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
+          const localX = -0.42 + toothIndex * 0.12;
+          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
           topTooth.position.set(localX, -0.12, -0.67);
           upperJaw.add(topTooth);
         }
         upperJawPivot.add(upperJaw);
 
-        group.add(crocBody, lowerJaw, upperJawPivot);
+        group.add(crocBody, tail, lowerJaw, upperJawPivot);
         const startZ = river.z + Math.sin(croc.phase) * 5;
         const startPos = worldPosition(croc.localX, startZ);
         group.position.set(startPos.x, 0.48, startPos.z);
@@ -887,6 +891,7 @@ export default function App() {
           type: "croc",
           mesh: group,
           upperJawPivot,
+          tail,
           riverZ: river.z,
           baseLocalX: croc.localX,
           phase: croc.phase,
@@ -1184,10 +1189,10 @@ export default function App() {
       });
     }
 
-    const fruitMat = makeMaterial("#ffbf85", { map: textures.collectibleGlow, roughness: 0.4, metalness: 0.06, emissive: "#ffd878", emissiveIntensity: 0.78, envMapIntensity: 1.1 });
-    const fruitBlushMat = makeMaterial("#ff7690", { roughness: 0.48, emissive: "#ffb26b", emissiveIntensity: 0.35 });
-    const fruitLobeMat = makeMaterial("#ff9e7a", { roughness: 0.5, emissive: "#ffd178", emissiveIntensity: 0.28 });
-    const fruitLeafMat = makeMaterial("#58a94e", { roughness: 0.56, emissive: "#deb95b", emissiveIntensity: 0.3 });
+    const fruitMat = makeMaterial("#ffb57f", { map: textures.collectibleGlow, roughness: 0.35, metalness: 0.05, emissive: "#ffdf88", emissiveIntensity: 0.95, envMapIntensity: 1.2 });
+    const fruitBlushMat = makeMaterial("#ff6f78", { roughness: 0.46, emissive: "#ffbb72", emissiveIntensity: 0.42 });
+    const fruitLobeMat = makeMaterial("#ff9d72", { roughness: 0.5, emissive: "#ffcb80", emissiveIntensity: 0.34 });
+    const fruitLeafMat = makeMaterial("#4f9f46", { roughness: 0.56, emissive: "#e5c76b", emissiveIntensity: 0.36 });
     const fruitStemMat = makeMaterial("#825226", { roughness: 0.82, emissive: "#c79757", emissiveIntensity: 0.14 });
     activeLevelRef.current.fruits.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
@@ -1195,13 +1200,13 @@ export default function App() {
       fruit.position.set(posOnPath.x, pos.y || 1.05, posOnPath.z);
       const peach = new THREE.Mesh(sharedGeometries.fruit, fruitMat);
       peach.castShadow = true;
-      peach.scale.set(1.05, 0.97, 1);
+      peach.scale.set(1.06, 0.94, 1.02);
       const lobe = new THREE.Mesh(sharedGeometries.fruitLobe, fruitLobeMat);
-      lobe.position.set(0, -0.05, -0.19);
-      lobe.scale.set(1.02, 1.12, 0.7);
+      lobe.position.set(0, -0.04, -0.2);
+      lobe.scale.set(0.94, 1.24, 0.64);
       const blush = new THREE.Mesh(sharedGeometries.fruit, fruitBlushMat);
-      blush.position.set(0.09, -0.03, 0.2);
-      blush.scale.set(0.52, 0.43, 0.42);
+      blush.position.set(0.11, -0.04, 0.21);
+      blush.scale.set(0.5, 0.36, 0.38);
       const leaf = new THREE.Mesh(sharedGeometries.fruitLeaf, fruitLeafMat);
       leaf.position.set(0.17, 0.3, 0.03);
       leaf.rotation.set(-0.32, 0.14, -0.84);
@@ -1212,9 +1217,9 @@ export default function App() {
       pickups.push({ type: "fruit", mesh: fruit, active: true, x: posOnPath.x, y: pos.y || 1.05, z: posOnPath.z, radius: PICKUPS.fruitRadius });
     });
 
-    const caneMat = makeMaterial("#9ccf65", { roughness: 0.62, emissive: "#ffd977", emissiveIntensity: 0.2 });
-    const caneNodeMat = makeMaterial("#e8d39a", { roughness: 0.48, emissive: "#ffe08a", emissiveIntensity: 0.24 });
-    const caneLeafMat = makeMaterial("#5cab51", { roughness: 0.56, emissive: "#dbbe62", emissiveIntensity: 0.18 });
+    const caneMat = makeMaterial("#a9d678", { roughness: 0.54, emissive: "#ffde8f", emissiveIntensity: 0.38 });
+    const caneNodeMat = makeMaterial("#ecd9aa", { roughness: 0.42, emissive: "#ffe2a0", emissiveIntensity: 0.4 });
+    const caneLeafMat = makeMaterial("#4b9a42", { roughness: 0.5, emissive: "#dfc56e", emissiveIntensity: 0.26 });
     activeLevelRef.current.health.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
       const group = new THREE.Group();
@@ -1234,7 +1239,14 @@ export default function App() {
         leaf.rotation.z = i === 0 ? -1.1 : 1.05;
         group.add(leaf);
       });
-      const glow = createLimitedPickupLight("#54ff83", 1.6, 7);
+      [-1, 1].forEach((side) => {
+        const frond = new THREE.Mesh(sharedGeometries.caneFrond, caneLeafMat);
+        frond.position.set(0.04 * side, 0.58, 0);
+        frond.rotation.z = side * 0.86;
+        frond.rotation.x = -0.24;
+        group.add(frond);
+      });
+      const glow = createLimitedPickupLight("#ffd86f", 1.9, 8);
       group.add(cane);
       if (glow) group.add(glow);
       scene.add(group);
@@ -1384,50 +1396,53 @@ export default function App() {
       group.position.set(posOnPath.x, log.height / 2, posOnPath.z);
       group.rotation.y = trackAngle(log.z);
 
-      const trunk = new THREE.Mesh(sharedGeometries.unitBox, fallenLogBarkMat);
-      trunk.position.y = log.height * 0.04;
-      trunk.scale.set(log.width, log.height * 0.82, log.depth * 1.2);
+      const trunkRadius = Math.max(log.height * 0.44, 0.35);
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 14), fallenLogBarkMat);
+      trunk.rotation.z = Math.PI / 2;
+      trunk.position.y = log.height * 0.06;
+      trunk.scale.set(log.depth * 1.14, log.width, trunkRadius);
       trunk.castShadow = true;
       trunk.receiveShadow = true;
       group.add(trunk);
 
-      const cutFaceLeft = new THREE.Mesh(sharedGeometries.unitBox, fallenLogCoreMat);
-      cutFaceLeft.position.set(-log.width * 0.5 + 0.08, log.height * 0.02, 0);
-      cutFaceLeft.scale.set(0.16, log.height * 0.58, log.depth * 0.86);
-      group.add(cutFaceLeft);
+      [-1, 1].forEach((side) => {
+        const cutFace = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.14, 14), fallenLogCoreMat);
+        cutFace.rotation.z = Math.PI / 2;
+        cutFace.position.set(side * (log.width * 0.5 - 0.04), log.height * 0.06, 0);
+        cutFace.scale.set(log.depth * 1.03, 1, trunkRadius * 0.86);
+        cutFace.castShadow = true;
+        cutFace.receiveShadow = true;
+        group.add(cutFace);
+      });
 
-      const cutFaceRight = new THREE.Mesh(sharedGeometries.unitBox, fallenLogCoreMat);
-      cutFaceRight.position.set(log.width * 0.5 - 0.08, log.height * 0.03, 0);
-      cutFaceRight.scale.set(0.16, log.height * 0.56, log.depth * 0.82);
-      group.add(cutFaceRight);
-
-      [-0.44, -0.18, 0.12, 0.42].forEach((xOffset, index) => {
+      [-0.5, -0.24, 0.03, 0.28, 0.54].forEach((xOffset, index) => {
         const vine = new THREE.Mesh(sharedGeometries.vine, fallenLogVineMat);
-        vine.position.set(xOffset * log.width, -log.height * 0.22 + index * 0.08, (index % 2 === 0 ? 0.3 : -0.28) * log.depth);
-        vine.scale.set(1.45, 0.88 + index * 0.12, 1.3);
-        vine.rotation.set(index * 0.14 - 0.2, index * 0.32, (index - 1.5) * 0.28);
+        vine.position.set(xOffset * log.width, log.height * (0.06 - index * 0.03), (index % 2 === 0 ? 0.38 : -0.36) * log.depth);
+        vine.scale.set(1.95, 1.28 + index * 0.18, 1.72);
+        vine.rotation.set(index * 0.13 - 0.16, index * 0.52, (index - 2) * 0.38);
         vine.castShadow = true;
+        vine.receiveShadow = true;
         group.add(vine);
       });
 
-      [-0.45, -0.2, 0.06, 0.31, 0.5].forEach((xOffset, index) => {
+      [-0.52, -0.29, -0.04, 0.16, 0.36, 0.58].forEach((xOffset, index) => {
         const moss = new THREE.Mesh(sharedGeometries.mossClump, fallenLogMossMat);
-        moss.position.set(xOffset * log.width, log.height * 0.36 + (index % 2) * 0.07, (index % 2 === 0 ? -0.26 : 0.26) * log.depth);
-        moss.scale.set(0.34 + index * 0.04, 0.18, 0.26);
-        moss.rotation.set(index * 0.06, index * 0.9, 0);
+        moss.position.set(xOffset * log.width, log.height * (0.34 + (index % 2) * 0.18), (index % 2 === 0 ? -0.29 : 0.31) * log.depth);
+        moss.scale.set(0.42 + index * 0.06, 0.22 + (index % 3) * 0.04, 0.32 + (index % 2) * 0.05);
+        moss.rotation.set(index * 0.07, index * 0.82, index % 2 === 0 ? -0.08 : 0.1);
         moss.castShadow = true;
         moss.receiveShadow = true;
         group.add(moss);
       });
 
-      [-0.36, -0.08, 0.22, 0.4].forEach((xOffset, index) => {
-        const stump = new THREE.Mesh(sharedGeometries.unitBox, fallenLogBarkMat);
-        stump.position.set(xOffset * log.width, log.height * 0.62, (index % 2 === 0 ? -0.22 : 0.22) * log.depth);
-        stump.scale.set(0.2, 0.36 + index * 0.03, 0.22);
-        stump.rotation.z = (index - 1.5) * 0.18;
-        stump.castShadow = true;
-        stump.receiveShadow = true;
-        group.add(stump);
+      [-0.44, -0.15, 0.19, 0.47].forEach((xOffset, index) => {
+        const brokenBranch = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 8), fallenLogBarkMat);
+        brokenBranch.position.set(xOffset * log.width, log.height * 0.58, (index % 2 === 0 ? -0.24 : 0.26) * log.depth);
+        brokenBranch.scale.set(0.12, 0.3 + index * 0.06, 0.12);
+        brokenBranch.rotation.set((index - 1.5) * 0.2, 0, (index % 2 === 0 ? -0.45 : 0.4));
+        brokenBranch.castShadow = true;
+        brokenBranch.receiveShadow = true;
+        group.add(brokenBranch);
       });
 
       scene.add(group);
@@ -1460,10 +1475,10 @@ export default function App() {
       group.position.set(posOnPath.x, branch.yOffset, posOnPath.z);
       group.rotation.y = trackAngle(branch.z);
 
-      const trunkHeight = 10.2;
-      const trunkWidth = 2.9;
-      const trunkDepth = 2.6;
-      const trunkOffset = branch.width * 0.5 + 1.35;
+      const trunkHeight = 12.8;
+      const trunkWidth = 3.35;
+      const trunkDepth = 3.1;
+      const trunkOffset = branch.width * 0.5 + 1.95;
       const trunkBaseY = -(branch.height * 0.5) + trunkHeight * 0.5;
 
       const leftTrunk = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
@@ -1481,41 +1496,41 @@ export default function App() {
         group.add(mesh);
       });
 
-      const canopyBranchOffsets = [-0.42, -0.22, 0, 0.23, 0.44];
+      const canopyBranchOffsets = [-0.48, -0.3, -0.12, 0.08, 0.28, 0.46];
       canopyBranchOffsets.forEach((offset, index) => {
         const beam = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
-        beam.position.set(offset * branch.width * 0.92, branch.height * 0.5 - (index % 2 === 0 ? 0.16 : 0.42), (index % 2 === 0 ? -0.3 : 0.34));
-        beam.scale.set(branch.width + 2.95 - index * 0.35, 0.7 + (index % 2) * 0.16, 0.86);
-        beam.rotation.z = offset * 0.5;
-        beam.rotation.x = (index - 2) * 0.05;
+        beam.position.set(offset * branch.width * 0.9, branch.height * 0.5 - 0.3 - (index % 2 === 0 ? 0.14 : 0.52), (index % 2 === 0 ? -0.9 : 0.9));
+        beam.scale.set(branch.width + 5.1 - index * 0.26, 0.84 + (index % 2) * 0.15, 1.2);
+        beam.rotation.z = offset * 0.75;
+        beam.rotation.x = (index - 2.5) * 0.08;
         beam.castShadow = true;
         beam.receiveShadow = true;
         group.add(beam);
       });
 
       const canopyLeaves = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
-      canopyLeaves.position.set(0, branch.height * 0.5 + 0.54, 0.1);
-      canopyLeaves.scale.set(branch.width + 4.2, 1.62, 2.9);
+      canopyLeaves.position.set(0, branch.height * 0.5 + 0.6, 0);
+      canopyLeaves.scale.set(branch.width + 5.6, 1.9, 4.6);
       canopyLeaves.castShadow = true;
       canopyLeaves.receiveShadow = true;
       group.add(canopyLeaves);
 
-      for (let i = 0; i < 7; i += 1) {
-        const x = -branch.width * 0.42 + i * (branch.width * 0.14);
-        const vineLength = 3.3 + (i % 3) * 0.55;
+      for (let i = 0; i < 9; i += 1) {
+        const x = -branch.width * 0.5 + i * (branch.width * 0.125);
+        const vineLength = 3.6 + (i % 4) * 0.75;
         const vine = new THREE.Mesh(sharedGeometries.unitBox, branchVineMat);
-        vine.position.set(x, 0.24 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.58);
-        vine.scale.set(0.28, vineLength, 0.28);
-        vine.rotation.z = (i - 3) * 0.08;
+        vine.position.set(x, 0.52 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.76);
+        vine.scale.set(0.34, vineLength, 0.34);
+        vine.rotation.z = (i - 4) * 0.11;
         vine.castShadow = true;
         vine.receiveShadow = true;
         group.add(vine);
 
-        if (i % 2 === 1) {
+        if (i % 3 !== 0) {
           const snakeBody = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
-          snakeBody.position.set(x + 0.08, vine.position.y - 0.3, vine.position.z + 0.16);
-          snakeBody.scale.set(0.4, 0.9, 0.4);
-          snakeBody.rotation.z = (i - 3) * 0.14;
+          snakeBody.position.set(x + 0.08, vine.position.y - 0.38, vine.position.z + 0.2);
+          snakeBody.scale.set(0.48, 1.18, 0.48);
+          snakeBody.rotation.z = (i - 4) * 0.18;
           snakeBody.castShadow = true;
           snakeBody.receiveShadow = true;
 
@@ -1566,11 +1581,17 @@ export default function App() {
     function addMonkeyArms(group) {
       [-1, 1].forEach((side) => {
         const arm = new THREE.Mesh(sharedGeometries.monkeyTailSegment, monkeyBodyMat);
-        arm.position.set(side * 0.72, 0.24, -0.06);
-        arm.scale.set(1.28, 1.7, 1.28);
-        arm.rotation.set(0.28, 0, side * 0.72);
+        arm.position.set(side * 0.66, 0.18, 0.08);
+        arm.scale.set(1.18, 1.58, 1.18);
+        arm.rotation.set(0.08, side * 0.1, side * 0.42);
         arm.castShadow = true;
         group.add(arm);
+
+        const hand = new THREE.Mesh(sharedGeometries.monkeyMuzzle, monkeyFaceMat);
+        hand.position.set(side * 0.88, -0.04, 0.24);
+        hand.scale.set(0.44, 0.36, 0.34);
+        hand.castShadow = true;
+        group.add(hand);
       });
     }
 
@@ -1630,9 +1651,9 @@ export default function App() {
     });
 
     // Golden pineapple collectibles — recognizable pineapple silhouette with warm collectible glow
-    const pineappleMat = makeMaterial("#f2b949", { map: textures.collectibleGlow, emissive: "#f7d26f", emissiveIntensity: 1.02, metalness: 0.14, roughness: 0.38, envMapIntensity: 1.2 });
-    const pineappleScaleMat = makeMaterial("#cf8730", { roughness: 0.5, emissive: "#f2c56a", emissiveIntensity: 0.33 });
-    const pineappleLeafMat = makeMaterial("#4f9e48", { roughness: 0.6, emissive: "#dec565", emissiveIntensity: 0.26 });
+    const pineappleMat = makeMaterial("#f4b449", { map: textures.collectibleGlow, emissive: "#ffe08b", emissiveIntensity: 1.14, metalness: 0.1, roughness: 0.35, envMapIntensity: 1.24 });
+    const pineappleScaleMat = makeMaterial("#d18a2a", { roughness: 0.48, emissive: "#f4c56d", emissiveIntensity: 0.44 });
+    const pineappleLeafMat = makeMaterial("#4d9b45", { roughness: 0.56, emissive: "#e2c96e", emissiveIntensity: 0.34 });
     activeLevelRef.current.collectibles.forEach((col) => {
       const posOnPath = worldPosition(col.localX, col.z);
       const group = new THREE.Group();
@@ -1642,14 +1663,15 @@ export default function App() {
       body.scale.set(1, 1.12, 1);
       body.castShadow = true;
       knot.add(body);
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 24; i++) {
         const scale = new THREE.Mesh(sharedGeometries.pineappleScale, pineappleScaleMat);
         const ring = i % 8;
         const layer = Math.floor(i / 8);
-        const angle = (ring / 8) * Math.PI * 2 + (layer * Math.PI) / 8;
-        scale.position.set(Math.cos(angle) * (0.26 + layer * 0.06), -0.2 + layer * 0.24, Math.sin(angle) * (0.26 + layer * 0.06));
-        scale.rotation.set(0.36, angle, 0.08);
-        scale.scale.set(0.95, 1.2, 0.95);
+        const angle = (ring / 8) * Math.PI * 2 + (layer % 2) * (Math.PI / 8);
+        const radius = 0.26 - layer * 0.02;
+        scale.position.set(Math.cos(angle) * radius, -0.2 + layer * 0.2, Math.sin(angle) * radius);
+        scale.rotation.set(Math.PI * 0.5, angle, 0.26);
+        scale.scale.set(1, 1.25, 1);
         knot.add(scale);
       }
       for (let i = 0; i < 8; i++) {
@@ -2120,17 +2142,19 @@ export default function App() {
         const xMove = Math.sin(t * 1.2 + croc.phase) * 1.2;
         croc.z = croc.riverZ + zMove;
         croc.x = worldX(croc.baseLocalX + xMove, croc.z);
-        croc.mesh.position.set(croc.x, 0.48 + Math.sin(t * 4 + croc.phase) * 0.08, croc.z);
+        const bodyBob = Math.sin(t * 4 + croc.phase) * 0.08;
+        croc.mesh.position.set(croc.x, 0.48 + bodyBob, croc.z);
         croc.mesh.rotation.y = trackAngle(croc.z) + Math.sin(t + croc.phase) * 0.35;
 
         const distanceToPlayer = Math.hypot(body.x - croc.x, body.z - croc.z);
         const closeFactor = clamp(1 - (distanceToPlayer - 2.2) / 9.5, 0, 1);
         const isThreatened = closeFactor > 0.14;
-        const snapCycle = Math.sin(t * (7.4 + closeFactor * 11.5) + croc.phase * 2.7) > 0 ? 1 : 0;
-        const snapOpen = isThreatened ? snapCycle * closeFactor : 0;
-        const idleOpen = (1 - closeFactor) * (0.06 + Math.sin(t * 2.8 + croc.phase) * 0.025);
+        const snapCycle = Math.sin(t * (7.8 + closeFactor * 13.5) + croc.phase * 2.7) > 0 ? 1 : 0;
+        const snapOpen = isThreatened ? snapCycle * (0.25 + closeFactor * 0.75) : 0;
+        const idleOpen = (1 - closeFactor) * (0.08 + Math.sin(t * 2.8 + croc.phase) * 0.03);
         const jawOpen = Math.max(0, snapOpen + idleOpen);
-        croc.upperJawPivot.rotation.x = -jawOpen * 1.05;
+        croc.upperJawPivot.rotation.x = -jawOpen * 1.15;
+        croc.tail.rotation.y = Math.sin(t * (4.8 + closeFactor * 4.2) + croc.phase * 1.7) * (0.2 + closeFactor * 0.38);
       });
     }
 
@@ -2264,7 +2288,7 @@ export default function App() {
           const result = handleLogCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         } else if (obs.type === "branch") {
           const result = handleBranchCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
@@ -2278,7 +2302,7 @@ export default function App() {
           if (result.breakCrate) breakCrate(obs);
           else if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         }
       }
 
@@ -3067,7 +3091,7 @@ export default function App() {
               Begin the Trail
             </button>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
-              {[["↑ / W", "Build Charge"], ["← / A   → / D", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift / E", "Smash / Spin"], ["M", "Mute"]].map(([key, label]) => (
+              {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Smash"], ["M", "Mute"]].map(([key, label]) => (
                 <div key={key} className="title-primary-control flex items-center gap-2 rounded-xl px-3 py-2">
                   <span className="title-control-key shrink-0 font-black text-amber-200">{key}</span><span>{label}</span>
                 </div>
