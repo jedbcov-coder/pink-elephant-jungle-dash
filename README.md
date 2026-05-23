@@ -17,6 +17,9 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game. You play as a 
 
 ## Main features
 
+- Gameplay progression now uses each level's `nextLevel`: finishing Level 1 offers Level 2, and finishing Level 2 shows the final win screen
+- Restart now always restarts the current level, while New Game always returns to Level 1
+- Level switching now fully resets run state (pickups, hazards, player state/position/speed, timers, and finish state) so each level starts clean
 - Playable low-poly 3D jungle runner with a pink elephant character
 - Level loading now uses a beginner-friendly level registry with a safe fallback to Level 1
 - Runtime level data now uses `currentLevelId` state and `buildLevelById(currentLevelId)`, starting on Level 1 exactly as before

@@ -366,6 +366,7 @@ export default function App() {
   const stampedeRef = useRef({ nextStepTime: 0 });
   const gameStartTimeRef = useRef(null);
   const touchInputDetectedRef = useRef(false);
+  const pendingLevelStartRef = useRef(null);
 
   const [started, setStarted] = useState(false);
   const [complete, setComplete] = useState(false);
@@ -441,6 +442,11 @@ export default function App() {
 
   useEffect(() => {
     activeLevelRef.current = buildLevelById(currentLevelId);
+    if (pendingLevelStartRef.current && pendingLevelStartRef.current.levelId === currentLevelId) {
+      const { start } = pendingLevelStartRef.current;
+      pendingLevelStartRef.current = null;
+      resetGameRef.current?.({ start });
+    }
   }, [currentLevelId]);
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -2596,13 +2602,18 @@ export default function App() {
       if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
       audioManagerRef.current?.dispose();
     };
-  }, []);
+  }, [currentLevelId]);
 
   const startNewGame = () => {
-    setCurrentLevelId("level-1");
     stopTitleTheme(0.18);
     startAudio();
-    resetGameRef.current?.({ start: true });
+    pendingLevelStartRef.current = { levelId: "level-1", start: true };
+    if (currentLevelId === "level-1") {
+      resetGameRef.current?.({ start: true });
+      pendingLevelStartRef.current = null;
+      return;
+    }
+    setCurrentLevelId("level-1");
   };
 
   const startDemo = () => {
@@ -2611,10 +2622,15 @@ export default function App() {
 
   const startLevelById = (levelId) => {
     if (!levelId) return;
-    setCurrentLevelId(levelId);
     stopTitleTheme(0.18);
     startAudio();
-    resetGameRef.current?.({ start: true });
+    if (levelId === currentLevelId) {
+      resetGameRef.current?.({ start: true });
+      pendingLevelStartRef.current = null;
+      return;
+    }
+    pendingLevelStartRef.current = { levelId, start: true };
+    setCurrentLevelId(levelId);
   };
 
   return (
