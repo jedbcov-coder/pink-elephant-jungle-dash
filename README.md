@@ -21,6 +21,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 ## Recent update
 
 - Moved service-worker update prompt and registration logic out of `src/main.jsx` into `src/hooks/usePwaInstallPrompt.js` to keep the main boot file cleaner without changing behavior.
+- Split `App.jsx` UI responsibilities into focused game UI components (`TouchControls`, `PwaInstallCard`, `SaveDebugTools`, `RotateOverlay`) to keep the main app file easier to maintain without changing gameplay behavior.
 - Improved service-worker update reliability by registering with `updateViaCache: "none"`, which helps browsers fetch fresh worker code during new deployments.
 - Added save utility controls for debugging: reset all save data, export save JSON (settings/profile/IndexedDB records), and import save JSON with schema validation + migration before safe replacement.
 - App startup now initializes the save system before gameplay loops begin, safely loads settings/profile snapshot, applies saved audio preferences through the save manager path, and falls back to defaults if loading fails.
@@ -31,6 +32,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 - Scoped touch gesture blocking to gameplay area only, added stronger double-tap/pinch/scroll prevention on the game canvas container, and improved multi-touch button tracking so movement + action combos work reliably.
 - Improved mobile immersive gameplay handling: the game now requests fullscreen on first touch/start, re-applies immersive mode after resume/app-switch/orientation changes, hides non-essential debug chrome while actively playing, and uses a safe viewport-height fallback so HUD elements stay visible on browsers that refuse full immersive mode.
 - Added a portrait fallback overlay ("Rotate your device") for phones/tablets that ignore orientation lock, while desktop windowed play remains unchanged.
+- Clarified immersive-mode behavior: fullscreen and landscape lock requests are now treated as best-effort only (many browsers block them silently), and gameplay keeps using the existing rotate overlay + safe layout fallback when immersive APIs are unavailable.
 - Improved offline reliability: service worker now uses navigation fallback + broader asset caching and shows an in-app update banner so players can refresh to new deployments without being stuck on stale cache.
 - Added a professional in-game **Install Game** card on the start screen that only appears when `beforeinstallprompt` is available, hides after install or dismissal, and stores a `pwaInstallDismissed` local setting so players are not nagged.
 - Refactored custom PWA install prompt code into a reusable hook (`usePwaInstallPrompt`) plus a dedicated UI component (`PwaInstallCard`) without changing install behavior.
