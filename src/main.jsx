@@ -7,7 +7,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
-import { setupServiceWorkerUpdatePrompt } from "./hooks/usePwaInstallPrompt.js";
+import { setupServiceWorkerUpdatePrompt } from "./pwa/setupServiceWorkerUpdatePrompt.js";
 import "./styles.css";
 
 class AppErrorBoundary extends React.Component {
