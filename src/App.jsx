@@ -227,6 +227,13 @@ function requestImmersiveMobileMode() {
   lockLandscape();
 }
 
+function getIsPortraitViewport() {
+  if (typeof window === "undefined") return false;
+  const orientationType = window.screen?.orientation?.type;
+  if (orientationType) return orientationType.startsWith("portrait");
+  return window.innerHeight > window.innerWidth;
+}
+
 function createBroadBananaLeafGeometry() {
   const shape = new THREE.Shape();
   shape.moveTo(0, 1.28);
@@ -404,6 +411,7 @@ export default function App() {
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
   const [showInstallCard, setShowInstallCard] = useState(false);
+  const [showRotateOverlay, setShowRotateOverlay] = useState(false);
   const activeLevelRef = useRef(buildLevelById("level-1"));
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
@@ -510,6 +518,37 @@ export default function App() {
       window.removeEventListener("pointerdown", tryImmersiveMode);
       window.removeEventListener("touchstart", showForTouchStart);
       window.removeEventListener("touchstart", tryImmersiveMode);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const pointerQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
+    const updateRotateOverlay = () => {
+      const isLikelyMobile = pointerQuery.matches || touchInputDetectedRef.current;
+      setShowRotateOverlay(isLikelyMobile && getIsPortraitViewport());
+    };
+
+    const onOrientationChange = () => updateRotateOverlay();
+    const onResize = () => updateRotateOverlay();
+    const onTouchStart = () => {
+      touchInputDetectedRef.current = true;
+      updateRotateOverlay();
+    };
+
+    updateRotateOverlay();
+    pointerQuery.addEventListener?.("change", updateRotateOverlay);
+    window.addEventListener("orientationchange", onOrientationChange);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+
+    return () => {
+      pointerQuery.removeEventListener?.("change", updateRotateOverlay);
+      window.removeEventListener("orientationchange", onOrientationChange);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
 
@@ -3466,6 +3505,24 @@ export default function App() {
                 {audioState.muted ? "Unmute" : "Mute"}
               </button>
             </div>
+          </div>
+        </section>
+      )}
+
+      {showRotateOverlay && (
+        <section
+          className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-6"
+          style={{ background: "rgba(3, 10, 6, 0.82)", backdropFilter: "blur(3px)" }}
+          role="status"
+          aria-live="polite"
+        >
+          <div
+            className="rounded-[1.5rem] p-6 text-center text-emerald-50"
+            style={{ background: "rgba(12,20,10,0.92)", border: "1px solid rgba(134,239,172,0.32)", maxWidth: "22rem" }}
+          >
+            <div className="text-4xl" aria-hidden="true">📱↻</div>
+            <h2 className="display-title mt-2 text-2xl font-black text-emerald-200">Rotate your device</h2>
+            <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">This game plays best in landscape mode. Turn your device sideways to continue.</p>
           </div>
         </section>
       )}
