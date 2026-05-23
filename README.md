@@ -9,6 +9,11 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 ## Recent update
 
 - Redesigned the low jump log obstacle to look like a fallen jungle tree with thicker vines, richer moss clumps, and broken branch stubs across the path.
+- Redesigned collectible fruit visuals so peaches, sugar cane, and pineapples look more like real edible fruit while keeping a bright golden glow that attracts pickup routes.
+- Redesigned the belly-slide obstacle into a giant twin-tree gate with interwoven overhead branches, denser hanging vines, and snake details, and tightened collision depth so players must belly-slide instead of double-jumping over it.
+- Refreshed monkey enemy hands/arms to remove banana-like shapes that looked like fangs, so monkeys read friendlier during gameplay.
+- Fixed the browser tab icon (favicon) path so it loads correctly in both local development and on GitHub Pages.
+- Added a safety ground reset after low-obstacle bump collisions so the elephant always drops back to normal ground height instead of floating at obstacle height.
 
 ## Repo safety settings (recommended)
 
@@ -25,7 +30,8 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - **Run faster (charge):** hold `W` or `↑`
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
-- **Smash/Spin (when available):** `Z` or `E`
+- **Smash:** `Shift`
+- **Spin (when available):** `E`
 - **Touch devices:** use the on-screen control buttons
 
 ## Main features
@@ -41,7 +47,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Hazard dodging and life-based runs
 - Fruit collection, hazard dodging, and life-based runs with fallen-tree jump obstacles wrapped in vines and moss
 - Multiple levels with increasing distance and speed
-- Level 2 now uses a warm orange sunset sky, and Level 3 (Night Run) uses the previous purple-white moonlit look
+- Level 2 now uses an orange sunset sky with pink highlights, and Level 3 (Night Run) carries the purple moonlit color set
 - Keyboard and touch controls for desktop and mobile
 - Pause/settings overlay and audio controls
 
