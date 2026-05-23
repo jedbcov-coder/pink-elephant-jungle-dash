@@ -1,6 +1,7 @@
 import { CONFIG } from "./config.js";
 import { LEVEL_SECTIONS, sectionDifficulty, sectionMetadata } from "./levelPromptMetadata.js";
 import { lerp } from "./math.js";
+import { getLevelConfig } from "./levels/index.js";
 
 export { LEVEL_SECTIONS } from "./levelPromptMetadata.js";
 
@@ -12,89 +13,9 @@ function addFruitLine(fruits, startZ, endZ, count, localXFn, yFn, metadata = {})
   }
 }
 
-export function buildLevel() {
+export function buildLevel(levelConfig) {
   const fruits = [], health = [], logs = [], crates = [], branches = [], rivers = [], enemies = [], collectibles = [];
-  const loops = [0, 245, 490];
-  const loopPlans = [
-    {
-      swayWidth: 1.45,
-      guideX: 0,
-      guideCount: 8,
-      swayCount: 6,
-      jumpCount: 5,
-      highCount: 5,
-      slideCount: 5,
-      crateFruitCount: 4,
-      jumpX: 0,
-      highX: 0,
-      slideX: 0,
-      crateFruitStartX: -0.55,
-      crateFruitEndX: 0.55,
-      log: { localX: 0, z: 108, width: 11.25 },
-      branch: { localX: 0, z: 148, width: 12.85 },
-      crates: [{ localX: 0, z: 184 }],
-      river: {
-        z: 228,
-        depth: 11.5,
-        crocs: [{ localX: -2.6, phase: 0.2 }, { localX: 2.6, phase: 3.1 }],
-      },
-      health: { localX: 0, z: 240 },
-      enemies: [{ localX: 0, z: 58, patrolRange: 1.85, patrolSpeed: 1.45 }],
-      pineapples: [{ localX: 3.65, z: 90, y: 1.35 }],
-    },
-    {
-      swayWidth: 2.65,
-      guideX: 0,
-      guideCount: 8,
-      swayCount: 8,
-      jumpCount: 6,
-      highCount: 7,
-      slideCount: 6,
-      crateFruitCount: 5,
-      jumpX: -0.75,
-      highX: 1.4,
-      slideX: -1.1,
-      crateFruitStartX: 1.6,
-      crateFruitEndX: -1.6,
-      log: { localX: -0.75, z: 108, width: 10.4 },
-      branch: { localX: 1.1, z: 148, width: 11.55 },
-      crates: [{ localX: -1.45, z: 184 }, { localX: 2.85, z: 184 }],
-      river: {
-        z: 228,
-        depth: 12.75,
-        crocs: [{ localX: -2.8, phase: 0.65 }, { localX: 2.45, phase: 2.95 }],
-      },
-      health: { localX: -1.8, z: 240 },
-      enemies: [{ localX: 1.45, z: 58, patrolRange: 2.75, patrolSpeed: 2.1 }],
-      pineapples: [{ localX: -3.75, z: 72, y: 1.55 }, { localX: 3.6, z: 166, y: 3.15 }],
-    },
-    {
-      swayWidth: 2.95,
-      guideX: -0.45,
-      guideCount: 7,
-      swayCount: 9,
-      jumpCount: 6,
-      highCount: 8,
-      slideCount: 6,
-      crateFruitCount: 6,
-      jumpX: 1.2,
-      highX: -2.05,
-      slideX: 1.65,
-      crateFruitStartX: -2.6,
-      crateFruitEndX: 2.6,
-      log: { localX: 1.05, z: 108, width: 10.05 },
-      branch: { localX: -1.35, z: 148, width: 11.05 },
-      crates: [{ localX: 0, z: 184 }, { localX: -3.05, z: 184 }, { localX: 3.05, z: 184 }],
-      river: {
-        z: 228,
-        depth: 13.35,
-        crocs: [{ localX: -3.05, phase: 1.1 }, { localX: 0, phase: 2.55 }, { localX: 3.05, phase: 3.9 }],
-      },
-      health: { localX: 2.2, z: 240 },
-      enemies: [{ localX: -1.6, z: 58, patrolRange: 3.05, patrolSpeed: 2.55 }],
-      pineapples: [{ localX: 4.05, z: 74, y: 1.7 }, { localX: -4.15, z: 170, y: 3.35 }],
-    },
-  ];
+  const { loops, loopPlans } = levelConfig;
 
   loops.forEach((offset, index) => {
     const o = -offset;
@@ -237,4 +158,8 @@ export function buildLevel() {
   };
 }
 
-export const LEVEL = buildLevel();
+export function buildLevelById(levelId) {
+  return buildLevel(getLevelConfig(levelId));
+}
+
+export const LEVEL = buildLevelById("level-1");
