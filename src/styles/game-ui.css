@@ -802,6 +802,17 @@ button:disabled {
   top: 11.2rem;
 }
 
+
+.hud-charge-row {
+  line-height: 1;
+  min-height: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.hud-charge-row .text-\[10px\] {
+  line-height: 1;
+}
+
 .hud-primary-panel .h-3 {
   height: 0.9rem;
 }

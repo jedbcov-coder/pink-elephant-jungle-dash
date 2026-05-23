@@ -2916,7 +2916,7 @@ export default function App() {
             <div ref={ui.health} className="h-full w-full rounded-full transition-all duration-150" />
           </div>
           <div className="my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-          <div className="mb-1 flex items-center justify-between">
+          <div className="hud-charge-row mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
               <Icon label="⬆" size={12} /> Charge
             </span>
