@@ -4,7 +4,7 @@
   "description": "A fast jungle runner game.",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#111827",
   "theme_color": "#111827",
