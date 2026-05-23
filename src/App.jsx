@@ -843,6 +843,9 @@ export default function App() {
         const mouthMat = makeMaterial("#f8f1cc");
         const toothMat = makeMaterial("#ffffff", { roughness: 0.3, metalness: 0.05, emissive: "#3a3a3a", emissiveIntensity: 0.08 });
         const crocBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.55, 1.15), crocMat);
+        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.95, 8), crocMat);
+        tail.rotation.x = Math.PI / 2;
+        tail.position.set(0, 0.02, 0.95);
 
         const lowerJaw = new THREE.Group();
         const lowerSnout = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.9), crocMat);
@@ -852,9 +855,9 @@ export default function App() {
         const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         lowerTeeth.position.set(0, 0.16, -1.27);
         lowerJaw.add(lowerSnout, lowerMouth, lowerTeeth);
-        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
-          const localX = -0.36 + toothIndex * 0.145;
-          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
+          const localX = -0.42 + toothIndex * 0.12;
+          const bottomTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
           bottomTooth.rotation.x = Math.PI;
           bottomTooth.position.set(localX, 0.18, -1.17);
           lowerJaw.add(bottomTooth);
@@ -871,15 +874,15 @@ export default function App() {
         const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 0.12), toothMat);
         upperTeeth.position.set(0, -0.1, -0.78);
         upperJaw.add(upperSnout, upperMouth, upperTeeth);
-        for (let toothIndex = 0; toothIndex < 6; toothIndex += 1) {
-          const localX = -0.36 + toothIndex * 0.145;
-          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), toothMat);
+        for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
+          const localX = -0.42 + toothIndex * 0.12;
+          const topTooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 6), toothMat);
           topTooth.position.set(localX, -0.12, -0.67);
           upperJaw.add(topTooth);
         }
         upperJawPivot.add(upperJaw);
 
-        group.add(crocBody, lowerJaw, upperJawPivot);
+        group.add(crocBody, tail, lowerJaw, upperJawPivot);
         const startZ = river.z + Math.sin(croc.phase) * 5;
         const startPos = worldPosition(croc.localX, startZ);
         group.position.set(startPos.x, 0.48, startPos.z);
@@ -888,6 +891,7 @@ export default function App() {
           type: "croc",
           mesh: group,
           upperJawPivot,
+          tail,
           riverZ: river.z,
           baseLocalX: croc.localX,
           phase: croc.phase,
@@ -1468,10 +1472,10 @@ export default function App() {
       group.position.set(posOnPath.x, branch.yOffset, posOnPath.z);
       group.rotation.y = trackAngle(branch.z);
 
-      const trunkHeight = 10.2;
-      const trunkWidth = 2.9;
-      const trunkDepth = 2.6;
-      const trunkOffset = branch.width * 0.5 + 1.35;
+      const trunkHeight = 12.8;
+      const trunkWidth = 3.35;
+      const trunkDepth = 3.1;
+      const trunkOffset = branch.width * 0.5 + 1.95;
       const trunkBaseY = -(branch.height * 0.5) + trunkHeight * 0.5;
 
       const leftTrunk = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
@@ -1489,41 +1493,41 @@ export default function App() {
         group.add(mesh);
       });
 
-      const canopyBranchOffsets = [-0.42, -0.22, 0, 0.23, 0.44];
+      const canopyBranchOffsets = [-0.48, -0.3, -0.12, 0.08, 0.28, 0.46];
       canopyBranchOffsets.forEach((offset, index) => {
         const beam = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
-        beam.position.set(offset * branch.width * 0.92, branch.height * 0.5 - (index % 2 === 0 ? 0.16 : 0.42), (index % 2 === 0 ? -0.3 : 0.34));
-        beam.scale.set(branch.width + 2.95 - index * 0.35, 0.7 + (index % 2) * 0.16, 0.86);
-        beam.rotation.z = offset * 0.5;
-        beam.rotation.x = (index - 2) * 0.05;
+        beam.position.set(offset * branch.width * 0.9, branch.height * 0.5 - 0.3 - (index % 2 === 0 ? 0.14 : 0.52), (index % 2 === 0 ? -0.9 : 0.9));
+        beam.scale.set(branch.width + 5.1 - index * 0.26, 0.84 + (index % 2) * 0.15, 1.2);
+        beam.rotation.z = offset * 0.75;
+        beam.rotation.x = (index - 2.5) * 0.08;
         beam.castShadow = true;
         beam.receiveShadow = true;
         group.add(beam);
       });
 
       const canopyLeaves = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
-      canopyLeaves.position.set(0, branch.height * 0.5 + 0.54, 0.1);
-      canopyLeaves.scale.set(branch.width + 4.2, 1.62, 2.9);
+      canopyLeaves.position.set(0, branch.height * 0.5 + 0.6, 0);
+      canopyLeaves.scale.set(branch.width + 5.6, 1.9, 4.6);
       canopyLeaves.castShadow = true;
       canopyLeaves.receiveShadow = true;
       group.add(canopyLeaves);
 
-      for (let i = 0; i < 7; i += 1) {
-        const x = -branch.width * 0.42 + i * (branch.width * 0.14);
-        const vineLength = 3.3 + (i % 3) * 0.55;
+      for (let i = 0; i < 9; i += 1) {
+        const x = -branch.width * 0.5 + i * (branch.width * 0.125);
+        const vineLength = 3.6 + (i % 4) * 0.75;
         const vine = new THREE.Mesh(sharedGeometries.unitBox, branchVineMat);
-        vine.position.set(x, 0.24 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.58);
-        vine.scale.set(0.28, vineLength, 0.28);
-        vine.rotation.z = (i - 3) * 0.08;
+        vine.position.set(x, 0.52 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.76);
+        vine.scale.set(0.34, vineLength, 0.34);
+        vine.rotation.z = (i - 4) * 0.11;
         vine.castShadow = true;
         vine.receiveShadow = true;
         group.add(vine);
 
-        if (i % 2 === 1) {
+        if (i % 3 !== 0) {
           const snakeBody = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
-          snakeBody.position.set(x + 0.08, vine.position.y - 0.3, vine.position.z + 0.16);
-          snakeBody.scale.set(0.4, 0.9, 0.4);
-          snakeBody.rotation.z = (i - 3) * 0.14;
+          snakeBody.position.set(x + 0.08, vine.position.y - 0.38, vine.position.z + 0.2);
+          snakeBody.scale.set(0.48, 1.18, 0.48);
+          snakeBody.rotation.z = (i - 4) * 0.18;
           snakeBody.castShadow = true;
           snakeBody.receiveShadow = true;
 
@@ -1574,11 +1578,17 @@ export default function App() {
     function addMonkeyArms(group) {
       [-1, 1].forEach((side) => {
         const arm = new THREE.Mesh(sharedGeometries.monkeyTailSegment, monkeyBodyMat);
-        arm.position.set(side * 0.72, 0.24, -0.06);
-        arm.scale.set(1.28, 1.7, 1.28);
-        arm.rotation.set(0.28, 0, side * 0.72);
+        arm.position.set(side * 0.66, 0.18, 0.08);
+        arm.scale.set(1.18, 1.58, 1.18);
+        arm.rotation.set(0.08, side * 0.1, side * 0.42);
         arm.castShadow = true;
         group.add(arm);
+
+        const hand = new THREE.Mesh(sharedGeometries.monkeyMuzzle, monkeyFaceMat);
+        hand.position.set(side * 0.88, -0.04, 0.24);
+        hand.scale.set(0.44, 0.36, 0.34);
+        hand.castShadow = true;
+        group.add(hand);
       });
     }
 
@@ -2129,17 +2139,19 @@ export default function App() {
         const xMove = Math.sin(t * 1.2 + croc.phase) * 1.2;
         croc.z = croc.riverZ + zMove;
         croc.x = worldX(croc.baseLocalX + xMove, croc.z);
-        croc.mesh.position.set(croc.x, 0.48 + Math.sin(t * 4 + croc.phase) * 0.08, croc.z);
+        const bodyBob = Math.sin(t * 4 + croc.phase) * 0.08;
+        croc.mesh.position.set(croc.x, 0.48 + bodyBob, croc.z);
         croc.mesh.rotation.y = trackAngle(croc.z) + Math.sin(t + croc.phase) * 0.35;
 
         const distanceToPlayer = Math.hypot(body.x - croc.x, body.z - croc.z);
         const closeFactor = clamp(1 - (distanceToPlayer - 2.2) / 9.5, 0, 1);
         const isThreatened = closeFactor > 0.14;
-        const snapCycle = Math.sin(t * (7.4 + closeFactor * 11.5) + croc.phase * 2.7) > 0 ? 1 : 0;
-        const snapOpen = isThreatened ? snapCycle * closeFactor : 0;
-        const idleOpen = (1 - closeFactor) * (0.06 + Math.sin(t * 2.8 + croc.phase) * 0.025);
+        const snapCycle = Math.sin(t * (7.8 + closeFactor * 13.5) + croc.phase * 2.7) > 0 ? 1 : 0;
+        const snapOpen = isThreatened ? snapCycle * (0.25 + closeFactor * 0.75) : 0;
+        const idleOpen = (1 - closeFactor) * (0.08 + Math.sin(t * 2.8 + croc.phase) * 0.03);
         const jawOpen = Math.max(0, snapOpen + idleOpen);
-        croc.upperJawPivot.rotation.x = -jawOpen * 1.05;
+        croc.upperJawPivot.rotation.x = -jawOpen * 1.15;
+        croc.tail.rotation.y = Math.sin(t * (4.8 + closeFactor * 4.2) + croc.phase * 1.7) * (0.2 + closeFactor * 0.38);
       });
     }
 
@@ -2273,7 +2285,7 @@ export default function App() {
           const result = handleLogCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         } else if (obs.type === "branch") {
           const result = handleBranchCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
@@ -2287,7 +2299,7 @@ export default function App() {
           if (result.breakCrate) breakCrate(obs);
           else if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         }
       }
 
@@ -3076,7 +3088,7 @@ export default function App() {
               Begin the Trail
             </button>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
-              {[["↑ / W", "Build Charge"], ["← / A   → / D", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift / E", "Smash / Spin"], ["M", "Mute"]].map(([key, label]) => (
+              {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Smash"], ["M", "Mute"]].map(([key, label]) => (
                 <div key={key} className="title-primary-control flex items-center gap-2 rounded-xl px-3 py-2">
                   <span className="title-control-key shrink-0 font-black text-amber-200">{key}</span><span>{label}</span>
                 </div>
