@@ -1570,11 +1570,7 @@ export default function App() {
         arm.scale.set(1.28, 1.7, 1.28);
         arm.rotation.set(0.28, 0, side * 0.72);
         arm.castShadow = true;
-        const fist = new THREE.Mesh(sharedGeometries.monkeyEar, monkeyFaceMat);
-        fist.position.set(side * 1.02, -0.08, -0.16);
-        fist.scale.set(0.9, 0.72, 0.82);
-        fist.castShadow = true;
-        group.add(arm, fist);
+        group.add(arm);
       });
     }
 
