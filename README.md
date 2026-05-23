@@ -76,6 +76,9 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 - Added a centralized save schema (`saveSchema.js`) with versioned defaults and safe migration so old or partial local save data is auto-completed without deleting unknown fields.
 
+- Improved PWA update flow for installed players: update banner now supports session-level **Later** dismissal, **Refresh** sends `SKIP_WAITING`, and reload happens only after the new worker takes control to avoid reload loops.
+- Updated service-worker lifecycle for safer releases: removed automatic `skipWaiting()` during install, kept versioned cache cleanup on activate, and switched static asset fetches to stale-while-revalidate behavior.
+
 ## Mobile touch regression checklist
 
 

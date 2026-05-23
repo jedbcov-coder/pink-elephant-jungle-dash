@@ -38,8 +38,6 @@ self.addEventListener("install", (event) => {
     } catch (error) {
       console.warn("Offline pre-cache manifest fetch failed.", error);
     }
-
-    await self.skipWaiting();
   })());
 });
 
@@ -80,19 +78,27 @@ self.addEventListener("fetch", (event) => {
   if (!isCacheableAsset) return;
 
   event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
     const cached = await caches.match(event.request, { ignoreSearch: true });
-    if (cached) return cached;
 
-    try {
-      const networkResponse = await fetch(event.request);
-      if (networkResponse.ok) {
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(event.request, networkResponse.clone());
-      }
-      return networkResponse;
-    } catch {
-      return Response.error();
+    const networkFetch = fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse.ok) {
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      })
+      .catch(() => null);
+
+    if (cached) {
+      networkFetch.catch(() => {
+        // Ignore background refresh failures while offline.
+      });
+      return cached;
     }
+
+    const networkResponse = await networkFetch;
+    return networkResponse || Response.error();
   })());
 });
 

@@ -2,6 +2,8 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
   let updateBannerElement = null;
+  let hasDismissedForSession = false;
+  let hasTriggeredRefresh = false;
 
   const removeUpdateBanner = () => {
     if (updateBannerElement) {
@@ -10,8 +12,8 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
     }
   };
 
-  const showUpdateBanner = (onReload) => {
-    if (updateBannerElement) return;
+  const showUpdateBanner = (onRefresh) => {
+    if (hasDismissedForSession || updateBannerElement) return;
 
     const banner = document.createElement("div");
     banner.className = "sw-update-banner";
@@ -33,18 +35,18 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
     banner.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     banner.innerHTML = '<span style="font-size:14px;line-height:1.3">Update available.</span>';
 
-    const updateButton = document.createElement("button");
-    updateButton.textContent = "Refresh";
-    updateButton.type = "button";
-    updateButton.style.background = "#ec4899";
-    updateButton.style.color = "#ffffff";
-    updateButton.style.border = "0";
-    updateButton.style.borderRadius = "8px";
-    updateButton.style.padding = "8px 12px";
-    updateButton.style.cursor = "pointer";
-    updateButton.addEventListener("click", () => {
+    const refreshButton = document.createElement("button");
+    refreshButton.textContent = "Refresh";
+    refreshButton.type = "button";
+    refreshButton.style.background = "#ec4899";
+    refreshButton.style.color = "#ffffff";
+    refreshButton.style.border = "0";
+    refreshButton.style.borderRadius = "8px";
+    refreshButton.style.padding = "8px 12px";
+    refreshButton.style.cursor = "pointer";
+    refreshButton.addEventListener("click", () => {
       removeUpdateBanner();
-      onReload();
+      onRefresh();
     });
 
     const laterButton = document.createElement("button");
@@ -56,9 +58,12 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
     laterButton.style.borderRadius = "8px";
     laterButton.style.padding = "8px 10px";
     laterButton.style.cursor = "pointer";
-    laterButton.addEventListener("click", removeUpdateBanner);
+    laterButton.addEventListener("click", () => {
+      hasDismissedForSession = true;
+      removeUpdateBanner();
+    });
 
-    banner.append(updateButton, laterButton);
+    banner.append(refreshButton, laterButton);
     document.body.appendChild(banner);
     updateBannerElement = banner;
   };
@@ -70,9 +75,11 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
 
       const promptForUpdate = () => {
         showUpdateBanner(() => {
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: "SKIP_WAITING" });
-          }
+          const waitingWorker = registration.waiting;
+          if (!waitingWorker || hasTriggeredRefresh) return;
+
+          hasTriggeredRefresh = true;
+          waitingWorker.postMessage({ type: "SKIP_WAITING" });
         });
       };
 
@@ -96,6 +103,7 @@ export function setupServiceWorkerUpdatePrompt({ appVersion, baseUrl }) {
       }, 5 * 60 * 1000);
 
       navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!hasTriggeredRefresh) return;
         window.location.reload();
       });
     } catch (error) {
