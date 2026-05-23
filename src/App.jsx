@@ -1566,11 +1566,17 @@ export default function App() {
     function addMonkeyArms(group) {
       [-1, 1].forEach((side) => {
         const arm = new THREE.Mesh(sharedGeometries.monkeyTailSegment, monkeyBodyMat);
-        arm.position.set(side * 0.72, 0.24, -0.06);
-        arm.scale.set(1.28, 1.7, 1.28);
-        arm.rotation.set(0.28, 0, side * 0.72);
+        arm.position.set(side * 0.66, 0.18, 0.08);
+        arm.scale.set(1.18, 1.58, 1.18);
+        arm.rotation.set(0.08, side * 0.1, side * 0.42);
         arm.castShadow = true;
         group.add(arm);
+
+        const hand = new THREE.Mesh(sharedGeometries.monkeyMuzzle, monkeyFaceMat);
+        hand.position.set(side * 0.88, -0.04, 0.24);
+        hand.scale.set(0.44, 0.36, 0.34);
+        hand.castShadow = true;
+        group.add(hand);
       });
     }
 
