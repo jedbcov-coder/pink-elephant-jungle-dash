@@ -8,8 +8,9 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ## Recent update
 
-- Redesigned crocodiles to feel more alive with tail swishes, stronger body motion, and faster mouth snapping near the player.
-- Added fuller rows of bright white teeth on both jaws for a clearer “danger close” visual cue.
+- Refreshed monkey enemy hands/arms to remove banana-like shapes that looked like fangs, so monkeys read friendlier during gameplay.
+- Fixed the browser tab icon (favicon) path so it loads correctly in both local development and on GitHub Pages.
+- Added a safety ground reset after low-obstacle bump collisions so the elephant always drops back to normal ground height instead of floating at obstacle height.
 
 ## Repo safety settings (recommended)
 
@@ -26,7 +27,8 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - **Run faster (charge):** hold `W` or `↑`
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
-- **Smash/Spin (when available):** `Z` or `E`
+- **Smash:** `Shift`
+- **Spin (when available):** `E`
 - **Touch devices:** use the on-screen control buttons
 
 ## Main features
@@ -42,7 +44,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Hazard dodging and life-based runs
 - Fruit collection, hazard dodging, and life-based runs with fallen-tree jump obstacles wrapped in vines and moss
 - Multiple levels with increasing distance and speed
-- Level 2 now uses a warm orange sunset sky, and Level 3 (Night Run) uses the previous purple-white moonlit look
+- Level 2 now uses an orange sunset sky with pink highlights, and Level 3 (Night Run) carries the purple moonlit color set
 - Keyboard and touch controls for desktop and mobile
 - Pause/settings overlay and audio controls
 

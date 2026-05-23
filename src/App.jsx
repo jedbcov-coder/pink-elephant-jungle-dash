@@ -1570,11 +1570,17 @@ export default function App() {
     function addMonkeyArms(group) {
       [-1, 1].forEach((side) => {
         const arm = new THREE.Mesh(sharedGeometries.monkeyTailSegment, monkeyBodyMat);
-        arm.position.set(side * 0.72, 0.24, -0.06);
-        arm.scale.set(1.28, 1.7, 1.28);
-        arm.rotation.set(0.28, 0, side * 0.72);
+        arm.position.set(side * 0.66, 0.18, 0.08);
+        arm.scale.set(1.18, 1.58, 1.18);
+        arm.rotation.set(0.08, side * 0.1, side * 0.42);
         arm.castShadow = true;
         group.add(arm);
+
+        const hand = new THREE.Mesh(sharedGeometries.monkeyMuzzle, monkeyFaceMat);
+        hand.position.set(side * 0.88, -0.04, 0.24);
+        hand.scale.set(0.44, 0.36, 0.34);
+        hand.castShadow = true;
+        group.add(hand);
       });
     }
 
@@ -2270,7 +2276,7 @@ export default function App() {
           const result = handleLogCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         } else if (obs.type === "branch") {
           const result = handleBranchCollision({ collisionBox, obstacleAabb: oBox, canRetreat });
           if (result.hurt) hurt(false);
@@ -2284,7 +2290,7 @@ export default function App() {
           if (result.breakCrate) breakCrate(obs);
           else if (result.hurt) hurt(false);
           blocked ||= result.blocked;
-          if (result.blocked && body.y <= oBox.maxY + 0.2) shouldForceGroundReset = true;
+          if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         }
       }
 
@@ -3073,7 +3079,7 @@ export default function App() {
               Begin the Trail
             </button>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
-              {[["↑ / W", "Build Charge"], ["← / A   → / D", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift / E", "Smash / Spin"], ["M", "Mute"]].map(([key, label]) => (
+              {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Smash"], ["M", "Mute"]].map(([key, label]) => (
                 <div key={key} className="title-primary-control flex items-center gap-2 rounded-xl px-3 py-2">
                   <span className="title-control-key shrink-0 font-black text-amber-200">{key}</span><span>{label}</span>
                 </div>
