@@ -3160,54 +3160,53 @@ export default function App() {
         </div>
       )}
 
-      {/* LEFT PANEL — stamina, charge, state */}
+      {/* SIDE HUD PANELS — energy + depth */}
       {started && !complete && !gameOver && (
-        <div className="hud-primary-panel pointer-events-none absolute left-3 top-12 z-20 w-52">
-          <div className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
-            <Icon label="⚡" size={12} /> Energy
-          </div>
-          <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div ref={ui.health} className="h-full w-full rounded-full transition-all duration-150" />
-          </div>
-          <div className="my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-          <div className="hud-charge-row mb-1 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
-              <Icon label="⬆" size={12} /> Charge
-            </span>
-            <span ref={ui.chargeText} className="text-[10px] font-black text-fuchsia-200">0%</span>
-          </div>
-          <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div ref={ui.charge} className="h-full w-0 rounded-full transition-all duration-75"
-              style={{ background: "linear-gradient(90deg, #ec4899, #d946ef)" }} />
-          </div>
-          <div className="mt-3 flex justify-center">
-            <span ref={ui.stateBadge} className="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-widest transition-all duration-150"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.35)" }}>
-              Ready
-            </span>
-          </div>
-          {/* Momentum label */}
-          <div className="mt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.5rem" }}>
-            <div ref={ui.momentumLabel}
-              className="text-center text-[9px] font-black uppercase tracking-[0.22em] transition-colors duration-300"
-              style={{ color: "rgba(255,255,255,0.4)" }}>
-              READY TO CHARGE
+        <div className="hud-side-panels-row pointer-events-none absolute left-3 right-3 top-12 z-20">
+          <div className="hud-primary-panel">
+            <div className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
+              <Icon label="⚡" size={12} /> Energy
+            </div>
+            <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div ref={ui.health} className="h-full w-full rounded-full transition-all duration-150" />
+            </div>
+            <div className="my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
+            <div className="hud-charge-row mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
+                <Icon label="⬆" size={12} /> Charge
+              </span>
+              <span ref={ui.chargeText} className="text-[10px] font-black text-fuchsia-200">0%</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div ref={ui.charge} className="h-full w-0 rounded-full transition-all duration-75"
+                style={{ background: "linear-gradient(90deg, #ec4899, #d946ef)" }} />
+            </div>
+            <div className="mt-3 flex justify-center">
+              <span ref={ui.stateBadge} className="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-widest transition-all duration-150"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.35)" }}>
+                Ready
+              </span>
+            </div>
+            {/* Momentum label */}
+            <div className="mt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.5rem" }}>
+              <div ref={ui.momentumLabel}
+                className="text-center text-[9px] font-black uppercase tracking-[0.22em] transition-colors duration-300"
+                style={{ color: "rgba(255,255,255,0.4)" }}>
+                READY TO CHARGE
+              </div>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* RIGHT PANEL — depth, next life */}
-      {started && !complete && !gameOver && (
-        <div className="hud-secondary-panel pointer-events-none absolute right-3 top-12 z-10 w-48">
-          <div className="mb-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-200/70">
-            <Icon label="🧭" size={12} /> Trail Depth
-          </div>
-          <div className="text-2xl font-black leading-none text-amber-100">
-            <span ref={ui.distance}>0</span><span className="ml-1 text-sm text-amber-100/50">m</span>
-          </div>
-          <div className="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-100/40">
-            <Icon label="🎯" size={12} /> Gate at {Math.round(Math.abs(activeLevelRef.current.gate.z))} m
+          <div className="hud-secondary-panel">
+            <div className="mb-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-200/70">
+              <Icon label="🧭" size={12} /> Trail Depth
+            </div>
+            <div className="text-2xl font-black leading-none text-amber-100">
+              <span ref={ui.distance}>0</span><span className="ml-1 text-sm text-amber-100/50">m</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-100/40">
+              <Icon label="🎯" size={12} /> Gate at {Math.round(Math.abs(activeLevelRef.current.gate.z))} m
+            </div>
           </div>
         </div>
       )}
