@@ -1475,73 +1475,125 @@ export default function App() {
       group.position.set(posOnPath.x, branch.yOffset, posOnPath.z);
       group.rotation.y = trackAngle(branch.z);
 
-      const trunkHeight = 12.8;
-      const trunkWidth = 3.35;
-      const trunkDepth = 3.1;
-      const trunkOffset = branch.width * 0.5 + 1.95;
-      const trunkBaseY = -(branch.height * 0.5) + trunkHeight * 0.5;
+      const branchBottomY = -(branch.height * 0.5);
+      const branchTopY = branch.height * 0.5;
 
-      const leftTrunk = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
-      leftTrunk.position.set(-trunkOffset, trunkBaseY, 0);
-      leftTrunk.scale.set(trunkWidth, trunkHeight, trunkDepth);
-      leftTrunk.rotation.z = 0.08;
+      // Side supports: thick twisted trunks framing the tunnel.
+      const supportHeight = branch.height + 4.8;
+      const supportWidth = 3.15;
+      const supportDepth = 3.2;
+      const supportOffset = branch.width * 0.5 + 2.05;
+      const supportCenterY = branchBottomY + supportHeight * 0.5;
 
-      const rightTrunk = leftTrunk.clone();
-      rightTrunk.position.x *= -1;
-      rightTrunk.rotation.z = -0.08;
+      [-1, 1].forEach((side) => {
+        const mainSupport = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
+        mainSupport.position.set(side * supportOffset, supportCenterY, 0);
+        mainSupport.scale.set(supportWidth, supportHeight, supportDepth);
+        mainSupport.rotation.z = side * -0.08;
+        mainSupport.castShadow = true;
+        mainSupport.receiveShadow = true;
+        group.add(mainSupport);
 
-      [leftTrunk, rightTrunk].forEach((mesh) => {
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        group.add(mesh);
+        const root = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
+        root.position.set(side * (supportOffset - 0.82), branchBottomY + 0.95, side * 0.42);
+        root.scale.set(1.9, 1.3, 2.05);
+        root.rotation.z = side * 0.18;
+        root.rotation.x = side * -0.1;
+        root.castShadow = true;
+        root.receiveShadow = true;
+        group.add(root);
+
+        const angledLimb = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
+        angledLimb.position.set(side * (supportOffset - 0.95), branchTopY - 0.7, side * -0.45);
+        angledLimb.scale.set(2.5, 1.1, 1.3);
+        angledLimb.rotation.z = side * 0.4;
+        angledLimb.rotation.y = side * -0.18;
+        angledLimb.castShadow = true;
+        angledLimb.receiveShadow = true;
+        group.add(angledLimb);
       });
 
-      const canopyBranchOffsets = [-0.48, -0.3, -0.12, 0.08, 0.28, 0.46];
-      canopyBranchOffsets.forEach((offset, index) => {
+      // Overhead mass: dense stacked branches + leafy fill.
+      const crossbarY = branchTopY - 0.6;
+      const crossbarOffsets = [-0.48, -0.32, -0.16, 0, 0.16, 0.32, 0.48];
+      crossbarOffsets.forEach((offset, index) => {
         const beam = new THREE.Mesh(sharedGeometries.unitBox, branchLimbMat);
-        beam.position.set(offset * branch.width * 0.9, branch.height * 0.5 - 0.3 - (index % 2 === 0 ? 0.14 : 0.52), (index % 2 === 0 ? -0.9 : 0.9));
-        beam.scale.set(branch.width + 5.1 - index * 0.26, 0.84 + (index % 2) * 0.15, 1.2);
-        beam.rotation.z = offset * 0.75;
-        beam.rotation.x = (index - 2.5) * 0.08;
+        beam.position.set(offset * branch.width * 0.95, crossbarY - (index % 2 === 0 ? 0.12 : 0.44), (index % 2 === 0 ? -0.95 : 0.95));
+        beam.scale.set(branch.width + 5.8 - index * 0.24, 0.94 + (index % 2) * 0.18, 1.35);
+        beam.rotation.z = offset * 0.72;
+        beam.rotation.x = (index - 3) * 0.08;
         beam.castShadow = true;
         beam.receiveShadow = true;
         group.add(beam);
       });
 
-      const canopyLeaves = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
-      canopyLeaves.position.set(0, branch.height * 0.5 + 0.6, 0);
-      canopyLeaves.scale.set(branch.width + 5.6, 1.9, 4.6);
-      canopyLeaves.castShadow = true;
-      canopyLeaves.receiveShadow = true;
-      group.add(canopyLeaves);
+      const tangledMass = new THREE.Mesh(sharedGeometries.unitBox, branchLeafMat);
+      tangledMass.position.set(0, branchTopY + 0.48, 0);
+      tangledMass.scale.set(branch.width + 6.2, 2.25, 5.1);
+      tangledMass.castShadow = true;
+      tangledMass.receiveShadow = true;
+      group.add(tangledMass);
 
-      for (let i = 0; i < 9; i += 1) {
-        const x = -branch.width * 0.5 + i * (branch.width * 0.125);
-        const vineLength = 3.6 + (i % 4) * 0.75;
+      // Snake silhouettes across the top to match the "Snake Gate" concept.
+      [
+        { y: branchTopY + 1.28, z: 0.78, dir: 1, scale: 1.0 },
+        { y: branchTopY + 0.82, z: -0.88, dir: -1, scale: 0.82 },
+      ].forEach((snake, snakeIndex) => {
+        [-0.72, -0.36, 0, 0.36, 0.72].forEach((seg, idx) => {
+          const body = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
+          body.position.set(seg * branch.width, snake.y + (idx % 2 === 0 ? 0.1 : -0.1), snake.z + Math.sin(idx * 1.2) * 0.2);
+          body.scale.set(1.15 * snake.scale, 0.58 * snake.scale, 0.72 * snake.scale);
+          body.rotation.y = snake.dir * (idx - 2) * 0.26;
+          body.castShadow = true;
+          body.receiveShadow = true;
+
+          const stripe = new THREE.Mesh(sharedGeometries.unitBox, snakeStripeMat);
+          stripe.position.set(0, 0.08, 0.24);
+          stripe.scale.set(0.56, 0.14, 0.2);
+          body.add(stripe);
+          group.add(body);
+        });
+
+        const head = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
+        head.position.set(snake.dir * (branch.width * 0.58), snake.y - 0.08, snake.z + snake.dir * 0.08);
+        head.scale.set(1.22 * snake.scale, 0.74 * snake.scale, 0.86 * snake.scale);
+        head.rotation.y = snake.dir > 0 ? -0.58 : 0.58;
+        head.castShadow = true;
+        head.receiveShadow = true;
+
+        const eye = new THREE.Mesh(sharedGeometries.unitBox, cueEyeMat);
+        eye.position.set(snake.dir * 0.2, 0.1, 0.28);
+        eye.scale.set(0.08, 0.08, 0.06);
+        head.add(eye);
+        group.add(head);
+      });
+
+      // Hanging vines: visual slide zone. Bottom aligns with collider bottom edge.
+      const hangCount = 15;
+      const hangingTopY = branchTopY - 0.25;
+      for (let i = 0; i < hangCount; i += 1) {
+        const t = i / (hangCount - 1);
+        const x = -branch.width * 0.52 + t * (branch.width * 1.04);
+        const minTipY = branchBottomY + 0.2;
+        const sway = Math.sin(t * Math.PI * 3.2) * 0.45;
+        const vineLength = Math.max(1.9, hangingTopY - minTipY + (i % 3) * 0.28);
         const vine = new THREE.Mesh(sharedGeometries.unitBox, branchVineMat);
-        vine.position.set(x, 0.52 - vineLength * 0.5, (i % 2 === 0 ? 1 : -1) * 0.76);
-        vine.scale.set(0.34, vineLength, 0.34);
-        vine.rotation.z = (i - 4) * 0.11;
+        vine.position.set(x, hangingTopY - vineLength * 0.5, (i % 2 === 0 ? 1.15 : -1.15) + sway * 0.22);
+        vine.scale.set(0.3 + (i % 3) * 0.05, vineLength, 0.3 + (i % 2) * 0.05);
+        vine.rotation.z = (i - (hangCount * 0.5)) * 0.045;
         vine.castShadow = true;
         vine.receiveShadow = true;
         group.add(vine);
 
-        if (i % 3 !== 0) {
-          const snakeBody = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
-          snakeBody.position.set(x + 0.08, vine.position.y - 0.38, vine.position.z + 0.2);
-          snakeBody.scale.set(0.48, 1.18, 0.48);
-          snakeBody.rotation.z = (i - 4) * 0.18;
-          snakeBody.castShadow = true;
-          snakeBody.receiveShadow = true;
-
-          const snakeStripe = new THREE.Mesh(sharedGeometries.unitBox, snakeStripeMat);
-          snakeStripe.position.set(0, 0, 0.2);
-          snakeStripe.scale.set(0.3, 0.72, 0.1);
-          snakeBody.add(snakeStripe);
-          group.add(snakeBody);
+        if (i % 2 === 0) {
+          const bead = new THREE.Mesh(sharedGeometries.unitBox, snakeBodyMat);
+          bead.position.set(x, branchBottomY + 0.3 + (i % 4) * 0.08, vine.position.z + 0.08);
+          bead.scale.set(0.28, 0.34, 0.24);
+          bead.castShadow = true;
+          bead.receiveShadow = true;
+          group.add(bead);
         }
       }
-
       scene.add(group);
       colliders.push({ type: "branch", active: true, mesh: group, x: posOnPath.x, y: branch.yOffset, z: posOnPath.z, w: branch.width, h: branch.height, d: branch.depth });
     });
