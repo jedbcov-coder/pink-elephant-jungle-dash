@@ -93,7 +93,21 @@ export function runSelfTests() {
   assert("track has visible left-right bends", maxCenter - minCenter > 12);
   assert("track bends stay readable", maxReadableAngle < 0.35);
 
-  assert("level finish plane matches configured finish line", LEVEL.finish.z === CONFIG.finishLineZ && CONFIG.finishLineZ === CONFIG.gateZ);
+  const builtLevel1 = buildLevelById("level-1");
+  const builtLevel2 = buildLevelById("level-2");
+
+  assert(
+    "level 1 finish/gate match configured globals",
+    builtLevel1.finish.z === CONFIG.finishLineZ
+      && builtLevel1.gate.z === CONFIG.gateZ
+      && CONFIG.finishLineZ === CONFIG.gateZ,
+  );
+  assert(
+    "level 2 finish/gate use level overrides after build",
+    builtLevel2.finish.z === level2.course.finishLineZ
+      && builtLevel2.gate.z === level2.course.gateZ
+      && builtLevel2.finish.z === builtLevel2.gate.z,
+  );
   assert("level finish failsafe is beyond the gate", LEVEL.finish.failSafeZ < LEVEL.finish.z);
 
   assert("level 2 id stays level-2", level2.id === "level-2");

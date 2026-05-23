@@ -25,6 +25,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game. You play as a 
 - Level 2 is now tuned as **Dusk Temple Run** with longer 5-loop pacing and denser late-loop hazards for a tougher finish
 - A development-safe self-test confirms both `buildLevelById("level-1")` and `buildLevelById("level-2")` build with required sections
 - Self-tests also verify Level 2 stays registered as `"level-2"` and resolves through `getLevelConfig("level-2")`
+- Self-tests now verify Level 1 finish/gate match global values and Level 2 finish/gate match its level-specific `course` overrides after build
 - Fruit collection, obstacle dodging, and life-based gameplay
 - Keyboard and touch controls for desktop and mobile play
 - In-game pause/settings overlay and audio controls
