@@ -32,6 +32,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 - Added a portrait fallback overlay ("Rotate your device") for phones/tablets that ignore orientation lock, while desktop windowed play remains unchanged.
 - Improved offline reliability: service worker now uses navigation fallback + broader asset caching and shows an in-app update banner so players can refresh to new deployments without being stuck on stale cache.
 - Added a professional in-game **Install Game** card on the start screen that only appears when `beforeinstallprompt` is available, hides after install or dismissal, and stores a `pwaInstallDismissed` local setting so players are not nagged.
+- Refactored custom PWA install prompt code into a reusable hook (`usePwaInstallPrompt`) plus a dedicated UI component (`PwaInstallCard`) without changing install behavior.
 - Tuned peach collectible colors/glow so they read as soft pastel orange with a red blush instead of bright white glowing orbs.
 - Replaced the in-game bottom-right Charge mascot with the app favicon image so gameplay HUD branding now matches the browser/app icon.
 - Split recurring level-element data into dedicated preset files (`obstacle-presets.js`, `enemy-presets.js`, `collectible-presets.js`) so crocodile rivers, low vine gates, fallen logs, monkeys, and fruit pickup layouts can be edited locally without touching large mixed level files.
