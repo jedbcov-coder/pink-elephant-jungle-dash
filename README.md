@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `PWA_
 
 ## Recent update
 
+- Simplified PWA icon setup to reuse the existing `public/favicon.png` directly in the manifest and service worker cache, so no generated PNG files are required in Codex workflows.
 - Added a shared level theme constant for the “sunset-temple-run” palette and wired Levels 2 and 3 to reuse it, keeping gameplay behavior unchanged.
 - Reworked the in-game side HUD into one responsive row that wraps safely and stacks on smaller screens, so Energy and Trail Depth cards stay readable and never overlap Time/Score center HUD elements.
 - Fixed Snake Gate accent data so each snake registers only one complete accent object (including tongue/eye/head/segments), and added defensive animation checks to prevent optional mesh errors near branch obstacles.
