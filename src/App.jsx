@@ -1188,7 +1188,10 @@ export default function App() {
       pickups.push({ type: "health", mesh: group, active: true, x: posOnPath.x, y: 1.25, z: posOnPath.z, radius: PICKUPS.healthRadius });
     });
 
-    const logMat = makeMaterial("#6a3f22", { roughness: 0.88 });
+    const fallenLogBarkMat = makeMaterial("#5a341f", { map: textures.bark, roughness: 0.9 });
+    const fallenLogCoreMat = makeMaterial("#9a6846", { roughness: 0.84 });
+    const fallenLogVineMat = makeMaterial("#2f7a43", { map: textures.leafVeins, roughness: 0.76, emissive: "#0d2b17", emissiveIntensity: 0.1 });
+    const fallenLogMossMat = makeMaterial("#3a8d4a", { map: textures.moss, roughness: 0.92, emissive: "#10311a", emissiveIntensity: 0.08 });
     // Gameplay still calls these smashable obstacles "crates", but they render as heavy stone blocks.
     const stoneBlockMat = makeMaterial("#8f8a71", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.94 });
     const stoneBlockBandMat = makeMaterial("#5f5b4a", { roughness: 0.98 });
@@ -1324,13 +1327,46 @@ export default function App() {
       addMudSkidCue(log);
       registerObstacleTelegraph({ localX: log.localX, z: log.z, type: "log", distance: 8.8, width: log.width });
       const posOnPath = worldPosition(log.localX, log.z);
-      const mesh = new THREE.Mesh(sharedGeometries.unitBox, logMat);
-      mesh.position.set(posOnPath.x, log.height / 2, posOnPath.z);
-      mesh.scale.set(log.width, log.height, log.depth);
-      mesh.rotation.y = trackAngle(log.z);
-      mesh.castShadow = true; mesh.receiveShadow = true;
-      scene.add(mesh);
-      colliders.push({ type: "log", active: true, mesh, x: posOnPath.x, y: log.height / 2, z: posOnPath.z, w: log.width, h: log.height, d: log.depth });
+      const group = new THREE.Group();
+      group.position.set(posOnPath.x, log.height / 2, posOnPath.z);
+      group.rotation.y = trackAngle(log.z);
+
+      const trunk = new THREE.Mesh(sharedGeometries.unitBox, fallenLogBarkMat);
+      trunk.scale.set(log.width, log.height * 0.74, log.depth);
+      trunk.castShadow = true;
+      trunk.receiveShadow = true;
+      group.add(trunk);
+
+      const cutFaceLeft = new THREE.Mesh(sharedGeometries.unitBox, fallenLogCoreMat);
+      cutFaceLeft.position.x = -log.width * 0.5 + 0.07;
+      cutFaceLeft.scale.set(0.16, log.height * 0.52, log.depth * 0.7);
+      group.add(cutFaceLeft);
+
+      const cutFaceRight = new THREE.Mesh(sharedGeometries.unitBox, fallenLogCoreMat);
+      cutFaceRight.position.x = log.width * 0.5 - 0.07;
+      cutFaceRight.scale.set(0.16, log.height * 0.52, log.depth * 0.7);
+      group.add(cutFaceRight);
+
+      [-0.34, 0.02, 0.38].forEach((yOffset, index) => {
+        const vine = new THREE.Mesh(sharedGeometries.vine, fallenLogVineMat);
+        vine.position.set((index - 1) * (log.width * 0.18), yOffset, (index % 2 === 0 ? 0.24 : -0.18) * log.depth);
+        vine.scale.set(1.2, 0.7 + index * 0.18, 1.2);
+        vine.rotation.z = (index - 1) * 0.24;
+        vine.castShadow = true;
+        group.add(vine);
+      });
+
+      [-0.36, -0.08, 0.24, 0.46].forEach((xOffset, index) => {
+        const moss = new THREE.Mesh(sharedGeometries.mossClump, fallenLogMossMat);
+        moss.position.set(xOffset * log.width, log.height * 0.32 + (index % 2) * 0.04, (index % 2 === 0 ? -0.2 : 0.2) * log.depth);
+        moss.scale.set(0.28 + index * 0.03, 0.14, 0.2);
+        moss.rotation.y = index * 0.8;
+        moss.receiveShadow = true;
+        group.add(moss);
+      });
+
+      scene.add(group);
+      colliders.push({ type: "log", active: true, mesh: group, x: posOnPath.x, y: log.height / 2, z: posOnPath.z, w: log.width, h: log.height, d: log.depth });
     });
 
     activeLevelRef.current.crates.forEach((crate) => {
