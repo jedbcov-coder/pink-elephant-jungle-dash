@@ -3237,7 +3237,7 @@ export default function App() {
 
   return (
     <main className={`relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
-      <div ref={mountRef} className={`absolute inset-0 ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
+      <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
       {sceneError && (
         <section className="app-fallback-screen absolute inset-0 z-30 flex items-center justify-center px-6">
