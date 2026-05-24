@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
 
-const TOUCH_CONTROL_BUTTONS = [
-  { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" },
+const RUN_CONTROL_BUTTON = { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" };
+
+const ACTION_CLUSTER_BUTTONS = [
   { code: "ArrowLeft", label: "Left", icon: "◀", hint: "Steer" },
   { code: "ArrowRight", label: "Right", icon: "▶", hint: "Steer" },
-  { code: "Space", label: "Jump", icon: "🐘", hint: "Tap" },
   { code: "Space", label: "Slide", icon: "↧", hint: "Hold" },
   { code: "KeyF", label: "Smash", icon: "💥", hint: "Hit" },
 ];
@@ -52,8 +52,28 @@ export function TouchControls({ visible, onControlChange }) {
   };
 
   return (
-    <div className="touch-controls" aria-label="Touch game controls">
-      {TOUCH_CONTROL_BUTTONS.map(({ code, label, icon, hint }) => (
+    <div className="touch-controls mobile-controls" aria-label="Touch game controls">
+      <div className="mobile-run-control" aria-label="Run control">
+        {[RUN_CONTROL_BUTTON].map(({ code, label, icon, hint }) => (
+          <button
+            key={`${code}-${label}`}
+            type="button"
+            className={`touch-control-button touch-control-${label.toLowerCase()}`}
+            aria-label={`${label} control`}
+            onContextMenu={(event) => event.preventDefault()}
+            onPointerDown={(event) => handlePointerDown(event, code)}
+            onPointerUp={(event) => handlePointerUp(event, code)}
+            onPointerCancel={(event) => handlePointerCancel(event, code)}
+            onPointerLeave={(event) => handlePointerCancel(event, code)}
+          >
+            <span className="touch-control-icon" aria-hidden="true">{icon}</span>
+            <span className="touch-control-label">{label}</span>
+            <span className="touch-control-hint">{hint}</span>
+          </button>
+        ))}
+      </div>
+      <div className="mobile-action-cluster" aria-label="Movement and action controls">
+        {ACTION_CLUSTER_BUTTONS.map(({ code, label, icon, hint }) => (
         <button
           key={`${code}-${label}`}
           type="button"
@@ -69,7 +89,8 @@ export function TouchControls({ visible, onControlChange }) {
           <span className="touch-control-label">{label}</span>
           <span className="touch-control-hint">{hint}</span>
         </button>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
