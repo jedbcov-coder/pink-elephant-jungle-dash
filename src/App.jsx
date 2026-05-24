@@ -333,6 +333,7 @@ export default function App() {
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
+  const [isPortrait, setIsPortrait] = useState(() => getIsPortraitViewport());
   const [showRotateOverlay, setShowRotateOverlay] = useState(false);
   const [graphicsQuality, setGraphicsQuality] = useState(() => loadSettings()?.display?.graphicsQuality ?? "balanced");
   const activeLevelRef = useRef(buildLevelById("level-1"));
@@ -583,31 +584,42 @@ export default function App() {
     if (typeof window === "undefined") return undefined;
 
     const pointerQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
-    const updateRotateOverlay = () => {
+    const updateOrientationUi = () => {
+      const portraitNow = getIsPortraitViewport();
       const isLikelyMobile = pointerQuery.matches || touchInputDetectedRef.current;
-      setShowRotateOverlay(isLikelyMobile && getIsPortraitViewport());
+      const showDuringGameplay = startedRef.current && !completeRef.current && !gameOverRef.current;
+      setIsPortrait(portraitNow);
+      setShowRotateOverlay(isLikelyMobile && portraitNow && showDuringGameplay);
     };
 
-    const onOrientationChange = () => updateRotateOverlay();
-    const onResize = () => updateRotateOverlay();
+    const onOrientationChange = () => updateOrientationUi();
+    const onResize = () => updateOrientationUi();
     const onTouchStart = () => {
       touchInputDetectedRef.current = true;
-      updateRotateOverlay();
+      updateOrientationUi();
     };
 
-    updateRotateOverlay();
-    pointerQuery.addEventListener?.("change", updateRotateOverlay);
+    updateOrientationUi();
+    pointerQuery.addEventListener?.("change", updateOrientationUi);
     window.addEventListener("orientationchange", onOrientationChange);
     window.addEventListener("resize", onResize);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
 
     return () => {
-      pointerQuery.removeEventListener?.("change", updateRotateOverlay);
+      pointerQuery.removeEventListener?.("change", updateOrientationUi);
       window.removeEventListener("orientationchange", onOrientationChange);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
+
+  useEffect(() => {
+    const isLikelyMobile = typeof window !== "undefined"
+      ? window.matchMedia?.("(hover: none) and (pointer: coarse)")?.matches || touchInputDetectedRef.current
+      : false;
+    const showDuringGameplay = started && !complete && !gameOver;
+    setShowRotateOverlay(Boolean(isLikelyMobile && isPortrait && showDuringGameplay));
+  }, [started, complete, gameOver, isPortrait]);
 
   useEffect(() => {
     if (started && !paused && !complete && !gameOver && immersiveRequestedRef.current) setImmersiveReady(true);
@@ -3284,8 +3296,8 @@ export default function App() {
   };
 
   return (
-    <main className={`app-shell relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
-      <div className="app-frame">
+    <main className={`app-shell relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
+      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"}>
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
       {sceneError && (
