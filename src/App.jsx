@@ -798,8 +798,6 @@ export default function App() {
     scene.add(sun);
 
     const textures = createSceneTextures();
-    const texturePreviewPanel = createTexturePreviewPanel(textures);
-    if (texturePreviewPanel) mount.appendChild(texturePreviewPanel);
 
     const jungle = new THREE.Mesh(new THREE.BoxGeometry(CONFIG.floorWidth, 1.2, courseFloorLength), new THREE.MeshStandardMaterial({ map: textures.ground, roughness: 0.98 }));
     jungle.position.set(0, -0.62, -courseFloorLength / 2 + 20);
@@ -3218,7 +3216,6 @@ export default function App() {
       renderer.dispose();
       renderer.forceContextLoss();
       scene.clear();
-      if (texturePreviewPanel?.parentElement === mount) mount.removeChild(texturePreviewPanel);
       if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
       audioManagerRef.current?.dispose();
     };
