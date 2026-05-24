@@ -189,7 +189,13 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
-- **Touch devices:** use the on-screen control buttons
+- **Touch devices (new thumb layout):** hold the **Run/Charge** button on the **left** side, and use the **right-side action cluster** for **Left, Right, Slide, and Smash**
+- **Desktop controls are preserved:** keyboard controls stay the same as before
+
+## Mobile layout notes
+
+- The mobile UI is optimized for **landscape play** so your thumbs have more room and the center view stays clear.
+- Controls and HUD respect **safe-area insets** (notch/cutout areas), so important buttons and stats stay visible and tappable on modern phones.
 
 ## Main features
 
