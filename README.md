@@ -20,7 +20,6 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
-- Added a project `.npmrc` with `legacy-peer-deps=true` as a safety fallback so `npm install` can proceed even if npm encounters transient peer-resolution conflicts in some environments.
 - Removed unused React ESLint plugins from devDependencies to eliminate the recurring npm peer-dependency (`ERESOLVE`) conflict path while keeping lint/check behavior unchanged for this project.
 - Strengthened npm dependency resolution by adding explicit npm `overrides` for ESLint 9.x (`eslint` and `@eslint/js`) to prevent future lock/install drift back to ESLint 10 peer conflicts.
 - Fixed npm install `ERESOLVE` conflict by pinning ESLint 9-compatible metadata in project manifests so `eslint-plugin-react@7.37.5` resolves cleanly instead of trying ESLint 10.
