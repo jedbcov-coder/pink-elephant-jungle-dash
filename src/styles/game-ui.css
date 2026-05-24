@@ -1889,49 +1889,59 @@ button:disabled {
 .app-shell.layout-phone-landscape .title-card {
   max-width: min(96vw, 42rem);
   max-height: none;
-  overflow: clip;
-  padding: clamp(0.85rem, 2.2vh, 1.4rem) clamp(0.95rem, 2.8vw, 1.25rem);
+  overflow: hidden;
+  padding: clamp(0.62rem, 1.7vh, 1rem) clamp(0.8rem, 2.2vw, 1rem);
 }
 
 .app-shell.layout-phone-landscape .title-elephant-badge {
-  margin-bottom: 0.4rem;
-  transform: scale(0.8);
+  margin-bottom: 0.25rem;
+  transform: scale(0.72);
 }
 
 .app-shell.layout-phone-landscape .title-logo-main {
-  font-size: clamp(1.8rem, 5.6vw, 2.45rem);
+  font-size: clamp(1.45rem, 4.4vw, 2rem);
+  line-height: 1.05;
 }
 
 .app-shell.layout-phone-landscape .title-logo-sub {
-  font-size: clamp(1.2rem, 3.8vw, 1.75rem);
+  font-size: clamp(1rem, 3.05vw, 1.35rem);
+  line-height: 1.05;
 }
 
-.app-shell.layout-phone-landscape .title-card p {
-  margin-top: 0.5rem;
-  font-size: clamp(0.74rem, 2vw, 0.86rem);
-  line-height: 1.32;
+.app-shell.layout-phone-landscape .title-card > p {
+  margin-top: 0.35rem;
+  font-size: clamp(0.68rem, 1.78vw, 0.76rem);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-shell.layout-phone-landscape .title-card .mt-6 {
-  margin-top: 0.65rem;
+  margin-top: 0.35rem;
 }
 
-.app-shell.layout-phone-landscape .title-card .mt-7 {
+.app-shell.layout-phone-landscape .title-card .mt-7,
+.app-shell.layout-phone-landscape .title-card .mt-4,
+.app-shell.layout-phone-landscape .title-card .mb-4,
+.app-shell.layout-phone-landscape .title-card .mb-2 {
   margin-top: 0;
+  margin-bottom: 0;
 }
 
 .app-shell.layout-phone-landscape .title-card .px-10 {
-  padding-left: 1.35rem;
-  padding-right: 1.35rem;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
 }
 
 .app-shell.layout-phone-landscape .title-card .py-4 {
-  padding-top: 0.7rem;
-  padding-bottom: 0.7rem;
+  padding-top: 0.58rem;
+  padding-bottom: 0.58rem;
 }
 
 .app-shell.layout-phone-landscape .title-primary-controls,
-.app-shell.layout-phone-landscape .title-advanced-note {
+.app-shell.layout-phone-landscape .title-advanced-note,
+.app-shell.layout-phone-landscape .title-selftest-note {
   display: none !important;
 }
 

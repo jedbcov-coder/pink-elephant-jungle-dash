@@ -3612,7 +3612,7 @@ export default function App() {
             <div className="title-advanced-note mx-auto mt-3 rounded-full px-4 py-2 text-center text-[11px] font-bold tracking-wide text-emerald-100/50">
               Trail markings telegraph hazards early; smash crates for score streaks without covering the road.
             </div>
-            <SelfTestStatus summaryRef={testSummaryRef} />
+            <div className="title-selftest-note"><SelfTestStatus summaryRef={testSummaryRef} /></div>
           </div>
         </section>
       )}
