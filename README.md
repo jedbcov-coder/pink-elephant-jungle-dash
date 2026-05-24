@@ -13,7 +13,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ### Latest HUD update
 
-- Rebuilt the **phone-landscape gameplay HUD** to be compact and playability-first: one shallow top row, compact energy/charge meter, smaller prompt, hidden low-priority panels, and stronger touch-control visibility/layering so Samsung S23 landscape fullscreen stays playable.
+- Phone-landscape now uses a **separate minimal gameplay HUD** (not the desktop HUD): top-left fruit/lives, top-center state pill, top-right timer + pause, tiny bottom-center prompt, and corner thumb controls so the center track stays clear on Samsung S23 landscape fullscreen.
 
 
 ## New: Device profile blueprint
@@ -53,6 +53,11 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.
+- Phone-landscape gameplay HUD split: desktop-heavy HUD panels are now fully hidden on `layout-phone-landscape`, replaced by a minimal gameplay-first HUD (top-left fruit/lives, top-center state pill, top-right timer + pause, bottom-center tiny prompt, and highest-priority corner touch controls) to keep the center lane clear on Samsung S23 landscape.
+- Settings button readability fix: replaced conflicting title-button color path with a hard-scoped title selector (including phone-landscape override) so the button now keeps a dark translucent background, clear border, and high-contrast cream/white text on both desktop and Samsung S23 landscape.
+- Phone-landscape title-fit pass (Samsung S23 fullscreen): removed title-card scrolling risk, tightened title spacing/typography, hid extra helper panels/self-test note in phone-landscape, and kept only the core title content + Settings + Begin button visible without scrolling.
+- Viewport root-sizing hard reset for phone-landscape fullscreen (Samsung S23 target): normalized `html/body/#root` and app shell/frame sizing to `100%` width with `100dvh` height, removed root safe-area side padding from the viewport container path, and prevented horizontal background peeking so gameplay now fills edge-to-edge without blue side strips.
 - Added a stable layout-mode system (`desktop`, `tablet-landscape`, `phone-landscape`, `phone-portrait`) on the root app shell, fixed Samsung S23 phone-landscape title fitting so Settings + Begin the Trail stay visible without scrolling, corrected Settings button contrast states, and added HUD mobile hook classes for the next phone-landscape HUD pass without changing gameplay logic.
 - Ran a focused contrast/readability pass for gameplay clarity: increased HUD label/pill contrast (removing low-contrast gray-on-gray combinations), boosted critical warning telegraph visibility and border strength, brightened obstacle warning accents, and darkened/desaturated mid/far background foliage/stone layers so player + hazards + pickups separate more clearly from scenery (including reduced-brightness / glare readability checks).
 
@@ -274,7 +279,7 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
-- **Phone/mobile:** compact thumb layout with **left-side Run/Charge** and a **right-side action cluster** for movement/actions.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
 - **Tablet:** touch controls stay enabled with **tablet-optimized spacing and button sizing** for easier taps.
 - **Desktop:** **keyboard-first controls are preserved** (same key mappings as before).
 - **2-in-1 laptops:** default behavior is **Auto** (touch controls on tablet/phone-like layouts, keyboard-first on desktop-wide layouts). You can override this in **Settings → Controls** with **Touch: Auto / On / Off**.
@@ -282,6 +287,7 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 ## Mobile layout notes
 
 - The mobile UI is optimized for **landscape play** so your thumbs have more room and the center view stays clear.
+- In phone-landscape gameplay, the app uses a **minimal HUD** to keep the elephant path visible: top-left fruit/lives, top-center state, top-right timer/pause, and a small bottom prompt only when needed.
 - Controls and HUD respect **safe-area insets** (notch/cutout areas), so important buttons and stats stay visible and tappable on modern phones.
 
 ## Main features

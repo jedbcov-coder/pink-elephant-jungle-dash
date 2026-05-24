@@ -571,6 +571,17 @@ export default function App() {
   }, [touchControlsMode, tryImmersiveMode]);
 
   useEffect(() => {
+    const gameplayActive = started && !complete && !gameOver;
+    if (!gameplayActive) return;
+    if (layoutMode !== "phone-landscape") return;
+
+    if (touchControlsMode === "on" || touchControlsMode === "auto") {
+      touchInputDetectedRef.current = true;
+      setTouchControlsVisible(true);
+    }
+  }, [started, complete, gameOver, layoutMode, touchControlsMode]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
     const refreshImmersiveMode = () => {
@@ -3402,8 +3413,8 @@ export default function App() {
   };
 
   return (
-    <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100vw", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
-      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: "var(--hud-safe-left)" }}>
+    <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
+      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
         <div className="game-frame-stage" aria-hidden="true" />
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
@@ -3612,7 +3623,7 @@ export default function App() {
             <div className="title-advanced-note mx-auto mt-3 rounded-full px-4 py-2 text-center text-[11px] font-bold tracking-wide text-emerald-100/50">
               Trail markings telegraph hazards early; smash crates for score streaks without covering the road.
             </div>
-            <SelfTestStatus summaryRef={testSummaryRef} />
+            <div className="title-selftest-note"><SelfTestStatus summaryRef={testSummaryRef} /></div>
           </div>
         </section>
       )}
