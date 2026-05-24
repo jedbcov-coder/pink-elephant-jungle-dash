@@ -36,6 +36,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Mobile/PWA viewport hardening pass: gameplay wrappers now use modern dynamic viewport units (`100svh` fallback + `100dvh`), safe-area padding is enforced on the game frame + HUD edges, and portrait on phones/tablets now shows rotate guidance instead of cramped play.
+
 - Fixed mobile landscape viewport sizing for edge-to-edge play (including Galaxy S23): root/layout containers now lock to `100vw` + `100dvh`, body margin/overflow are constrained, the gameplay canvas fills the visible viewport, and horizontal scrolling is blocked during gameplay.
 - Added a dedicated mobile-landscape control pattern for screens up to 900px wide: desktop keyboard-help overlays are now hidden in that view, and on-screen touch controls are pinned to the left/right edges with safer button sizing and spacing for thumbs.
 
