@@ -1236,16 +1236,16 @@ export default function App() {
     const depthEdgeMossMat = makeMaterial("#72f052", { map: textures.moss, roughness: 0.96, emissive: "#efff9a", emissiveIntensity: 0.1 });
     const depthEdgeRockMat = makeMaterial("#9f986f", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1, emissive: "#ffd36c", emissiveIntensity: 0.08 });
     const depthEdgeRuinMat = makeMaterial("#8f936c", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.96, emissive: "#ffe08a", emissiveIntensity: 0.07 });
-    const depthMidLeafMat = makeMaterial("#1f7b42", { map: textures.leafVeins, roughness: 0.9, side: THREE.DoubleSide });
-    const depthMidVineMat = makeMaterial("#23683b", { roughness: 0.96 });
-    const depthMidMossMat = makeMaterial("#3f7f35", { map: textures.moss, roughness: 1 });
-    const depthMidRockMat = makeMaterial("#696b58", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
-    const depthMidRuinMat = makeMaterial("#5d6651", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.98 });
-    const depthFarLeafMat = makeMaterial("#18351f", { map: textures.leafVeins, roughness: 1, side: THREE.DoubleSide });
-    const depthFarVineMat = makeMaterial("#142b1c", { roughness: 1 });
-    const depthFarMossMat = makeMaterial("#223a21", { map: textures.moss, roughness: 1 });
-    const depthFarRockMat = makeMaterial("#343a31", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
-    const depthFarRuinMat = makeMaterial("#30372f", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthMidLeafMat = makeMaterial("#1a5f35", { map: textures.leafVeins, roughness: 0.94, side: THREE.DoubleSide });
+    const depthMidVineMat = makeMaterial("#1d5630", { roughness: 0.98 });
+    const depthMidMossMat = makeMaterial("#2f612b", { map: textures.moss, roughness: 1 });
+    const depthMidRockMat = makeMaterial("#535746", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthMidRuinMat = makeMaterial("#4d5544", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.99 });
+    const depthFarLeafMat = makeMaterial("#102417", { map: textures.leafVeins, roughness: 1, side: THREE.DoubleSide });
+    const depthFarVineMat = makeMaterial("#0e1f14", { roughness: 1 });
+    const depthFarMossMat = makeMaterial("#182a18", { map: textures.moss, roughness: 1 });
+    const depthFarRockMat = makeMaterial("#242a25", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthFarRuinMat = makeMaterial("#202720", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
 
     function trackCurvatureCue(z) {
       return Math.abs(trackAngle(z - 18) - trackAngle(z + 18));
@@ -1563,7 +1563,7 @@ export default function App() {
     const branchLeafMat = makeMaterial("#1d7a42", { map: textures.leafVeins, roughness: 0.86, emissive: "#0b351b", emissiveIntensity: 0.12 });
     const branchVineMat = makeMaterial("#2f5f2d", { roughness: 0.9 });
     const snakeBodyMat = makeMaterial("#708625", { roughness: 0.62, emissive: "#2f3f16", emissiveIntensity: 0.2 });
-    const branchWarningStripeMat = makeMaterial("#cab147", { roughness: 0.72, emissive: "#6f4f11", emissiveIntensity: 0.24 });
+    const branchWarningStripeMat = makeMaterial("#f2cf4f", { roughness: 0.66, emissive: "#8a5d00", emissiveIntensity: 0.38 });
     const snakeBellyMat = makeMaterial("#c9ab63", { roughness: 0.68, emissive: "#4b3f1f", emissiveIntensity: 0.12 });
     const snakeTongueMat = new THREE.MeshStandardMaterial({ color: "#ff4b7a", emissive: "#cc2d56", emissiveIntensity: 0.5 });
     const snakeStripeMat = makeMaterial("#1e2e12", { roughness: 0.75 });
@@ -1572,9 +1572,9 @@ export default function App() {
     const cueStoneBlockMarkerMat = makeMaterial("#d0c27f", { roughness: 0.9 });
     const cueRippleMat = makeMaterial("#9de7ff", { transparent: true, opacity: 0.68, roughness: 0.45, emissive: "#124d66", emissiveIntensity: 0.2 });
     const cueEyeMat = new THREE.MeshStandardMaterial({ color: "#ff2a1c", emissive: "#ff1200", emissiveIntensity: 2.8 });
-    const telegraphRingMat = new THREE.MeshBasicMaterial({ color: "#ffe08a", transparent: true, opacity: 0.22, depthWrite: false });
-    const telegraphArrowMat = new THREE.MeshBasicMaterial({ color: "#ffd34a", transparent: true, opacity: 0.34, depthWrite: false });
-    const telegraphDangerMat = new THREE.MeshBasicMaterial({ color: "#ff7a45", transparent: true, opacity: 0.26, depthWrite: false });
+    const telegraphRingMat = new THREE.MeshBasicMaterial({ color: "#fff1a8", transparent: true, opacity: 0.34, depthWrite: false });
+    const telegraphArrowMat = new THREE.MeshBasicMaterial({ color: "#ffe067", transparent: true, opacity: 0.48, depthWrite: false });
+    const telegraphDangerMat = new THREE.MeshBasicMaterial({ color: "#ff8f5f", transparent: true, opacity: 0.42, depthWrite: false });
     const CUE_PREVIEW_DISTANCE = 5.8;
     const TELEGRAPH_VISIBLE_DISTANCE = 54;
 

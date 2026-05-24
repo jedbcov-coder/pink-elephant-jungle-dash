@@ -924,7 +924,7 @@ button:disabled {
 .hud-icon-row {
   align-items: center;
   border-radius: 9999px;
-  color: rgba(255, 251, 235, 0.86);
+  color: rgba(255, 251, 235, 0.94);
   display: flex;
   gap: 0.55rem;
   min-height: 2.55rem;
@@ -932,10 +932,11 @@ button:disabled {
 }
 
 .hud-icon-row-label {
-  color: rgba(255, 236, 173, 0.66);
+  color: rgba(255, 236, 173, 0.9);
   font-size: clamp(0.62rem, 0.58rem + 0.22vw, 0.74rem);
   font-weight: 900;
   letter-spacing: 0.18em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.55);
   text-transform: uppercase;
 }
 
@@ -1007,7 +1008,7 @@ button:disabled {
 }
 
 .hud-score-label {
-  color: rgba(255, 236, 173, 0.64);
+  color: rgba(255, 236, 173, 0.92);
   font-size: clamp(0.64rem, 0.6rem + 0.2vw, 0.76rem);
   font-weight: 900;
   letter-spacing: 0.24em;
@@ -1049,17 +1050,17 @@ button:disabled {
 }
 
 .hud-section-pill {
-  background: rgba(16, 40, 22, 0.46);
-  border: 1px solid rgba(100, 220, 130, 0.14);
-  color: rgba(167, 243, 208, 0.62);
+  background: rgba(12, 34, 18, 0.72);
+  border: 1px solid rgba(122, 252, 162, 0.34);
+  color: rgba(201, 255, 225, 0.95);
   font-size: 0.66rem;
   letter-spacing: 0.2em;
 }
 
 .hud-timer-pill {
-  background: rgba(20, 15, 8, 0.44);
-  border: 1px solid rgba(255, 200, 80, 0.14);
-  color: rgba(254, 243, 199, 0.72);
+  background: rgba(27, 17, 8, 0.72);
+  border: 1px solid rgba(255, 211, 92, 0.35);
+  color: rgba(255, 246, 213, 0.96);
   font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.9rem);
 }
 
@@ -1107,15 +1108,15 @@ button:disabled {
   background: rgba(8, 16, 9, 0.46);
   border: 1px solid rgba(246, 210, 138, 0.13);
   border-radius: 1.25rem;
-  color: rgba(255, 251, 235, 0.66);
+  color: rgba(255, 251, 235, 0.9);
   max-width: 16rem;
   min-width: 0;
-  opacity: 0.76;
+  opacity: 0.92;
   padding: 0.72rem 0.85rem;
 }
 
 .hud-secondary-panel .text-2xl {
-  color: rgba(254, 243, 199, 0.70);
+  color: rgba(254, 243, 199, 0.95);
   font-size: 1.25rem;
   line-height: 1.45rem;
 }
@@ -1126,11 +1127,13 @@ button:disabled {
 
 .hud-prompt {
   background: rgba(8, 16, 9, 0.88);
-  border: 1px solid rgba(246, 210, 138, 0.42);
+  border: 2px solid rgba(251, 218, 125, 0.88);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28), 0 0 22px rgba(250, 204, 21, 0.10);
   font-size: clamp(0.9rem, 1.6vw, 1.08rem);
   max-width: min(560px, 92vw);
   padding: 0.65rem 1.45rem;
+  color: rgba(255, 250, 226, 0.98);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .hud-speedometer {
