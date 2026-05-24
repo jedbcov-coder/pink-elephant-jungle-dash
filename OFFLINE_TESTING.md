@@ -1,35 +1,19 @@
-# Offline testing checklist
+# Offline testing (quick checklist)
 
 Use this after `npm run build:pages` and after publishing to GitHub Pages.
 
-1. Open the live game while online once.
-2. Install the app from the browser install button (optional but recommended).
-3. Open DevTools → **Application** and confirm a service worker is active.
-4. In DevTools → **Application → Cache Storage**, confirm there is a `jungle-dash-offline-*` cache.
-5. In DevTools → **Network**, enable **Offline**.
+1. Open the live game once while online.
+2. (Optional) Install it from the browser install button.
+3. Open DevTools → **Application** and verify a service worker is active.
+4. Open DevTools → **Application → Cache Storage** and verify `jungle-dash-offline-*` exists.
+5. Open DevTools → **Network** and switch to **Offline**.
 6. Refresh the page.
-7. Confirm the app shell still opens and gameplay starts.
-8. Confirm already-loaded images/audio/assets still appear offline.
-9. Go back online, deploy a small change, then reload the app.
-10. Confirm an **Update available** banner appears and **Refresh** loads the new version.
+7. Confirm the app opens and gameplay starts while offline.
+8. Confirm previously loaded assets (images/audio/game files) still work.
+9. Go back online, deploy a small update, and reload.
+10. Confirm the **Update available** banner appears; click **Refresh** and verify the new version loads.
 
-If you still see stale files:
-- DevTools → Application → **Service Workers**: click **Unregister**.
-- DevTools → Application → **Storage**: click **Clear site data**.
-- Reopen the game online once, then retest offline.
-
-If you still see stale files:
-- DevTools → Application → **Service Workers**: click **Unregister**.
-- DevTools → Application → **Storage**: click **Clear site data**.
-- Reopen the game online once, then retest offline.
-
-
-## Save Data QA
-
-1. Change a setting, refresh, confirm it persists.
-2. Complete a run, refresh, confirm best score persists.
-3. Unlock/select a skin, refresh, confirm unlock + selection persist.
-4. Trigger an achievement, refresh, confirm it still appears.
-5. Clear save with reset utility, confirm defaults restore correctly.
-6. Private/incognito mode note: some browsers limit storage, so persistence can behave differently.
-
+If stale content remains:
+- DevTools → **Application → Service Workers**: **Unregister**
+- DevTools → **Application → Storage**: **Clear site data**
+- Reopen the game online once, then repeat the offline test.

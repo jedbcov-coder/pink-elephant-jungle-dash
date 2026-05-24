@@ -26,6 +26,8 @@ Use `DEVICE_TESTING.md` for manual validation across phone, tablet, and desktop 
 
 This game can now be installed from Chrome/Edge using the browser install button when opened from GitHub Pages.
 
+Offline mode is configured so previously loaded game files can be used without a network connection, and the app shows an **Update available** prompt when a newer deployment is ready.
+
 - Manifest file: `manifest.webmanifest`
 - Service worker: `service-worker.js`
 - Install icons: all manifest icon entries now reuse the existing `favicon.png` file (no extra image files needed)
