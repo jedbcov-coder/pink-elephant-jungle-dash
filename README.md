@@ -53,6 +53,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Phone-landscape title-fit pass (Samsung S23 fullscreen): removed title-card scrolling risk, tightened title spacing/typography, hid extra helper panels/self-test note in phone-landscape, and kept only the core title content + Settings + Begin button visible without scrolling.
+- Viewport root-sizing hard reset for phone-landscape fullscreen (Samsung S23 target): normalized `html/body/#root` and app shell/frame sizing to `100%` width with `100dvh` height, removed root safe-area side padding from the viewport container path, and prevented horizontal background peeking so gameplay now fills edge-to-edge without blue side strips.
 - Added a stable layout-mode system (`desktop`, `tablet-landscape`, `phone-landscape`, `phone-portrait`) on the root app shell, fixed Samsung S23 phone-landscape title fitting so Settings + Begin the Trail stay visible without scrolling, corrected Settings button contrast states, and added HUD mobile hook classes for the next phone-landscape HUD pass without changing gameplay logic.
 - Ran a focused contrast/readability pass for gameplay clarity: increased HUD label/pill contrast (removing low-contrast gray-on-gray combinations), boosted critical warning telegraph visibility and border strength, brightened obstacle warning accents, and darkened/desaturated mid/far background foliage/stone layers so player + hazards + pickups separate more clearly from scenery (including reduced-brightness / glare readability checks).
 
