@@ -281,6 +281,7 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
 - **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run + Left/Right steering**. Right thumb: **Jump/Slide, Charge, Smash**.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
 - **Tablet:** touch controls stay enabled with **tablet-optimized spacing and button sizing** for easier taps.
 - **Desktop:** **keyboard-first controls are preserved** (same key mappings as before).
 - **2-in-1 laptops:** default behavior is **Auto** (touch controls on tablet/phone-like layouts, keyboard-first on desktop-wide layouts). You can override this in **Settings → Controls** with **Touch: Auto / On / Off**.
