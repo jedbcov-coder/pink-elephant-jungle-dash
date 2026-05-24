@@ -16,6 +16,15 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Phone-landscape now uses a **separate minimal gameplay HUD** (not the desktop HUD): top-left fruit/lives, top-center state pill, top-right timer + pause, tiny bottom-center prompt, and corner thumb controls so the center track stays clear on Samsung S23 landscape fullscreen.
 
 
+
+### Latest phone-landscape polish
+
+- Removed the last phone-landscape left-edge gutter source by hard-forcing full-viewport width (`100vw`) and zero side padding/margins on the phone-landscape shell/frame/canvas path, plus matching backdrop color and horizontal overflow lock.
+- Tightened top-left Fruit/Lives badges and converted timer + settings into a compact single top-right row.
+- Reduced settings button size for phone-landscape and moved/shrunk prompt lower so it stays out of the elephant path and clear of thumb controls.
+- Forced phone-landscape touch controls to render visible at gameplay start (no extra touch needed), and raised their z-index over HUD layers.
+- Hid the dashed safe-frame in phone-landscape by default (treated as non-gameplay debug/decorative chrome).
+
 ## New: Device profile blueprint
 
 Need separate settings for phone/tablet/desktop/2-in-1? Copy the ready-to-paste guide in `docs/DEVICE_PROFILE_BLUEPRINT.md`.

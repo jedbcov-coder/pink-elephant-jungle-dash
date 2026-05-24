@@ -571,7 +571,7 @@ export default function App() {
   }, [touchControlsMode, tryImmersiveMode]);
 
   useEffect(() => {
-    const gameplayActive = started && !complete && !gameOver;
+    const gameplayActive = started && !paused && !complete && !gameOver;
     if (!gameplayActive) return;
     if (layoutMode !== "phone-landscape") return;
 
@@ -579,7 +579,7 @@ export default function App() {
       touchInputDetectedRef.current = true;
       setTouchControlsVisible(true);
     }
-  }, [started, complete, gameOver, layoutMode, touchControlsMode]);
+  }, [started, paused, complete, gameOver, layoutMode, touchControlsMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -3472,6 +3472,11 @@ export default function App() {
             </div>
           </div>
           <div className="hud-right-cluster">
+            <div className="hud-timer-pill flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black text-amber-100">
+              <Icon label="⏱" />
+              <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "rgba(255,200,100,0.6)" }}>TIME</span>
+              <span ref={ui.timerDisplay} style={{ fontVariantNumeric: "tabular-nums" }}>00:00</span>
+            </div>
             <div className="hud-control-row pointer-events-auto">
               <button
                 type="button"
@@ -3482,11 +3487,6 @@ export default function App() {
               >
                 ⚙
               </button>
-            </div>
-            <div className="hud-timer-pill flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black text-amber-100">
-              <Icon label="⏱" />
-              <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "rgba(255,200,100,0.6)" }}>TIME</span>
-              <span ref={ui.timerDisplay} style={{ fontVariantNumeric: "tabular-nums" }}>00:00</span>
             </div>
           </div>
         </div>

@@ -1732,9 +1732,9 @@ button:disabled {
 
 /* Phone-landscape minimal gameplay HUD: keep center lane clear and touch-first controls. */
 .layout-phone-landscape .hud-top-strip {
-  top: calc(var(--hud-safe-top) + 0.2rem);
-  left: calc(var(--hud-safe-left) + 0.45rem);
-  right: calc(var(--hud-safe-right) + 0.45rem);
+  top: calc(var(--hud-safe-top) + 0.08rem);
+  left: calc(var(--hud-safe-left) + 0.22rem);
+  right: calc(var(--hud-safe-right) + 0.22rem);
   padding: 0;
   gap: 0.25rem;
   align-items: flex-start;
@@ -1750,11 +1750,11 @@ button:disabled {
 }
 
 .layout-phone-landscape .hud-icon-row {
-  min-height: 1.34rem;
-  padding: 0.12rem 0.36rem;
-  border-radius: 0.58rem;
-  gap: 0.2rem;
-  max-width: 26vw;
+  min-height: 1.18rem;
+  padding: 0.08rem 0.3rem;
+  border-radius: 0.54rem;
+  gap: 0.18rem;
+  max-width: 24vw;
 }
 .layout-phone-landscape .hud-icon-bubble { width: 0.88rem; font-size: 0.64rem; }
 .layout-phone-landscape .hud-icon-row-label { font-size: 0.46rem; letter-spacing: 0.08em; }
@@ -1762,21 +1762,25 @@ button:disabled {
 .layout-phone-landscape .hud-lives-value { font-size: 0.56rem; letter-spacing: 0.02em; }
 
 .layout-phone-landscape .hud-right-cluster {
-  gap: 0.18rem;
-  align-items: flex-end;
+  display: flex;
+  flex-direction: row;
+  gap: 0.16rem;
+  align-items: center;
+  justify-content: flex-end;
   pointer-events: none;
-  min-width: 5.5rem;
+  min-width: 0;
 }
 .layout-phone-landscape .hud-control-row { pointer-events: auto; }
 .layout-phone-landscape .hud-gold-frame-button {
-  min-width: 1.8rem;
-  min-height: 1.8rem;
-  width: 1.8rem;
-  height: 1.8rem;
+  min-width: 1.46rem;
+  min-height: 1.46rem;
+  width: 1.46rem;
+  height: 1.46rem;
+  font-size: 0.78rem;
   padding: 0;
 }
 .layout-phone-landscape .hud-timer-pill {
-  padding: 0.16rem 0.42rem;
+  padding: 0.12rem 0.34rem;
   border-radius: 999px;
   font-size: 0.6rem;
   gap: 0.24rem;
@@ -1804,15 +1808,15 @@ button:disabled {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  bottom: calc(var(--hud-safe-bottom) + 4.25rem);
+  bottom: calc(var(--hud-safe-bottom) + 2.95rem);
   align-items: center;
   z-index: 21;
   pointer-events: none;
 }
 .layout-phone-landscape .hud-prompt {
-  max-width: min(60vw, 14rem);
-  padding: 0.14rem 0.38rem;
-  font-size: 0.5rem;
+  max-width: min(68vw, 13.2rem);
+  padding: 0.12rem 0.34rem;
+  font-size: 0.48rem;
   border-radius: 999px;
   white-space: nowrap;
   opacity: 0.92;
@@ -1835,7 +1839,10 @@ button:disabled {
 
 /* Touch controls must remain highest-priority and edge-anchored in phone-landscape. */
 .layout-phone-landscape .mobile-controls {
-  z-index: 46;
+  z-index: 70;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: none;
 }
 .layout-phone-landscape .mobile-run-control {
@@ -1892,7 +1899,6 @@ button:disabled {
 .layout-phone-landscape.app-shell,
 .layout-phone-landscape .app-frame,
 .layout-phone-landscape .game-frame-stage,
-.layout-phone-landscape .game-safe-zone,
 .layout-phone-landscape .gameplay-touch-zone {
   margin: 0 !important;
   border: 0 !important;
@@ -1933,6 +1939,36 @@ button:disabled {
 .layout-phone-landscape .touch-control-button {
   min-width: clamp(52px, 8vw, 70px);
   min-height: clamp(52px, 8vw, 70px);
+}
+
+.layout-phone-landscape .game-safe-zone {
+  display: none !important;
+  border: 0 !important;
+}
+
+.layout-phone-landscape,
+.layout-phone-landscape body,
+.layout-phone-landscape #root,
+.app-shell.layout-phone-landscape {
+  background: #04140a !important;
+}
+
+.app-shell.layout-phone-landscape {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.layout-phone-landscape .app-frame,
+.layout-phone-landscape .gameplay-touch-zone,
+.layout-phone-landscape .gameplay-touch-zone canvas {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
 }
 
 .app-shell.layout-phone-landscape .title-card {
