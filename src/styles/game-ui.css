@@ -703,7 +703,8 @@ select:focus-visible {
 }
 
 .app-fallback-screen {
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   width: 100%;
   background:
     radial-gradient(circle at 50% 18%, rgba(244, 114, 182, 0.2), transparent 28rem),
@@ -1623,5 +1624,11 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(2, auto);
     gap: 10px;
+  }
+}
+
+@media (orientation: portrait) and (pointer: coarse) {
+  .app-frame[data-orientation="portrait"] .gameplay-touch-zone {
+    visibility: hidden;
   }
 }

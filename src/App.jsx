@@ -630,7 +630,7 @@ export default function App() {
     if (typeof document === "undefined") return undefined;
     const mount = mountRef.current;
     if (!mount) return undefined;
-    mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh";
+    mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100svh";
     return undefined;
   }, [viewportHeight]);
 
@@ -3297,7 +3297,7 @@ export default function App() {
 
   return (
     <main className={`app-shell relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100vw", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
-      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"}>
+      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: "var(--hud-safe-left)" }}>
         <div className="game-frame-stage" aria-hidden="true" />
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
