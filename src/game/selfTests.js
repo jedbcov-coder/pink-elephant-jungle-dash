@@ -187,7 +187,7 @@ export function runSelfTests() {
     });
     const standingBranchPlayerBox = playerBox(
       representativeBranchPosition.x,
-      CONFIG.playerSize / 2,
+      representativeBranchBox.minY - (CONFIG.playerSize * CONFIG.hitboxScale) / 2 + 0.02,
       representativeBranchPosition.z,
       false,
     );
@@ -220,8 +220,9 @@ export function runSelfTests() {
 
     const nearFrontZ = representativeBranchPosition.z + representativeBranch.depth / 2 - (CONFIG.playerSize * CONFIG.hitboxScale) / 2;
     const nearBackZ = representativeBranchPosition.z - representativeBranch.depth / 2 + (CONFIG.playerSize * CONFIG.hitboxScale) / 2;
-    const frontStandingPlayerBox = playerBox(representativeBranchPosition.x, CONFIG.playerSize / 2, nearFrontZ, false);
-    const backStandingPlayerBox = playerBox(representativeBranchPosition.x, CONFIG.playerSize / 2, nearBackZ, false);
+    const branchStandY = representativeBranchBox.minY - (CONFIG.playerSize * CONFIG.hitboxScale) / 2 + 0.02;
+    const frontStandingPlayerBox = playerBox(representativeBranchPosition.x, branchStandY, nearFrontZ, false);
+    const backStandingPlayerBox = playerBox(representativeBranchPosition.x, branchStandY, nearBackZ, false);
     const frontSlidingPlayerBox = playerBox(representativeBranchPosition.x, CONFIG.playerSize / 2, nearFrontZ, true);
     const backSlidingPlayerBox = playerBox(representativeBranchPosition.x, CONFIG.playerSize / 2, nearBackZ, true);
 

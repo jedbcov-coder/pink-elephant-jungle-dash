@@ -229,7 +229,18 @@ function SelfTestStatus({ summaryRef }) {
     const nextSummary = `${passCount}/${results.length} self-tests passed`;
     summaryRef.current = nextSummary;
     setSummary(nextSummary);
-    if (passCount !== results.length) console.warn("Pink Elephant self-tests failed", results);
+    if (passCount !== results.length) {
+      const failedResults = results.filter((result) => !result.pass).map((result) => ({
+        test: result.name,
+        reason: "Assertion returned false.",
+      }));
+      console.groupCollapsed(`Pink Elephant self-tests failed (${failedResults.length}/${results.length})`);
+      failedResults.forEach((failedResult, index) => {
+        console.warn(`${index + 1}. ${failedResult.test} — ${failedResult.reason}`);
+      });
+      console.table(failedResults);
+      console.groupEnd();
+    }
   }, [summaryRef]);
 
   return <div className="mt-4 text-[11px] tracking-wide text-emerald-100/50">{summary}</div>;

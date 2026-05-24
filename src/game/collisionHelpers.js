@@ -106,7 +106,7 @@ export function handleLogCollision({ collisionBox, obstacleAabb, canRetreat = fa
 }
 
 export function handleBranchCollision({ collisionBox, obstacleAabb, canRetreat = false }) {
-  const hits = branchHitsPlayer(collisionBox, obstacleAabb);
+  const hits = aabb(collisionBox, obstacleAabb) && branchHitsPlayer(collisionBox, obstacleAabb);
   return { hurt: hits && !canRetreat, blocked: hits && !canRetreat };
 }
 

@@ -20,6 +20,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Fixed branch-collision self-test failures by requiring actual AABB overlap before branch damage/blocking is applied, which aligns branch hit handling with visual overlap and keeps valid slide clearances passing.
+- Improved self-test failure logging in the browser console so each failed test now prints as its own readable warning line with a test name and reason, plus a compact failure table for quick debugging.
 - Added the modern `<meta name="mobile-web-app-capable" content="yes">` tag above the existing Apple tag in `index.html`, while keeping iOS compatibility and fixing the Chrome deprecation warning.
 - Added the modern `<meta name="mobile-web-app-capable" content="yes">` tag in both source and deployed HTML so PWA capability checks no longer rely only on the deprecated iOS-only tag.
 - Fixed a startup crash in `src/App.jsx` by removing a call to an undefined development texture preview helper (`createTexturePreviewPanel`), so the live scene now starts normally.
