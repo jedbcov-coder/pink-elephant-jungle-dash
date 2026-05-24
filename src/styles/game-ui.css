@@ -1732,9 +1732,9 @@ button:disabled {
 
 /* Phone-landscape minimal gameplay HUD: keep center lane clear and touch-first controls. */
 .layout-phone-landscape .hud-top-strip {
-  top: calc(var(--hud-safe-top) + 0.22rem);
-  left: calc(var(--hud-safe-left) + 0.4rem);
-  right: calc(var(--hud-safe-right) + 0.4rem);
+  top: calc(var(--hud-safe-top) + 0.2rem);
+  left: calc(var(--hud-safe-left) + 0.45rem);
+  right: calc(var(--hud-safe-right) + 0.45rem);
   padding: 0;
   gap: 0.25rem;
   align-items: flex-start;
@@ -1762,16 +1762,17 @@ button:disabled {
 .layout-phone-landscape .hud-lives-value { font-size: 0.56rem; letter-spacing: 0.02em; }
 
 .layout-phone-landscape .hud-right-cluster {
-  gap: 0.22rem;
+  gap: 0.18rem;
   align-items: flex-end;
   pointer-events: none;
+  min-width: 5.5rem;
 }
 .layout-phone-landscape .hud-control-row { pointer-events: auto; }
 .layout-phone-landscape .hud-gold-frame-button {
-  min-width: 2.08rem;
-  min-height: 2.08rem;
-  width: 2.08rem;
-  height: 2.08rem;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
   padding: 0;
 }
 .layout-phone-landscape .hud-timer-pill {
@@ -1803,13 +1804,13 @@ button:disabled {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  bottom: calc(var(--hud-safe-bottom) + 4.95rem);
+  bottom: calc(var(--hud-safe-bottom) + 4.25rem);
   align-items: center;
   z-index: 21;
   pointer-events: none;
 }
 .layout-phone-landscape .hud-prompt {
-  max-width: min(34vw, 11rem);
+  max-width: min(60vw, 14rem);
   padding: 0.14rem 0.38rem;
   font-size: 0.5rem;
   border-radius: 999px;
@@ -1886,6 +1887,52 @@ button:disabled {
 .layout-phone-landscape .app-frame {
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+.layout-phone-landscape.app-shell,
+.layout-phone-landscape .app-frame,
+.layout-phone-landscape .game-frame-stage,
+.layout-phone-landscape .game-safe-zone,
+.layout-phone-landscape .gameplay-touch-zone {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.layout-phone-landscape .hud-top-left-score,
+.layout-phone-landscape .hud-side-panels-row,
+.layout-phone-landscape .hud-primary-panel,
+.layout-phone-landscape .hud-secondary-panel,
+.layout-phone-landscape .hud-speedometer,
+.layout-phone-landscape .hud-elephant-ability-badge,
+.layout-phone-landscape .hud-audio-dock {
+  visibility: hidden !important;
+}
+
+.layout-phone-landscape .game-hud-shell,
+.layout-phone-landscape .game-hud-slot {
+  pointer-events: none;
+}
+
+.layout-phone-landscape .hud-control-row,
+.layout-phone-landscape .mobile-controls button,
+.layout-phone-landscape .touch-control-button,
+.layout-phone-landscape .touch-control-hitbox {
+  pointer-events: auto;
+}
+
+.layout-phone-landscape .mobile-controls {
+  display: block !important;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.layout-phone-landscape .touch-control-button {
+  min-width: clamp(52px, 8vw, 70px);
+  min-height: clamp(52px, 8vw, 70px);
 }
 
 .app-shell.layout-phone-landscape .title-card {

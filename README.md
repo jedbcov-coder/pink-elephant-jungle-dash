@@ -53,6 +53,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Samsung S23 phone-landscape HUD hardening: removed the desktop right-side HUD slab from phone-landscape gameplay, forced full viewport fill with no side blue strip, tightened a true mini top-row (fruit/lives, level, timer + smaller pause), kept prompt as a bottom-center pill, and forced touch controls to render immediately above HUD overlays.
 - Touch-zone alignment fix for phone-landscape gameplay: movement controls now live in the bottom-left zone, while Jump/Slide + Charge + Smash live in the bottom-right zone for clearer two-thumb play.
 - Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.
 - Phone-landscape gameplay HUD split: desktop-heavy HUD panels are now fully hidden on `layout-phone-landscape`, replaced by a minimal gameplay-first HUD (top-left fruit/lives, top-center state pill, top-right timer + pause, bottom-center tiny prompt, and highest-priority corner touch controls) to keep the center lane clear on Samsung S23 landscape.

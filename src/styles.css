@@ -12,7 +12,7 @@ body {
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
-  background: #60b0ff;
+  background: #04140a;
   color: #fff;
 }
 
@@ -120,7 +120,8 @@ body {
 }
 
 html, body, #root {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100dvh;
   min-height: 100dvh;
   margin: 0;
@@ -132,6 +133,7 @@ html, body, #root {
 #root {
   position: fixed;
   inset: 0;
+  background: #04140a;
 }
 
 body.immersive-playing {
