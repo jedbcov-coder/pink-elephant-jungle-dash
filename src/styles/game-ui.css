@@ -1575,23 +1575,23 @@ button:disabled {
   }
 }
 @media (orientation: landscape) and (max-width: 932px) {
-  .hud-audio-dock {
+  .layout-phone-landscape .hud-audio-dock {
     left: calc(0.55rem + var(--hud-safe-left));
     bottom: calc(9.8rem + var(--hud-safe-bottom));
   }
-  .hud-elephant-ability-badge {
+  .layout-phone-landscape .hud-elephant-ability-badge {
     right: calc(0.55rem + var(--hud-safe-right));
     bottom: calc(9.8rem + var(--hud-safe-bottom));
   }
 }
 
 @media (orientation: landscape) and (max-width: 932px) and (max-height: 520px) {
-  .mobile-run-control {
+  .layout-phone-landscape .mobile-run-control {
     left: max(14px, env(safe-area-inset-left, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
-  .mobile-action-cluster {
+  .layout-phone-landscape .mobile-action-cluster {
     right: max(14px, env(safe-area-inset-right, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
     gap: clamp(10px, 1.2vw, 14px);
@@ -1625,21 +1625,21 @@ button:disabled {
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
-  .desktop-controls,
-  .control-tutorial,
-  .keyboard-help,
-  .large-control-overlay {
+  .layout-phone-landscape .desktop-controls,
+  .layout-phone-landscape .control-tutorial,
+  .layout-phone-landscape .keyboard-help,
+  .layout-phone-landscape .large-control-overlay {
     display: none !important;
   }
 
-  .mobile-controls {
+  .layout-phone-landscape .mobile-controls {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 30;
   }
 
-  .mobile-controls button {
+  .layout-phone-landscape .mobile-controls button {
     pointer-events: auto;
     touch-action: none;
     user-select: none;
@@ -1649,19 +1649,19 @@ button:disabled {
     font-size: clamp(0.7rem, 1.6vw, 1rem);
   }
 
-  .mobile-run-control {
+  .layout-phone-landscape .mobile-run-control {
     position: absolute;
     left: max(14px, env(safe-area-inset-left, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
-  .mobile-run-control button {
+  .layout-phone-landscape .mobile-run-control button {
     width: clamp(72px, 11vw, 96px);
     height: clamp(72px, 11vw, 96px);
     border-radius: 24px;
   }
 
-  .mobile-action-cluster {
+  .layout-phone-landscape .mobile-action-cluster {
     position: absolute;
     right: max(14px, env(safe-area-inset-right, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
@@ -1681,13 +1681,21 @@ button:disabled {
 /* Phone-landscape title sizing: keep the full title card visible without scroll on short viewports. */
 .title-card {
   width: min(100%, 48rem);
+  max-height: min(88vh, 54rem);
+  overflow: hidden;
 }
 
 .title-settings-button {
+  appearance: none;
   background: rgba(18, 44, 30, 0.82);
   border: 1px solid rgba(167, 243, 208, 0.38);
   color: #fef3c7;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+.title-card .title-settings-button {
+  background: rgba(18, 44, 30, 0.92);
+  border-color: rgba(167, 243, 208, 0.5);
+  color: #fef3c7;
 }
 .title-settings-button:hover {
   background: rgba(28, 68, 45, 0.9);
@@ -1916,4 +1924,60 @@ button:disabled {
 .app-shell.layout-phone-landscape .title-primary-controls,
 .app-shell.layout-phone-landscape .title-advanced-note {
   display: none !important;
+}
+
+/* Desktop/tablet guard rails: prevent phone-landscape compaction from leaking into larger layouts. */
+.layout-desktop .title-card,
+.layout-tablet-landscape .title-card {
+  width: min(100%, 52rem);
+  max-height: none;
+  overflow: visible;
+  padding: 2rem;
+}
+
+.layout-desktop .title-primary-controls,
+.layout-tablet-landscape .title-primary-controls {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.layout-desktop .hud-side-panels-row,
+.layout-tablet-landscape .hud-side-panels-row {
+  align-items: flex-start;
+  flex-direction: row;
+  justify-content: space-between;
+  left: calc(0.75rem + var(--hud-safe-left));
+  right: calc(0.75rem + var(--hud-safe-right));
+  top: var(--hud-side-top);
+}
+
+.layout-desktop .hud-primary-panel,
+.layout-tablet-landscape .hud-primary-panel {
+  flex: 0 1 18rem;
+  max-width: 19rem;
+}
+
+.layout-desktop .hud-secondary-panel,
+.layout-tablet-landscape .hud-secondary-panel {
+  flex: 0 1 14.5rem;
+  max-width: 15rem;
+}
+
+.layout-desktop .hud-audio-dock,
+.layout-tablet-landscape .hud-audio-dock {
+  left: calc(0.75rem + var(--hud-safe-left));
+  bottom: calc(1rem + var(--hud-safe-bottom));
+}
+
+.layout-desktop .hud-prompt-layer,
+.layout-tablet-landscape .hud-prompt-layer {
+  bottom: calc(0.8rem + var(--hud-safe-bottom));
+  width: min(72vw, 30rem);
+}
+
+.layout-desktop .hud-prompt,
+.layout-tablet-landscape .hud-prompt {
+  font-size: clamp(0.82rem, 1.1vw, 0.98rem);
+  max-width: 100%;
+  padding: 0.5rem 1rem;
 }
