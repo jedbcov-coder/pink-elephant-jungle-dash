@@ -1162,22 +1162,7 @@ button:disabled {
 }
 
 .touch-controls {
-  bottom: var(--touch-bottom-offset);
-  display: grid;
-  gap: var(--touch-gap);
-  grid-template-areas:
-    ". charge smash"
-    "left jump right"
-    ". slide .";
-  grid-template-columns: repeat(3, minmax(var(--touch-grid-col-min), 1fr));
-  left: 50%;
-  max-width: min(26rem, calc(100vw - 1rem - var(--hud-safe-left) - var(--hud-safe-right)));
-  pointer-events: auto;
-  position: absolute;
-  touch-action: none;
-  transform: translateX(-50%);
-  user-select: none;
-  z-index: 24;
+  display: none;
 }
 
 /* Mobile control overlay layout (keeps center gameplay lane clear). */
@@ -1253,14 +1238,16 @@ button:disabled {
 }
 
 @media (min-width: 768px) and (orientation: landscape) {
+@media (min-width: 768px) and (orientation: landscape) and (pointer: fine) {
   .touch-controls {
     bottom: calc(2.5rem + var(--hud-safe-bottom));
+    display: grid;
+    gap: 0.65rem;
     grid-template-areas:
       ".    jump  .     . charge smash"
       "left .     right . .      ."
       ".    slide .     . .      .";
     grid-template-columns: 5rem 5rem 5rem minmax(2rem, 1fr) 5.5rem 5.5rem;
-    gap: 0.65rem;
     left: calc(3rem + var(--hud-safe-left));
     right: calc(3rem + var(--hud-safe-right));
     max-width: none;
@@ -1377,11 +1364,6 @@ button:disabled {
 }
 
 @media (max-width: 430px), (max-height: 600px) {
-  .touch-controls {
-    gap: 0.42rem;
-    grid-template-columns: repeat(3, minmax(3.75rem, 1fr));
-  }
-
   .touch-control-button { border-radius: 1rem; }
 
   .touch-control-icon {
@@ -1397,10 +1379,6 @@ button:disabled {
   }
 }
 @media (orientation: landscape) and (max-width: 932px) {
-  .touch-controls {
-    left: calc(50% + ((var(--hud-safe-left) - var(--hud-safe-right)) * 0.28));
-    bottom: calc(var(--touch-bottom-offset) + 0.3rem);
-  }
   .hud-audio-dock {
     left: calc(0.55rem + var(--hud-safe-left));
     bottom: calc(9.8rem + var(--hud-safe-bottom));
