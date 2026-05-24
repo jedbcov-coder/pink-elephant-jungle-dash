@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Aligned root/mobile viewport layout rules across `index.html`, `src/styles.css`, and `src/styles/game-ui.css` so `html`, `body`, `#root`, and gameplay container consistently use full viewport sizing (`100vw` + `100dvh`), remove left gutter risk, and prevent horizontal scrolling during gameplay (including Galaxy S23 landscape checks).
 - Mobile phones now hide desktop-oriented keyboard help cards on the title overlay (including the primary key mapping grid and large advanced tip panel) while desktop players still see full keyboard guidance.
 - Reorganized mobile touch controls into a clearer two-side layout: dedicated left-side Charge button and right-side movement/action cluster (Left, Right, Slide, Smash) while keeping the same input behavior and keyboard mappings.
 - Added a unified in-game Settings screen (Title + Pause access) that groups Audio, Controls, Display quality preset (stored only), PWA install/app mode, Save Data tools, and About/version in one place while keeping gameplay logic unchanged.
