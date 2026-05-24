@@ -53,6 +53,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Touch-zone alignment fix for phone-landscape gameplay: movement controls now live in the bottom-left zone, while Jump/Slide + Charge + Smash live in the bottom-right zone for clearer two-thumb play.
 - Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.
 - Phone-landscape gameplay HUD split: desktop-heavy HUD panels are now fully hidden on `layout-phone-landscape`, replaced by a minimal gameplay-first HUD (top-left fruit/lives, top-center state pill, top-right timer + pause, bottom-center tiny prompt, and highest-priority corner touch controls) to keep the center lane clear on Samsung S23 landscape.
 - Settings button readability fix: replaced conflicting title-button color path with a hard-scoped title selector (including phone-landscape override) so the button now keeps a dark translucent background, clear border, and high-contrast cream/white text on both desktop and Samsung S23 landscape.
@@ -279,6 +280,7 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run + Left/Right steering**. Right thumb: **Jump/Slide, Charge, Smash**.
 - **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
 - **Tablet:** touch controls stay enabled with **tablet-optimized spacing and button sizing** for easier taps.
 - **Desktop:** **keyboard-first controls are preserved** (same key mappings as before).
