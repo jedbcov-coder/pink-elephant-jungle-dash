@@ -20,6 +20,10 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Removed unused React ESLint plugins from devDependencies to eliminate the recurring npm peer-dependency (`ERESOLVE`) conflict path while keeping lint/check behavior unchanged for this project.
+- Strengthened npm dependency resolution by adding explicit npm `overrides` for ESLint 9.x (`eslint` and `@eslint/js`) to prevent future lock/install drift back to ESLint 10 peer conflicts.
+- Fixed npm install `ERESOLVE` conflict by pinning ESLint 9-compatible metadata in project manifests so `eslint-plugin-react@7.37.5` resolves cleanly instead of trying ESLint 10.
+- Fixed recurring `vite: not found` build failures in environments that install only production dependencies by moving `vite` from devDependencies to dependencies so `npm run build` and `npm run build:pages` can run reliably.
 - Added a lightweight CSS brace sanity check (`npm run check:css`) so accidental unclosed/extra braces in `src/styles/game-ui.css` are caught before build.
 - Fixed a CSS build blocker by removing an accidentally duplicated `@media` wrapper in `src/styles/game-ui.css` that caused a PostCSS `Unclosed block` error during `npm run build`.
 - Updated lint tooling compatibility by pinning ESLint 9.x so `eslint-plugin-react@7.37.5` installs cleanly without peer-dependency conflicts.
