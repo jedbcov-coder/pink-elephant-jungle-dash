@@ -11,6 +11,8 @@ export function SettingsPanel({
   onToggleAudio,
   graphicsQuality,
   onGraphicsQualityChange,
+  touchControlsMode,
+  onTouchControlsModeChange,
   isStandalone,
   canInstall,
   showInstallCard,
@@ -63,7 +65,29 @@ export function SettingsPanel({
         <div className="mt-5 border-t border-amber-100/20 pt-4">
           <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Controls</h3>
           <p className="mt-2 text-xs text-amber-50/75"><strong>Desktop:</strong> Arrow keys or WASD move, Space jumps (hold to slide), and F smashes.</p>
-          <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile:</strong> Touch buttons appear on touch devices.</p>
+          <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile/Tablet:</strong> Compact thumb controls appear for touch-first layouts.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              ["auto", "Touch: Auto"],
+              ["on", "Touch: On"],
+              ["off", "Touch: Off"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => onTouchControlsModeChange(value)}
+                aria-pressed={touchControlsMode === value}
+                className="rounded-full px-4 py-2 text-xs font-black"
+                style={{
+                  background: touchControlsMode === value ? "rgba(167,243,208,0.95)" : "rgba(255,255,255,0.12)",
+                  color: touchControlsMode === value ? "#022c22" : "rgba(255,255,255,0.85)",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: phone/tablet-like layouts or touch + tablet posture show touch controls; desktop-wide stays keyboard-first.</p>
           <p className="mt-1 text-xs text-emerald-100/50">Tip: Landscape mode is recommended on mobile.</p>
         </div>
 

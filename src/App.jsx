@@ -310,6 +310,7 @@ export default function App() {
   const [finalResults, setFinalResults] = useState(null);
   const [audioState, setAudioState] = useState(readStoredAudioState);
   const [touchControlsVisible, setTouchControlsVisible] = useState(false);
+  const [touchControlsMode, setTouchControlsMode] = useState(() => loadSettings()?.display?.touchControlsMode ?? "auto");
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
@@ -447,14 +448,24 @@ export default function App() {
     };
 
     const touchDeviceQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
-    const wideDesktopQuery = window.matchMedia("(min-width: 1024px) and (hover: hover) and (pointer: fine)");
+    const tabletLikeQuery = window.matchMedia("(max-width: 1100px) and (orientation: landscape)");
+    const phoneLikeQuery = window.matchMedia("(max-width: 900px)");
+    const wideDesktopQuery = window.matchMedia("(min-width: 1200px) and (hover: hover) and (pointer: fine)");
     const updateVisibility = () => {
-      const isWideDesktopLayout = wideDesktopQuery.matches;
-      if (isWideDesktopLayout) {
+      if (touchControlsMode === "on") {
+        setTouchControlsVisible(true);
+        return;
+      }
+      if (touchControlsMode === "off") {
         setTouchControlsVisible(false);
         return;
       }
-      setTouchControlsVisible(touchDeviceQuery.matches || touchInputDetectedRef.current);
+      const touchDetected = touchDeviceQuery.matches || touchInputDetectedRef.current;
+      const isPhoneOrTabletWidth = phoneLikeQuery.matches;
+      const isTabletPosture = tabletLikeQuery.matches && touchDetected;
+      const isWideDesktopLayout = wideDesktopQuery.matches;
+      const shouldShowAuto = isPhoneOrTabletWidth || isTabletPosture;
+      setTouchControlsVisible(shouldShowAuto && !isWideDesktopLayout);
     };
     const showForTouchInput = (event) => {
       if (event.pointerType === "touch" || event.pointerType === "pen") {
@@ -469,6 +480,8 @@ export default function App() {
 
     updateVisibility();
     touchDeviceQuery.addEventListener?.("change", updateVisibility);
+    tabletLikeQuery.addEventListener?.("change", updateVisibility);
+    phoneLikeQuery.addEventListener?.("change", updateVisibility);
     wideDesktopQuery.addEventListener?.("change", updateVisibility);
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
     window.addEventListener("pointerdown", handlePointerForImmersive, { passive: true });
@@ -477,13 +490,15 @@ export default function App() {
 
     return () => {
       touchDeviceQuery.removeEventListener?.("change", updateVisibility);
+      tabletLikeQuery.removeEventListener?.("change", updateVisibility);
+      phoneLikeQuery.removeEventListener?.("change", updateVisibility);
       wideDesktopQuery.removeEventListener?.("change", updateVisibility);
       window.removeEventListener("pointerdown", showForTouchInput);
       window.removeEventListener("pointerdown", handlePointerForImmersive);
       window.removeEventListener("touchstart", showForTouchStart);
       window.removeEventListener("touchstart", tryImmersiveMode);
     };
-  }, [tryImmersiveMode]);
+  }, [touchControlsMode, tryImmersiveMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -3540,6 +3555,12 @@ export default function App() {
           const existing = loadSettings() ?? {};
           saveSettings({ ...existing, display: { ...(existing.display ?? {}), graphicsQuality: value } });
           setGraphicsQuality(value);
+        }}
+        touchControlsMode={touchControlsMode}
+        onTouchControlsModeChange={(value) => {
+          const existing = loadSettings() ?? {};
+          saveSettings({ ...existing, display: { ...(existing.display ?? {}), touchControlsMode: value } });
+          setTouchControlsMode(value);
         }}
         isStandalone={isStandaloneApp}
         canInstall={Boolean(deferredInstallPrompt)}
