@@ -41,8 +41,8 @@ body {
   --touch-gap: clamp(0.42rem, 1.4vw, 0.7rem);
   --touch-bottom-offset: calc(clamp(0.7rem, 2.2svh, 1.35rem) + var(--hud-safe-bottom));
   --hud-font-small: clamp(0.58rem, calc(0.52rem + 0.3vw), 0.78rem);
-  --hud-font-body: clamp(0.72rem, calc(0.66rem + 0.34vw), 0.95rem);
-  --hud-font-value: clamp(1.05rem, calc(0.98rem + 0.7vw), 1.55rem);
+  --hud-font-body: clamp(1.125rem, calc(1.02rem + 0.52vw), 1.5rem);
+  --hud-font-value: clamp(1.25rem, calc(1.1rem + 0.9vw), 1.75rem);
   --hud-side-top: calc(clamp(2.65rem, 6.4dvh, 3.35rem) + var(--hud-safe-top));
 }
 
@@ -837,8 +837,8 @@ button:disabled {
     0 12px 22px rgba(0, 0, 0, 0.26);
   display: inline-flex;
   justify-content: center;
-  min-height: 2.5rem;
-  min-width: 2.5rem;
+  min-height: 3rem;
+  min-width: 3rem;
 }
 
 .hud-circle-action-button {
@@ -854,9 +854,9 @@ button:disabled {
   border-radius: 0.92rem;
   color: #fff3a6;
   font-size: clamp(1rem, 0.92rem + 0.42vw, 1.2rem);
-  height: 2.65rem;
+  height: 3rem;
   transition: transform 150ms ease, filter 150ms ease;
-  width: 2.65rem;
+  width: 3rem;
 }
 
 .hud-gold-frame-button:hover,
@@ -1327,15 +1327,24 @@ button:disabled {
   user-select: none;
 }
 
+.touch-control-hitbox {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  margin: -6px;
+  padding: 6px;
+}
+
+
 .mobile-run-control {
   --mobile-edge-left: max(12px, env(safe-area-inset-left, 0px));
   --mobile-edge-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   position: absolute;
   left: var(--mobile-edge-left);
   bottom: var(--mobile-edge-bottom);
-  width: clamp(72px, 11vw, 96px);
-  min-width: clamp(72px, 11vw, 96px);
-  min-height: clamp(72px, 11vw, 96px);
+  width: clamp(84px, 12vw, 112px);
+  min-width: clamp(84px, 12vw, 112px);
+  min-height: clamp(84px, 12vw, 112px);
 }
 
 @media (display-mode: standalone) {
@@ -1351,14 +1360,14 @@ button:disabled {
   right: var(--mobile-edge-right);
   bottom: var(--mobile-edge-bottom);
   display: grid;
-  grid-template-columns: repeat(2, minmax(clamp(52px, 8vw, 76px), 1fr));
-  gap: clamp(8px, 1.4vw, 12px);
+  grid-template-columns: repeat(2, minmax(clamp(56px, 8.5vw, 84px), 1fr));
+  gap: clamp(12px, 1.8vw, 16px);
 }
 
 .mobile-action-cluster button {
-  width: clamp(52px, 8vw, 76px);
-  min-width: clamp(52px, 8vw, 76px);
-  min-height: clamp(52px, 8vw, 76px);
+  width: clamp(56px, 8.5vw, 84px);
+  min-width: clamp(56px, 8.5vw, 84px);
+  min-height: clamp(56px, 8.5vw, 84px);
 }
 
 /* Tablet landscape tier: keep the same thumb layout, but slightly larger controls and spacing. */
@@ -1366,22 +1375,22 @@ button:disabled {
   .mobile-run-control {
     --mobile-edge-left: max(16px, env(safe-area-inset-left, 0px));
     --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-    width: clamp(82px, 10.5vw, 108px);
-    min-width: clamp(82px, 10.5vw, 108px);
-    min-height: clamp(82px, 10.5vw, 108px);
+    width: clamp(92px, 11vw, 120px);
+    min-width: clamp(92px, 11vw, 120px);
+    min-height: clamp(92px, 11vw, 120px);
   }
 
   .mobile-action-cluster {
     --mobile-edge-right: max(16px, env(safe-area-inset-right, 0px));
     --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-    grid-template-columns: repeat(2, minmax(clamp(58px, 7.6vw, 84px), 1fr));
-    gap: clamp(8px, 1.3vw, 14px);
+    grid-template-columns: repeat(2, minmax(clamp(62px, 8.2vw, 92px), 1fr));
+    gap: clamp(12px, 1.6vw, 18px);
   }
 
   .mobile-action-cluster button {
-    width: clamp(58px, 7.6vw, 84px);
-    min-width: clamp(58px, 7.6vw, 84px);
-    min-height: clamp(58px, 7.6vw, 84px);
+    width: clamp(62px, 8.2vw, 92px);
+    min-width: clamp(62px, 8.2vw, 92px);
+    min-height: clamp(62px, 8.2vw, 92px);
   }
 
   .touch-control-button {
@@ -1543,14 +1552,14 @@ button:disabled {
 
 @media (orientation: landscape) and (max-width: 932px) and (max-height: 520px) {
   .mobile-run-control {
-    left: max(10px, env(safe-area-inset-left, 0px));
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    left: max(14px, env(safe-area-inset-left, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-action-cluster {
-    right: max(10px, env(safe-area-inset-right, 0px));
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
-    gap: clamp(4px, 1vw, 8px);
+    right: max(14px, env(safe-area-inset-right, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    gap: clamp(10px, 1.2vw, 14px);
   }
 }
 

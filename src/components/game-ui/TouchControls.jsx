@@ -55,8 +55,8 @@ export function TouchControls({ visible, onControlChange }) {
     <div className="touch-controls mobile-controls" aria-label="Touch game controls">
       <div className="mobile-run-control" aria-label="Run control">
         {[RUN_CONTROL_BUTTON].map(({ code, label, icon, hint }) => (
+          <div key={`${code}-${label}`} className="touch-control-hitbox">
           <button
-            key={`${code}-${label}`}
             type="button"
             className={`touch-control-button touch-control-${label.toLowerCase()}`}
             aria-label={`${label} control`}
@@ -70,12 +70,13 @@ export function TouchControls({ visible, onControlChange }) {
             <span className="touch-control-label">{label}</span>
             <span className="touch-control-hint">{hint}</span>
           </button>
+          </div>
         ))}
       </div>
       <div className="mobile-action-cluster" aria-label="Movement and action controls">
         {ACTION_CLUSTER_BUTTONS.map(({ code, label, icon, hint }) => (
+        <div key={`${code}-${label}`} className="touch-control-hitbox">
         <button
-          key={`${code}-${label}`}
           type="button"
           className={`touch-control-button touch-control-${label.toLowerCase()}`}
           aria-label={`${label} control`}
@@ -89,6 +90,7 @@ export function TouchControls({ visible, onControlChange }) {
           <span className="touch-control-label">{label}</span>
           <span className="touch-control-hint">{hint}</span>
         </button>
+          </div>
         ))}
       </div>
     </div>

@@ -36,6 +36,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Tablet comfort/accessibility pass: enlarged touch targets for gameplay and HUD utility controls (48px minimum, 56px+ on primary controls), increased HUD text scale into an 18–28px-friendly range with heavier readable weights, added larger control spacing/invisible hitbox padding, and kept primary gameplay center clear by pinning utility controls to safe edge zones.
+
 - Mobile/PWA viewport hardening pass: gameplay wrappers now use modern dynamic viewport units (`100svh` fallback + `100dvh`), safe-area padding is enforced on the game frame + HUD edges, and portrait on phones/tablets now shows rotate guidance instead of cramped play.
 
 - Fixed mobile landscape viewport sizing for edge-to-edge play (including Galaxy S23): root/layout containers now lock to `100vw` + `100dvh`, body margin/overflow are constrained, the gameplay canvas fills the visible viewport, and horizontal scrolling is blocked during gameplay.
