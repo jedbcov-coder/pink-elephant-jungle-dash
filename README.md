@@ -53,6 +53,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.
 - Phone-landscape gameplay HUD split: desktop-heavy HUD panels are now fully hidden on `layout-phone-landscape`, replaced by a minimal gameplay-first HUD (top-left fruit/lives, top-center state pill, top-right timer + pause, bottom-center tiny prompt, and highest-priority corner touch controls) to keep the center lane clear on Samsung S23 landscape.
 - Settings button readability fix: replaced conflicting title-button color path with a hard-scoped title selector (including phone-landscape override) so the button now keeps a dark translucent background, clear border, and high-contrast cream/white text on both desktop and Samsung S23 landscape.
 - Phone-landscape title-fit pass (Samsung S23 fullscreen): removed title-card scrolling risk, tightened title spacing/typography, hid extra helper panels/self-test note in phone-landscape, and kept only the core title content + Settings + Begin button visible without scrolling.

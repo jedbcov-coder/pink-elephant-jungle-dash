@@ -571,6 +571,17 @@ export default function App() {
   }, [touchControlsMode, tryImmersiveMode]);
 
   useEffect(() => {
+    const gameplayActive = started && !complete && !gameOver;
+    if (!gameplayActive) return;
+    if (layoutMode !== "phone-landscape") return;
+
+    if (touchControlsMode === "on" || touchControlsMode === "auto") {
+      touchInputDetectedRef.current = true;
+      setTouchControlsVisible(true);
+    }
+  }, [started, complete, gameOver, layoutMode, touchControlsMode]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
     const refreshImmersiveMode = () => {
