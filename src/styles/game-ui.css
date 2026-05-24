@@ -1223,6 +1223,35 @@ button:disabled {
   min-height: clamp(52px, 8vw, 76px);
 }
 
+/* Tablet landscape tier: keep the same thumb layout, but slightly larger controls and spacing. */
+@media (min-width: 768px) and (max-width: 1199px) and (orientation: landscape) and (pointer: coarse) {
+  .mobile-run-control {
+    --mobile-edge-left: max(16px, env(safe-area-inset-left, 0px));
+    --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    width: clamp(82px, 10.5vw, 108px);
+    min-width: clamp(82px, 10.5vw, 108px);
+    min-height: clamp(82px, 10.5vw, 108px);
+  }
+
+  .mobile-action-cluster {
+    --mobile-edge-right: max(16px, env(safe-area-inset-right, 0px));
+    --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    grid-template-columns: repeat(2, minmax(clamp(58px, 7.6vw, 84px), 1fr));
+    gap: clamp(8px, 1.3vw, 12px);
+  }
+
+  .mobile-action-cluster button {
+    width: clamp(58px, 7.6vw, 84px);
+    min-width: clamp(58px, 7.6vw, 84px);
+    min-height: clamp(58px, 7.6vw, 84px);
+  }
+
+  .touch-control-button {
+    border-radius: 1.28rem;
+    padding: clamp(0.44rem, 0.72vw, 0.78rem) clamp(0.4rem, 0.8vw, 0.76rem);
+  }
+}
+
 @media (min-width: 768px) and (orientation: landscape) {
   .touch-controls {
     bottom: calc(2.5rem + var(--hud-safe-bottom));

@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Added a dedicated tablet-landscape touch-control tier between phone and desktop in `src/styles/game-ui.css`, keeping the same left-thumb run button + right action cluster pattern while slightly increasing button size/spacing and nudging edge offsets for safer HUD corner clearance.
 - Aligned root/mobile viewport layout rules across `index.html`, `src/styles.css`, and `src/styles/game-ui.css` so `html`, `body`, `#root`, and gameplay container consistently use full viewport sizing (`100vw` + `100dvh`), remove left gutter risk, and prevent horizontal scrolling during gameplay (including Galaxy S23 landscape checks).
 - Updated mobile control CSS with a fixed full-screen `.mobile-controls` overlay, left-side run button sizing, and right-side 2-column action cluster spacing tuned for safe-area insets and landscape phone layouts while keeping the center gameplay lane mostly clear.
 - Mobile phones now hide desktop-oriented keyboard help cards on the title overlay (including the primary key mapping grid and large advanced tip panel) while desktop players still see full keyboard guidance.
