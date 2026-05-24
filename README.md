@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Standardized viewport/container sizing across `index.html`, `src/styles.css`, `src/styles/game-ui.css`, and the `src/App.jsx` gameplay mount so `html`, `body`, and `#root` consistently fill the viewport using `100%` + `100dvh`, the mount inherits full size, and horizontal overflow risk is reduced without gameplay logic changes.
 - Updated touch-control visibility detection in `src/App.jsx` so phones/tablets keep on-screen touch controls, while wide desktop keyboard-first layouts now suppress touch controls by default even on touch-capable hardware.
 - Added a dedicated tablet-landscape touch-control tier between phone and desktop in `src/styles/game-ui.css`, keeping the same left-thumb run button + right action cluster pattern while slightly increasing button size/spacing and nudging edge offsets for safer HUD corner clearance.
 - Scoped legacy `.touch-controls` grid layout to desktop-style pointer conditions only, while keeping the new mobile thumb overlay (`.mobile-controls`) as the source of truth for phones so desktop/tablet no longer inherit unintended mobile placement and phones no longer inherit old grid assumptions.
