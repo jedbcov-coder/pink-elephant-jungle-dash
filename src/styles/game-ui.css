@@ -1509,3 +1509,10 @@ button:disabled {
   object-fit: contain;
   filter: drop-shadow(0 0 10px rgba(255, 164, 218, 0.55));
 }
+
+/* Orientation safety: keep gameplay overlays from overlapping in portrait.
+   Normal menus continue to work in both portrait and landscape. */
+.app-frame[data-orientation="portrait"] .mobile-controls {
+  opacity: 0;
+  pointer-events: none;
+}
