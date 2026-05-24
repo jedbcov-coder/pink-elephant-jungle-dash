@@ -81,14 +81,22 @@ function requestImmersiveMobileMode() {
 
   const requestFullscreen = async () => {
     if (!document.fullscreenElement && root.requestFullscreen) {
-      await root.requestFullscreen({ navigationUI: "hide" });
+      try {
+        await root.requestFullscreen({ navigationUI: "hide" });
+      } catch (error) {
+        if (import.meta.env.DEV) console.debug("[immersive] Fullscreen request skipped.", error);
+      }
     }
   };
 
   const lockLandscape = async () => {
     const orientation = window.screen?.orientation;
     if (orientation?.lock) {
-      await orientation.lock("landscape");
+      try {
+        await orientation.lock("landscape");
+      } catch (error) {
+        if (import.meta.env.DEV) console.debug("[immersive] Orientation lock skipped.", error);
+      }
     }
   };
 
@@ -290,9 +298,9 @@ export default function App() {
   const touchInputDetectedRef = useRef(false);
   const immersiveRequestedRef = useRef(false);
 
-  const tryImmersiveMode = useCallback(() => {
+  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
     immersiveRequestedRef.current = true;
-    requestImmersiveMobileMode();
+    if (fromUserGesture) requestImmersiveMobileMode();
     setImmersiveReady(true);
   }, []);
 
@@ -458,7 +466,7 @@ export default function App() {
 
     const handlePointerForImmersive = (event) => {
       if (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen") return;
-      if (!immersiveRequestedRef.current) tryImmersiveMode();
+      if (!immersiveRequestedRef.current) tryImmersiveMode(true);
     };
 
     const touchDeviceQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
@@ -500,7 +508,8 @@ export default function App() {
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
     window.addEventListener("pointerdown", handlePointerForImmersive, { passive: true });
     window.addEventListener("touchstart", showForTouchStart, { passive: true });
-    window.addEventListener("touchstart", tryImmersiveMode, { passive: true });
+    const immersiveFromTouchStart = () => tryImmersiveMode(true);
+    window.addEventListener("touchstart", immersiveFromTouchStart, { passive: true });
 
     return () => {
       touchDeviceQuery.removeEventListener?.("change", updateVisibility);
@@ -510,7 +519,7 @@ export default function App() {
       window.removeEventListener("pointerdown", showForTouchInput);
       window.removeEventListener("pointerdown", handlePointerForImmersive);
       window.removeEventListener("touchstart", showForTouchStart);
-      window.removeEventListener("touchstart", tryImmersiveMode);
+      window.removeEventListener("touchstart", immersiveFromTouchStart);
     };
   }, [touchControlsMode, tryImmersiveMode]);
 
@@ -520,7 +529,7 @@ export default function App() {
     const refreshImmersiveMode = () => {
       if (!immersiveRequestedRef.current || !startedRef.current || pausedRef.current || completeRef.current || gameOverRef.current) return;
       window.setTimeout(() => {
-        tryImmersiveMode();
+        tryImmersiveMode(false);
       }, 120);
     };
 
@@ -552,7 +561,7 @@ export default function App() {
 
   useEffect(() => {
     if (started && !paused && !complete && !gameOver) {
-      tryImmersiveMode();
+      tryImmersiveMode(false);
     }
   }, [complete, gameOver, paused, started, tryImmersiveMode]);
 
@@ -642,7 +651,7 @@ export default function App() {
 
   useEffect(() => {
     if (!started || paused || complete || gameOver) return;
-    const reapply = () => tryImmersiveMode();
+    const reapply = () => tryImmersiveMode(false);
     const timer = window.setInterval(reapply, 5000);
     return () => window.clearInterval(timer);
   }, [complete, gameOver, paused, started, tryImmersiveMode]);
