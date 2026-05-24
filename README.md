@@ -20,6 +20,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Strengthened npm dependency resolution by adding explicit npm `overrides` for ESLint 9.x (`eslint` and `@eslint/js`) to prevent future lock/install drift back to ESLint 10 peer conflicts.
 - Fixed npm install `ERESOLVE` conflict by pinning ESLint 9-compatible metadata in project manifests so `eslint-plugin-react@7.37.5` resolves cleanly instead of trying ESLint 10.
 - Fixed recurring `vite: not found` build failures in environments that install only production dependencies by moving `vite` from devDependencies to dependencies so `npm run build` and `npm run build:pages` can run reliably.
 - Added a lightweight CSS brace sanity check (`npm run check:css`) so accidental unclosed/extra braces in `src/styles/game-ui.css` are caught before build.
