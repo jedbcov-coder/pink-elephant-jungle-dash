@@ -1,46 +1,69 @@
 # DEVICE_TESTING.md
 
-This checklist verifies universal device compatibility for **Pink Elephant Jungle Dash**.
+This checklist is the **required tablet release gate** for **Pink Elephant Jungle Dash**.  
+Run it before every update.
 
-## Phone checks (small + large)
+## 1) Target devices (must test on real hardware)
 
-- [ ] Open in mobile browser (portrait): rotate-helper appears and gameplay waits for landscape.
-- [ ] Rotate to landscape-left and landscape-right: HUD and controls stay inside notch/home-bar safe areas.
-- [ ] Confirm no horizontal scrolling in title screen, settings, and active gameplay.
-- [ ] Confirm all touch controls are easy to tap (minimum 48px targets).
-- [ ] Hold one movement control and tap an action at the same time (multi-touch) — both inputs work.
-- [ ] Pause and resume — no stuck movement/action input.
-- [ ] Put app in background, return, and rotate device — run state is preserved (no forced reset).
+- [ ] **Samsung Galaxy tablet class device** (example: Galaxy Tab S9 / S8 / A9+)
+- [ ] **One additional Android tablet profile** from a different brand or Android skin (example: Lenovo Tab, Pixel Tablet, Xiaomi Pad)
 
-## Tablet checks
+Record tested devices for this release:
 
-- [ ] Test portrait and landscape where practical.
-- [ ] Confirm responsive layout scales up cleanly (no clipped HUD cards, no overlap).
-- [ ] Confirm typography is readable and still proportional.
-- [ ] Confirm touch controls remain comfortably tappable.
-- [ ] Confirm safe-area spacing still protects controls near edges.
+- Device 1 model + Android version:
+- Device 2 model + Android version:
 
-## Desktop checks
+## 2) Required test modes
 
-- [ ] Resize from narrow window to wide monitor and back — game remains usable and state is preserved.
-- [ ] Confirm centered scalable app frame (not stretched awkwardly on ultra-wide screens).
-- [ ] Confirm no horizontal scrolling at any browser width.
-- [ ] Confirm keyboard-first flow still works normally.
+Test each target device in all modes below:
 
-## PWA install and offline checks
+- [ ] **Browser tab mode** (Chrome in normal tab)
+- [ ] **Installed PWA mode** (launched from home screen/app drawer)
+- [ ] **Installed display behavior** feels standalone/fullscreen (no browser-chrome dependence during normal play)
+- [ ] **Landscape primary gameplay** works (default play orientation)
+- [ ] **Portrait fallback message** is clear and appears when gameplay should not run in portrait
 
-- [ ] Install from browser prompt and launch from home screen/app launcher.
-- [ ] Confirm app opens in standalone/fullscreen style (feels like an app, not a browser tab).
-- [ ] Disable network and relaunch — app still loads offline.
-- [ ] Re-enable network and publish a new build — update banner appears and refresh works.
+## 3) UX quality checks (tablet comfort + clarity)
 
-## Notes log
+- [ ] Text is readable at normal arm-distance tablet use (HUD, buttons, prompts)
+- [ ] Thumb controls are easy and comfortable (no strain, no cramped spacing)
+- [ ] No accidental edge taps from bezel/home gesture areas during active play
+- [ ] Obstacles are visually clear and recognizable in under **1 second** while running
 
-For each issue found, capture:
+## 4) Stability checks (must pass on each target tablet)
 
-- Device and OS version
-- Browser/app wrapper version
-- Orientation at time of issue
-- What happened
-- Repro steps
-- Screenshot/video
+- [ ] Start a run, lock device, unlock, and confirm the game resumes safely
+- [ ] Rotate device during an active run and confirm state/input stability
+- [ ] Switch to another app, return to game, and confirm session continuity
+- [ ] Play a long session (15+ minutes) and confirm no major memory/performance degradation
+
+## 5) Pass/Fail sign-off (release gate)
+
+A release is blocked unless **all boxes are checked**.
+
+- [ ] Device coverage complete (Samsung Galaxy tablet class + one additional Android tablet)
+- [ ] All required test modes passed
+- [ ] All UX quality checks passed
+- [ ] All stability checks passed
+- [ ] Any found issues are logged and resolved or explicitly deferred with owner/date
+- [ ] Final reviewer sign-off completed
+
+Sign-off details:
+
+- Reviewer:
+- Date:
+- Release/Build version:
+- Final decision: **PASS / FAIL**
+
+## 6) Issue log (if anything fails)
+
+For each issue found:
+
+- Device model + Android version
+- Mode (browser tab / installed PWA / orientation)
+- Exact step to reproduce
+- Expected result
+- Actual result
+- Screenshot/video link
+- Status (open / fixed / deferred)
+- Owner + target fix date

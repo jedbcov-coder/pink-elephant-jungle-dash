@@ -24,6 +24,7 @@ The app now uses a stricter universal-device baseline:
 - install + offline behavior validated through manifest and service worker
 
 Use `DEVICE_TESTING.md` for manual validation across phone, tablet, and desktop before release.
+For tablet sign-off before each update, complete every required item in the tablet release gate inside `DEVICE_TESTING.md`.
 
 ## Install as an app (PWA)
 
