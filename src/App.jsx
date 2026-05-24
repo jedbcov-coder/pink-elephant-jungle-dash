@@ -290,6 +290,9 @@ export default function App() {
   const debugRef = useRef(false);
   const pausedRef = useRef(false);
   const pauseStartedAtRef = useRef(null);
+  const lifecycleSnapshotRef = useRef(null);
+  const lifecyclePauseReasonRef = useRef(null);
+  const resumeSafetyUntilRef = useRef(0);
   const audioManagerRef = useRef(null);
   if (!audioManagerRef.current) audioManagerRef.current = createAudioManager();
   const resetGameRef = useRef(null);
@@ -390,6 +393,31 @@ export default function App() {
       pauseStartedAtRef.current = null;
     }
     setPaused(shouldPause);
+  }
+
+
+  function captureLifecycleSnapshot(reason = "unknown") {
+    if (!startedRef.current || completeRef.current || gameOverRef.current) return;
+    lifecyclePauseReasonRef.current = reason;
+    lifecycleSnapshotRef.current = {
+      reason,
+      capturedAt: performance.now(),
+      gameStartTime: gameStartTimeRef.current,
+      stampedeNextStepTime: stampedeRef.current?.nextStepTime ?? 0,
+    };
+  }
+
+  function restoreLifecycleSnapshot() {
+    const snapshot = lifecycleSnapshotRef.current;
+    if (!snapshot) return;
+    lifecycleSnapshotRef.current = null;
+    const now = performance.now();
+    const pausedFor = Math.max(0, now - (snapshot.capturedAt ?? now));
+    if (gameStartTimeRef.current && Number.isFinite(pausedFor)) {
+      gameStartTimeRef.current += pausedFor;
+    }
+    if (stampedeRef.current) stampedeRef.current.nextStepTime = audioManagerRef.current?.getCurrentTime?.() ?? snapshot.stampedeNextStepTime ?? 0;
+    resumeSafetyUntilRef.current = performance.now() + 850;
   }
 
   function resumeGame() {
@@ -2404,6 +2432,7 @@ export default function App() {
     }
 
     function hurt(croc = false) {
+      if (performance.now() < resumeSafetyUntilRef.current) return;
       if (body.hurtTimer > 0 || body.completed || body.lives <= 0) return;
       body.health = Math.max(0, body.health - (croc ? 34 : 22));
       body.hurtTimer = 0.45;
@@ -2501,14 +2530,27 @@ export default function App() {
       setKeyState(keyRef.current, e.code, false);
     }
 
-    function blur() {
+    function suspendGameplay(reason = "background") {
       keyRef.current = createKeys();
+      captureLifecycleSnapshot(reason);
       if (startedRef.current && !completeRef.current && !gameOverRef.current) setPausedState(true);
+    }
+
+    function handleWindowBlur() { suspendGameplay("blur"); }
+    function handleDocumentHidden() {
+      if (document.visibilityState === "hidden") suspendGameplay("hidden");
+    }
+    function handlePageHide() { suspendGameplay("pagehide"); }
+    function handleWindowFocus() {
+      restoreLifecycleSnapshot();
     }
 
     window.addEventListener("keydown", keyDown);
     window.addEventListener("keyup", keyUp);
-    window.addEventListener("blur", blur);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("visibilitychange", handleDocumentHidden);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("focus", handleWindowFocus);
     window.addEventListener("resize", resize);
 
     function updateCrocs(now) {
@@ -3208,7 +3250,10 @@ export default function App() {
       cancelAnimationFrame(frame);
       window.removeEventListener("keydown", keyDown);
       window.removeEventListener("keyup", keyUp);
-      window.removeEventListener("blur", blur);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("visibilitychange", handleDocumentHidden);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("resize", resize);
       resetGameRef.current = null;
 
