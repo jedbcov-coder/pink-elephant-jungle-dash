@@ -34,6 +34,10 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Added responsive typography scaling for headings, HUD counters, labels, and buttons using `clamp()`.
+- Raised text baseline readability on small phones and set form input fonts to at least 16px to prevent mobile auto-zoom.
+- Shortened gameplay-facing helper copy to keep overlays easier to scan during play.
+
 - Added a universal responsive game frame: phones use full safe screen area, while tablets/desktops keep a centered 16:9 gameplay frame with optional side-panel space and preserved HUD readability.
 - Added explicit orientation behavior rules: portrait/landscape detection is now always tracked, normal menus remain usable in both orientations, and active gameplay on touch devices shows a clear rotate-device overlay in portrait while preserving your current run state through rotation changes.
 - Standardized interactive touch targets to a 48px minimum across buttons and form controls, added visible keyboard focus rings, and increased mobile control spacing so nearby controls keep at least an 8px gap.
