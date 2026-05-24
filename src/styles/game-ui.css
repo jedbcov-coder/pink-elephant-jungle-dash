@@ -29,6 +29,8 @@ body {
   --font-md: clamp(0.9rem, 3vw, 1.05rem);
   --font-lg: clamp(1.05rem, 3.4vw, 1.45rem);
   --layout-max-width: min(94vw, 86rem);
+  --game-frame-aspect: 16 / 9;
+  --game-frame-panel-width: clamp(0px, 9vw, 11rem);
   --hud-inline-gap: clamp(0.65rem, 1.6vw, 1rem);
   --ui-scale: 0.92;
   --hud-text-scale: 0.94;
@@ -109,6 +111,8 @@ body {
   width: min(100%, 100vw);
   min-height: max(100svh, 100dvh);
   height: 100%;
+  display: grid;
+  place-items: stretch;
   padding-top: max(0px, env(safe-area-inset-top, 0px));
   padding-right: max(0px, env(safe-area-inset-right, 0px));
   padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
@@ -117,11 +121,47 @@ body {
 
 .app-frame {
   position: relative;
-  width: min(100%, var(--layout-max-width));
-  max-width: 100%;
+  width: 100%;
   height: 100%;
   margin: 0 auto;
   overflow: hidden;
+}
+
+.game-frame-stage {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .app-shell {
+    padding: clamp(0.6rem, 1.8vw, 1.2rem);
+  }
+
+  .app-frame {
+    width: min(100%, var(--layout-max-width));
+    aspect-ratio: var(--game-frame-aspect);
+    height: auto;
+    max-height: 100%;
+    margin: auto;
+    border-radius: clamp(0.9rem, 1.8vw, 1.4rem);
+    border: 1px solid rgba(255, 240, 207, 0.28);
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+    background: rgba(8, 20, 13, 0.28);
+  }
+
+  .game-frame-stage {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg,
+        rgba(8, 17, 12, 0.44) 0,
+        rgba(8, 17, 12, 0.44) var(--game-frame-panel-width),
+        transparent var(--game-frame-panel-width),
+        transparent calc(100% - var(--game-frame-panel-width)),
+        rgba(8, 17, 12, 0.44) calc(100% - var(--game-frame-panel-width)),
+        rgba(8, 17, 12, 0.44) 100%);
+  }
 }
 
 
