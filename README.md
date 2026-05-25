@@ -7,6 +7,11 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
+### Latest short-height desktop/laptop title-fit update
+
+- Added height-aware desktop/laptop media queries for common short-height landscape viewports (including 1366×768, 1536×864, 1600×900, and 1920×1080).
+- Scoped changes to title/start-screen selectors only so gameplay and HUD selectors remain unchanged.
+
 
 ### Latest desktop "Always" touch controls visibility fix
 
