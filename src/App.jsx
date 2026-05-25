@@ -3689,44 +3689,46 @@ export default function App() {
 
       {/* COMPLETE SCREEN */}
       {complete && (
-        <section className="absolute inset-0 z-20 flex items-center justify-center px-6"
+        <section className="complete-overlay absolute inset-0 z-20 flex items-center justify-center px-6"
           style={{ background: "rgba(0,0,0,0.52)", backdropFilter: "blur(4px)" }}>
-          <div className="rounded-[2rem] p-10 text-center"
+          <div className="complete-card rounded-[2rem] p-10 text-center"
             style={{ background: "rgba(12,20,10,0.88)", border: "1px solid rgba(255,200,80,0.35)", boxShadow: "0 0 65px rgba(255,190,80,0.22)", maxHeight: "92vh", overflowY: "auto" }}>
-            <div className="mb-4 text-6xl">🏆</div>
-            <h2 className="display-title text-4xl font-black text-amber-200">
+            <div className="complete-trophy mb-4 text-6xl">🏆</div>
+            <h2 className="complete-title display-title text-4xl font-black text-amber-200">
               {nextLevelId ? `${currentLevelConfig.name} Complete!` : "Jungle Gate Reached!"}
             </h2>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-amber-50/70">
+            <p className="complete-message mt-3 max-w-sm text-sm leading-relaxed text-amber-50/70">
               {nextLevelId
                 ? `Great run! You're ready for ${nextLevelConfig?.name ?? "the next level"}.`
                 : "The herd made it through. The jungle is yours."}
             </p>
-            <div className="mt-5 grid grid-cols-2 gap-3 text-left text-sm font-black text-amber-100 sm:grid-cols-3">
-              <span className="rounded-2xl bg-white/5 px-3 py-2">🍋 Fruit <span>{finalResults?.fruit ?? 0}</span></span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2">🍍 Bonus <span>{finalResults?.fruitLifeCounter ?? 0}</span>/100</span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2">📦 Crates <span>{finalResults?.crates ?? 0}</span></span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2">⭐ Score <span>{finalResults?.score ?? 0}</span></span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2">🐘 Lives <span>{finalResults?.lives ?? 0}</span></span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2">⏱ Time <span>{formatElapsed(finalResults?.elapsedMs ?? 0)}</span></span>
-              <span className="rounded-2xl bg-white/5 px-3 py-2 sm:col-span-3">🌿 Distance <span>{Math.round(finalResults?.distance ?? 0)}</span>m</span>
+            <div className="complete-stats mt-5 grid grid-cols-2 gap-3 text-left text-sm font-black text-amber-100 sm:grid-cols-3">
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">🍋 Fruit <span>{finalResults?.fruit ?? 0}</span></span>
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">🍍 Bonus <span>{finalResults?.fruitLifeCounter ?? 0}</span>/100</span>
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">📦 Crates <span>{finalResults?.crates ?? 0}</span></span>
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">⭐ Score <span>{finalResults?.score ?? 0}</span></span>
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">🐘 Lives <span>{finalResults?.lives ?? 0}</span></span>
+              <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">⏱ Time <span>{formatElapsed(finalResults?.elapsedMs ?? 0)}</span></span>
+              <span className="complete-stat-chip complete-stat-distance rounded-2xl bg-white/5 px-3 py-2 sm:col-span-3">🌿 Distance <span>{Math.round(finalResults?.distance ?? 0)}</span>m</span>
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
               {nextLevelId ? (
                 <button onClick={() => startLevelById(nextLevelId)}
-                  className="rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
+                  className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
                   Start {nextLevelConfig?.name ?? "Next Level"}
                 </button>
               ) : (
                 <button onClick={startDemo}
-                  className="rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
+                  className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
                   Restart Trail
                 </button>
               )}
-              <button onClick={() => startLevelById(currentLevelId)}
-                className="rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                Restart {currentLevelConfig.name}
-              </button>
+              {!nextLevelId && (
+                <button onClick={() => startLevelById(currentLevelId)}
+                  className="rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
+                  Restart {currentLevelConfig.name}
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -3734,9 +3736,9 @@ export default function App() {
 
       {/* GAME OVER SCREEN */}
       {gameOver && (
-        <section className="absolute inset-0 z-20 flex items-center justify-center px-6"
+        <section className="complete-overlay absolute inset-0 z-20 flex items-center justify-center px-6"
           style={{ background: "rgba(42,5,10,0.72)", backdropFilter: "blur(4px)" }}>
-          <div className="rounded-[2rem] p-10 text-center"
+          <div className="complete-card rounded-[2rem] p-10 text-center"
             style={{ background: "rgba(24,10,12,0.9)", border: "1px solid rgba(255,120,140,0.35)", boxShadow: "0 0 65px rgba(255,80,120,0.18)", maxHeight: "92vh", overflowY: "auto" }}>
             <div className="mb-4 text-6xl">⚠️</div>
             <h2 className="display-title text-4xl font-black text-red-100">The Herd Needs Rest</h2>
