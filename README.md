@@ -15,6 +15,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Removed the debug-like top section links and removed duplicate bottom **Back to Game** action; the panel now has one clear close action.
 - Replaced mixed-color audio pills with consistent ON/OFF toggles, simplified touch mode labels to **Automatic / Always Visible / Disabled**, and tightened controls copy into compact Desktop/Mobile blocks.
 - Restyled Save Tools actions to match the dark jungle glass theme and moved version/build text to a small muted footer.
+- Added a footer About message in Settings: **"Made with love for Georgia, by uncle Jed"** shown under the game title and above version info.
 
 ### Latest pause menu UX cleanup (2026-05-25)
 
