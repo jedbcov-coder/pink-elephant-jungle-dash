@@ -337,13 +337,6 @@ export default function App() {
   const gameStartTimeRef = useRef(null);
   const touchInputDetectedRef = useRef(false);
   const immersiveRequestedRef = useRef(false);
-
-  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
-    immersiveRequestedRef.current = true;
-    if (fromUserGesture) requestImmersiveMobileMode();
-    setImmersiveReady(true);
-  }, []);
-
   const pendingLevelStartRef = useRef(null);
 
   const [started, setStarted] = useState(false);
@@ -352,15 +345,6 @@ export default function App() {
   const [debug, setDebug] = useState(false);
   const [paused, setPaused] = useState(false);
   const [sceneError, setSceneError] = useState(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const media = window.matchMedia?.("(display-mode: standalone)");
-    const update = () => setIsStandaloneApp(Boolean(window.navigator.standalone) || Boolean(media?.matches));
-    update();
-    media?.addEventListener?.("change", update);
-    return () => media?.removeEventListener?.("change", update);
-  }, []);
   const [showSaveDebugTools, setShowSaveDebugTools] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsContext, setSettingsContext] = useState("title");
@@ -384,6 +368,13 @@ export default function App() {
   const profileSnapshotRef = useRef(null);
   const saveSystemReadyRef = useRef(false);
   const [saveSystemReady, setSaveSystemReady] = useState(false);
+
+  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
+    immersiveRequestedRef.current = true;
+    if (fromUserGesture) requestImmersiveMobileMode();
+    setImmersiveReady(true);
+  }, []);
+
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfigStrict(nextLevelId) : null;
@@ -555,6 +546,14 @@ export default function App() {
     return audioManagerRef.current?.startAudio() ?? null;
   }
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia?.("(display-mode: standalone)");
+    const update = () => setIsStandaloneApp(Boolean(window.navigator.standalone) || Boolean(media?.matches));
+    update();
+    media?.addEventListener?.("change", update);
+    return () => media?.removeEventListener?.("change", update);
+  }, []);
 
   useEffect(() => {
     activeLevelRef.current = buildLevelById(currentLevelId);
