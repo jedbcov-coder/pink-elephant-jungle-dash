@@ -30,6 +30,11 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 
 
+### Latest mobile reverse control safety update (2026-05-25)
+
+- Added reverse into the Charge joystick drag flow: while holding **Charge**, drag downward to back up, so players can recover quickly if blocked by a log or obstacle.
+- Kept the dedicated **Reverse** button too, so beginners have both a clear button and a gesture fallback.
+
 ### Latest mobile controls + HUD cleanup update (2026-05-25)
 
 - Charge is now a joystick-style touch pad: hold to charge, then drag left/right on the same button to steer.
