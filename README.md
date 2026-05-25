@@ -438,3 +438,10 @@ Notes:
 
 
 - Touch quick pause: tap/click center gameplay area to open pause menu with quick audio controls.
+
+## Verification snapshot (2026-05-25)
+
+- Confirmed from source logic that touch controls are only mounted during active gameplay (`isGameplayActive`) and therefore do not render over the title screen.
+- Confirmed `Touch: Always` mode forces touch controls visible during gameplay across desktop/laptop, touch 2-in-1, and phone/tablet layouts.
+- Confirmed keyboard input handling remains active and unchanged for gameplay input.
+- Ran `npm run test` and `npm run build` successfully.
