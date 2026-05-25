@@ -16,6 +16,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Reduced pause-screen clutter by replacing technical/debug-style text with a simple footer: **Press Esc or P to Resume**.
 - Kept all existing pause behavior and shortcuts; this change is layout/UX only.
 
+### Latest main menu clarity update (2026-05-25)
+
+- Start menu buttons are now always stacked vertically with **Begin the Trail** on top and **Settings** underneath on desktop, tablet, and mobile.
+- **Begin the Trail** is now wider as the primary action, while **Settings** is narrower as the secondary action.
+- Shortened the title description text and added more breathing room before the buttons.
+- Kept jungle art style and gameplay/settings logic unchanged; this pass is layout and visual hierarchy only.
 ### Latest touch controls default visibility update (2026-05-25)
 
 - Touch controls now default to **Always show** for fresh installs and for any player without a valid saved touch-controls setting.

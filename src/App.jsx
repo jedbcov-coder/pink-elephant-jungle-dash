@@ -3617,15 +3617,15 @@ export default function App() {
             <h1 className="display-title title-logo-main text-5xl font-black leading-tight text-pink-300 drop-shadow" style={{ letterSpacing: "0.015em" }}>Pink Elephant</h1>
             <h2 className="display-title title-logo-sub mt-1 text-3xl font-black text-amber-100" style={{ letterSpacing: "0.06em" }}>Jungle Dash</h2>
             <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-amber-50/75">
-              Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
+              Charge, jump, slide, and smash through the jungle. Watch for trail signs, dodge obstacles, collect fruit crates, and chase your best score.
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="hud-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
+            <div className="title-main-actions mt-7 flex flex-col items-center gap-3">
               <button onClick={startDemo}
-              className="rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
+              className="title-begin-action rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
               Begin the Trail
               </button>
+              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="title-settings-action hud-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
             </div>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
               {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Trunk Smash"], ["M", "Mute"]].map(([key, label]) => (

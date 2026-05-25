@@ -178,3 +178,23 @@ main.immersive-ready {
   .app-shell.layout-desktop .title-advanced-note,
   .app-shell.layout-desktop .title-selftest-note { display: none; }
 }
+
+/* Title menu hierarchy: keep primary/secondary actions vertically stacked on all screen sizes. */
+.title-main-actions {
+  margin-inline: auto;
+  width: min(100%, 20rem);
+}
+
+.title-begin-action {
+  width: clamp(17.5rem, 68vw, 20rem);
+  min-height: 3rem;
+}
+
+.title-settings-action {
+  width: clamp(13.75rem, 56vw, 16rem);
+  min-height: 3rem;
+}
+
+.title-selftest-note {
+  margin-top: 1rem;
+}
