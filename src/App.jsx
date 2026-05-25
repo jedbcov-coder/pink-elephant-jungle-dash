@@ -3546,6 +3546,16 @@ export default function App() {
                 <span ref={ui.fruitLife} className="hud-fruit-life-fill transition-all duration-150" />
               </span>
             </div>
+            <div className="hud-score-compact hud-panel-dark" title="Score from fruit, crates, pineapples, and monkeys">
+              <span className="hud-score-compact-label">Score</span>
+              <span className="hud-score-compact-value hud-gold-outline-text hud-gold-gradient-text" ref={ui.scoreTally}>0</span>
+              <div ref={ui.multiplierBadge}
+                className="hud-multiplier-badge hud-gold-outline-text hud-gold-gradient-text transition-all duration-200"
+                style={{ opacity: 0, transform: "scale(0.85)", color: "#ffd34a" }}>
+                1x COMBO
+              </div>
+              <div className="hud-crate-chip hud-panel-dark" title="Crates smashed">📦 <span ref={ui.cratesTally}>0</span></div>
+            </div>
           </div>
           <div className="hud-right-cluster">
             <div className="hud-timer-pill flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black text-amber-100">
@@ -3574,21 +3584,6 @@ export default function App() {
         </>
       )}
 
-      {started && !complete && !gameOver && (
-        <div className="hud-top-left-score pointer-events-none absolute z-20">
-          <div className="hud-score-stack" title="Score from fruit, crates, pineapples, and monkeys">
-            <span className="hud-score-label">Score</span>
-            <span className="hud-score-emphasis hud-gold-outline-text hud-gold-gradient-text" ref={ui.scoreTally}>0</span>
-          </div>
-          <div ref={ui.multiplierBadge}
-              className="hud-multiplier-badge hud-gold-outline-text hud-gold-gradient-text transition-all duration-200"
-              style={{ opacity: 0, transform: "scale(0.85)", color: "#ffd34a" }}>
-              1x COMBO
-            </div>
-          <div className="hud-crate-chip hud-panel-dark" title="Crates smashed">📦 <span ref={ui.cratesTally}>0</span></div>
-        </div>
-      )}
-
       {/* SIDE HUD PANELS — energy + depth */}
       {started && !complete && !gameOver && (
         <div className="hud-side-panels-row hud-safe-inline pointer-events-none absolute left-3 right-3 top-12 z-20">
@@ -3599,30 +3594,8 @@ export default function App() {
             <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <div ref={ui.health} className="h-full w-full rounded-full transition-all duration-150" />
             </div>
-            <div className="my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-            <div className="hud-charge-row mb-1 flex items-center justify-between">
-              <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
-                <Icon label="⬆" size={12} /> Charge
-              </span>
-              <span ref={ui.chargeText} className="text-[10px] font-black text-fuchsia-200">0%</span>
-            </div>
-            <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div ref={ui.charge} className="h-full w-0 rounded-full transition-all duration-75"
-                style={{ background: "linear-gradient(90deg, #ec4899, #d946ef)" }} />
-            </div>
-            <div className="mt-3 flex justify-center">
-              <span ref={ui.stateBadge} className="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-widest transition-all duration-150"
-                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.35)" }}>
-                Ready
-              </span>
-            </div>
-            {/* Momentum label */}
-            <div className="mt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.5rem" }}>
-              <div ref={ui.momentumLabel}
-                className="text-center text-[9px] font-black uppercase tracking-[0.22em] transition-colors duration-300"
-                style={{ color: "rgba(255,255,255,0.4)" }}>
-                READY TO CHARGE
-              </div>
+            <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/50">
+              Keep energy up to absorb bumps.
             </div>
           </div>
 
