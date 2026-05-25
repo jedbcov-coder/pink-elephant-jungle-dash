@@ -90,6 +90,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Startup flow now logs a single boot message in the browser console: `Pink Elephant version: [version] | [build label] | [update note]`, sourced from `src/appInfo.js` for one clear release marker per app load.
 - Updated the title-screen deployment marker source (`src/appInfo.js`) to keep one authoritative Version/Build/Update export set, plus a maintainer note to bump it for every visible deployment (especially GitHub Pages publishes).
 - Title-screen status marker update: replaced the player-visible self-test summary text with three compact build lines (**Version**, **Build**, **Update**) so the title area keeps a subtle release/status indicator without looking like gameplay HUD.
 - Level-complete overlay mobile-fit pass: added compact phone-landscape result card sizing (smaller trophy/title/text/stats spacing), removed complete-card scrolling on short landscape phones, and kept the next-level primary button visible without scrolling.

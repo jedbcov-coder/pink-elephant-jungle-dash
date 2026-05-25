@@ -7,9 +7,15 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
+import { APP_BUILD_LABEL, APP_UPDATE_NOTE, APP_VERSION } from "./appInfo.js";
 import { setupServiceWorkerUpdatePrompt } from "./pwa/setupServiceWorkerUpdatePrompt.js";
 import "./styles.css";
 import "./styles/game-ui.css";
+
+if (!window.__PEJD_BOOT__.versionLogged) {
+  console.info(`Pink Elephant version: ${APP_VERSION} | ${APP_BUILD_LABEL} | ${APP_UPDATE_NOTE}`);
+  window.__PEJD_BOOT__.versionLogged = true;
+}
 
 class AppErrorBoundary extends React.Component {
   constructor(props) {
