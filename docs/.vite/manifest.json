@@ -1,11 +1,45 @@
 {
+  "_react-B0ZntvhZ.js": {
+    "file": "assets/react-B0ZntvhZ.js",
+    "name": "react",
+    "imports": [
+      "_rolldown-runtime-jpDsebLB.js"
+    ]
+  },
+  "_rolldown-runtime-jpDsebLB.js": {
+    "file": "assets/rolldown-runtime-jpDsebLB.js",
+    "name": "rolldown-runtime"
+  },
+  "_three-C85b3rFv.js": {
+    "file": "assets/three-C85b3rFv.js",
+    "name": "three"
+  },
   "index.html": {
-    "file": "assets/index-jPzOw9aO.js",
+    "file": "assets/index-CNomub3G.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-jpDsebLB.js",
+      "_react-B0ZntvhZ.js"
+    ],
+    "dynamicImports": [
+      "src/App.jsx"
+    ],
     "css": [
-      "assets/index-gRpudRsU.css"
+      "assets/index-B-UHGVay.css"
+    ]
+  },
+  "src/App.jsx": {
+    "file": "assets/App-CCa5zmPt.js",
+    "name": "App",
+    "src": "src/App.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-jpDsebLB.js",
+      "index.html",
+      "_react-B0ZntvhZ.js",
+      "_three-C85b3rFv.js"
     ]
   }
 }
