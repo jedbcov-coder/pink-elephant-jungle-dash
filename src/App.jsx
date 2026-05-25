@@ -771,6 +771,36 @@ export default function App() {
     setKeyState(keyRef.current, code, isPressed);
   }
 
+  function releaseTouchInputs() {
+    setKeyState(keyRef.current, "ArrowUp", false);
+    setKeyState(keyRef.current, "ArrowLeft", false);
+    setKeyState(keyRef.current, "ArrowRight", false);
+    setKeyState(keyRef.current, "Space", false);
+    setKeyState(keyRef.current, "KeyF", false);
+  }
+
+  useEffect(() => {
+    if (!started || paused || complete || gameOver || settingsOpen) {
+      releaseTouchInputs();
+    }
+  }, [started, paused, complete, gameOver, settingsOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const release = () => releaseTouchInputs();
+    const releaseOnVisibility = () => {
+      if (document.visibilityState !== "visible") releaseTouchInputs();
+    };
+    window.addEventListener("blur", release);
+    window.addEventListener("pagehide", release);
+    document.addEventListener("visibilitychange", releaseOnVisibility);
+    return () => {
+      window.removeEventListener("blur", release);
+      window.removeEventListener("pagehide", release);
+      document.removeEventListener("visibilitychange", releaseOnVisibility);
+    };
+  }, []);
+
   function applyAudioState(nextState) {
     const normalized = normalizeAudioState(nextState);
     audioManagerRef.current?.setAudioState(normalized);
@@ -3601,7 +3631,11 @@ export default function App() {
       )}
 
       {started && !complete && !gameOver && (
-        <TouchControls visible={touchControlsVisible} onControlChange={handleTouchControlChange} />
+        <TouchControls
+          visible={touchControlsVisible}
+          disabled={!started || paused || complete || gameOver || settingsOpen}
+          onControlChange={handleTouchControlChange}
+        />
       )}
 
       {import.meta.env.DEV && layoutMode === "phone-landscape" && (

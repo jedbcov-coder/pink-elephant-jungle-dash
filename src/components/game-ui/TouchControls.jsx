@@ -1,24 +1,44 @@
-import React, { useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
-const RUN_CONTROL_BUTTON = { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" };
-
-const MOVEMENT_CLUSTER_BUTTONS = [
+const LEFT_CLUSTER_BUTTONS = [
+  { code: "ArrowUp", label: "Charge", icon: "CHARGE", hint: "Hold", style: "badge" },
   { code: "ArrowLeft", label: "Left", icon: "◀", hint: "Steer" },
   { code: "ArrowRight", label: "Right", icon: "▶", hint: "Steer" },
 ];
 
-const ACTION_CLUSTER_BUTTONS = [
-  { code: "Space", label: "JumpSlide", icon: "⤒↧", hint: "Tap/Hold" },
-  { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" },
-  { code: "KeyF", label: "Smash", icon: "💥", hint: "Hit" },
+const RIGHT_CLUSTER_BUTTONS = [
+  { code: "Space", label: "Jump", icon: "⤒", hint: "Tap" },
+  { code: "KeyF", label: "SmashSlide", icon: "💥", hint: "Tap/Hold" },
 ];
 
-export function TouchControls({ visible, onControlChange }) {
+const BUTTON_LABELS = {
+  Charge: "Hold to charge forward",
+  Left: "Move left",
+  Right: "Move right",
+  Jump: "Jump",
+  SmashSlide: "Smash or hold to slide",
+};
+
+export function TouchControls({ visible, disabled, onControlChange }) {
   if (!visible) return null;
 
   const activePointersByCodeRef = useRef(new Map());
 
+  const releaseAll = useCallback(() => {
+    for (const [code] of activePointersByCodeRef.current.entries()) {
+      onControlChange(code, false);
+    }
+    activePointersByCodeRef.current.clear();
+  }, [onControlChange]);
+
+  useEffect(() => {
+    if (disabled) releaseAll();
+  }, [disabled, releaseAll]);
+
+  useEffect(() => () => releaseAll(), [releaseAll]);
+
   const addPointerPress = (code, pointerId) => {
+    if (disabled) return;
     const activePointers = activePointersByCodeRef.current.get(code) ?? new Set();
     activePointers.add(pointerId);
     activePointersByCodeRef.current.set(code, activePointers);
@@ -57,13 +77,15 @@ export function TouchControls({ visible, onControlChange }) {
 
   return (
     <div className="touch-controls mobile-controls" aria-label="Touch game controls">
-      <div className="mobile-run-control" aria-label="Run control">
-        {[RUN_CONTROL_BUTTON, ...MOVEMENT_CLUSTER_BUTTONS].map(({ code, label, icon, hint }) => (
+      <div className="mobile-left-cluster" aria-label="Movement and charge controls">
+        {LEFT_CLUSTER_BUTTONS.map(({ code, label, icon, hint, style }) => (
           <div key={`${code}-${label}`} className="touch-control-hitbox">
           <button
             type="button"
-            className={`touch-control-button touch-control-${label.toLowerCase()}`}
-            aria-label={`${label} control`}
+            className={`touch-control-button touch-control-${label.toLowerCase()} ${style === "badge" ? "touch-control-badge" : ""}`.trim()}
+            aria-label={BUTTON_LABELS[label]}
+            title={BUTTON_LABELS[label]}
+            disabled={disabled}
             onContextMenu={(event) => event.preventDefault()}
             onPointerDown={(event) => handlePointerDown(event, code)}
             onPointerUp={(event) => handlePointerUp(event, code)}
@@ -77,13 +99,15 @@ export function TouchControls({ visible, onControlChange }) {
           </div>
         ))}
       </div>
-      <div className="mobile-action-cluster" aria-label="Movement and action controls">
-        {ACTION_CLUSTER_BUTTONS.map(({ code, label, icon, hint }) => (
+      <div className="mobile-right-cluster" aria-label="Action controls">
+        {RIGHT_CLUSTER_BUTTONS.map(({ code, label, icon, hint }) => (
         <div key={`${code}-${label}`} className="touch-control-hitbox">
         <button
           type="button"
           className={`touch-control-button touch-control-${label.toLowerCase()}`}
-          aria-label={`${label} control`}
+          aria-label={BUTTON_LABELS[label]}
+          title={BUTTON_LABELS[label]}
+          disabled={disabled}
           onContextMenu={(event) => event.preventDefault()}
           onPointerDown={(event) => handlePointerDown(event, code)}
           onPointerUp={(event) => handlePointerUp(event, code)}

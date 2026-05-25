@@ -1366,7 +1366,7 @@ button:disabled {
 }
 
 
-.mobile-run-control {
+.mobile-left-cluster {
   --mobile-edge-left: max(12px, env(safe-area-inset-left, 0px));
   --mobile-edge-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   position: absolute;
@@ -1377,13 +1377,47 @@ button:disabled {
   min-height: clamp(84px, 12vw, 112px);
 }
 
+
+.mobile-left-cluster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(clamp(56px, 8.5vw, 84px), 1fr));
+  gap: clamp(10px, 1.8vw, 16px);
+}
+
+.mobile-left-cluster .touch-control-hitbox:first-child {
+  grid-column: 1 / span 2;
+  justify-content: center;
+}
+
+.mobile-right-cluster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(10px, 1.8vw, 16px);
+}
+
+.touch-control-badge {
+  border-radius: 999px;
+  min-width: clamp(84px, 12vw, 112px);
+  min-height: clamp(84px, 12vw, 112px);
+  border: 2px solid rgba(255, 219, 97, 0.78);
+}
+
+.touch-control-button:focus-visible {
+  outline: 3px solid rgba(167, 243, 208, 0.95);
+  outline-offset: 2px;
+}
+
+.touch-control-button:disabled {
+  opacity: 0.45;
+  transform: none;
+}
 @media (display-mode: standalone) {
   .app-shell {
     min-height: 100dvh;
   }
 }
 
-.mobile-action-cluster {
+.mobile-right-cluster {
   --mobile-edge-right: max(12px, env(safe-area-inset-right, 0px));
   --mobile-edge-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   position: absolute;
@@ -1394,7 +1428,7 @@ button:disabled {
   gap: clamp(12px, 1.8vw, 16px);
 }
 
-.mobile-action-cluster button {
+.mobile-right-cluster button {
   width: clamp(56px, 8.5vw, 84px);
   min-width: clamp(56px, 8.5vw, 84px);
   min-height: clamp(56px, 8.5vw, 84px);
@@ -1402,7 +1436,7 @@ button:disabled {
 
 /* Tablet landscape tier: keep the same thumb layout, but slightly larger controls and spacing. */
 @media (min-width: 768px) and (max-width: 1199px) and (orientation: landscape) and (pointer: coarse) {
-  .mobile-run-control {
+  .mobile-left-cluster {
     --mobile-edge-left: max(16px, env(safe-area-inset-left, 0px));
     --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
     width: clamp(92px, 11vw, 120px);
@@ -1410,14 +1444,14 @@ button:disabled {
     min-height: clamp(92px, 11vw, 120px);
   }
 
-  .mobile-action-cluster {
+  .mobile-right-cluster {
     --mobile-edge-right: max(16px, env(safe-area-inset-right, 0px));
     --mobile-edge-bottom: max(16px, env(safe-area-inset-bottom, 0px));
     grid-template-columns: repeat(2, minmax(clamp(62px, 8.2vw, 92px), 1fr));
     gap: clamp(12px, 1.6vw, 18px);
   }
 
-  .mobile-action-cluster button {
+  .mobile-right-cluster button {
     width: clamp(62px, 8.2vw, 92px);
     min-width: clamp(62px, 8.2vw, 92px);
     min-height: clamp(62px, 8.2vw, 92px);
@@ -1518,19 +1552,13 @@ button:disabled {
 }
 
 .touch-control-jump {
-  grid-area: jump;
   background:
     radial-gradient(circle at 36% 22%, rgba(255, 244, 201, 0.24), transparent 34%),
     rgba(93, 36, 76, 0.84);
   border-color: rgba(244, 114, 182, 0.58);
 }
 
-.touch-control-slide {
-  grid-area: slide;
-}
-
-.touch-control-smash {
-  grid-area: smash;
+.touch-control-smashslide {
   background:
     radial-gradient(circle at 36% 22%, rgba(255, 244, 201, 0.22), transparent 34%),
     rgba(105, 52, 14, 0.84);
@@ -1581,12 +1609,12 @@ button:disabled {
 }
 
 @media (orientation: landscape) and (max-width: 932px) and (max-height: 520px) {
-  .layout-phone-landscape .mobile-run-control {
+  .layout-phone-landscape .mobile-left-cluster {
     left: max(14px, env(safe-area-inset-left, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
-  .layout-phone-landscape .mobile-action-cluster {
+  .layout-phone-landscape .mobile-right-cluster {
     right: max(14px, env(safe-area-inset-right, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
     gap: clamp(10px, 1.2vw, 14px);
@@ -1644,19 +1672,19 @@ button:disabled {
     font-size: clamp(0.7rem, 1.6vw, 1rem);
   }
 
-  .layout-phone-landscape .mobile-run-control {
+  .layout-phone-landscape .mobile-left-cluster {
     position: absolute;
     left: max(14px, env(safe-area-inset-left, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
-  .layout-phone-landscape .mobile-run-control button {
+  .layout-phone-landscape .mobile-left-cluster button {
     width: clamp(72px, 11vw, 96px);
     height: clamp(72px, 11vw, 96px);
     border-radius: 24px;
   }
 
-  .layout-phone-landscape .mobile-action-cluster {
+  .layout-phone-landscape .mobile-right-cluster {
     position: absolute;
     right: max(14px, env(safe-area-inset-right, 0px));
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
@@ -1865,11 +1893,11 @@ button:disabled {
   visibility: visible !important;
   pointer-events: none;
 }
-.layout-phone-landscape .mobile-run-control {
+.layout-phone-landscape .mobile-left-cluster {
   left: calc(var(--hud-safe-left) + 0.42rem);
   bottom: calc(var(--hud-safe-bottom) + 0.42rem);
 }
-.layout-phone-landscape .mobile-action-cluster {
+.layout-phone-landscape .mobile-right-cluster {
   right: calc(var(--hud-safe-right) + 0.42rem);
   bottom: calc(var(--hud-safe-bottom) + 0.42rem);
 }
