@@ -3485,7 +3485,7 @@ export default function App() {
             <div className="hud-control-row pointer-events-auto">
               <button
                 type="button"
-                className="hud-gold-frame-button hud-settings-button"
+                className="hud-settings-button hud-settings-icon-button"
                 onClick={() => setPausedState(true)}
                 aria-label="Pause game and open settings"
                 title="Pause / Settings"
