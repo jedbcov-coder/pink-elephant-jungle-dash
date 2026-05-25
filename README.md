@@ -8,6 +8,13 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+
+### Latest PWA device-fit update (2026-05-25)
+
+- Fixed a production build blocker by removing duplicate app version exports, so deployment builds can complete again.
+- Improved mobile accessibility and cross-device behavior by updating the viewport meta tag to allow better browser-managed zoom behavior and keyboard-safe resizing (`interactive-widget=resizes-content`).
+- Bumped deployment marker to `1.0.3 / docs-pwa-device-fit-2026-05-25` with update note `build fix and viewport accessibility tune`.
+
 ### Latest stabilisation update (2026-05-25)
 
 - Tablet polish pass: rotate overlay now says “phone or tablet” for clearer portrait guidance, tablet-landscape touch controls are slightly larger for easier taps, display settings now label **Balanced** as **Recommended for Tablets**, and tablet prompt positioning was raised to reduce overlap with bottom controls on medium tablets.
