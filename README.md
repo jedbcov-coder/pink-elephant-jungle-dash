@@ -36,7 +36,7 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ### Latest desktop-layout repair
 
-- Start screen desktop/laptop scaling pass: title card now uses short-height responsive sizing, wider landscape fit, tighter spacing, and keeps **Settings** + **Begin the Trail** visible at normal browser zoom; on short-height desktop/laptop viewports, full controls/help cards are hidden and replaced by the concise tip/self-test line.
+- Start screen desktop/laptop scaling pass: title card now uses short-height responsive sizing, wider landscape fit, tighter spacing, and keeps **Settings** + **Begin the Trail** visible at normal browser zoom; on short-height desktop/laptop viewports, full controls/help cards are hidden and replaced by a concise status/tip line.
 - Restored desktop/laptop UI after mobile HUD regression: tightened phone-landscape CSS scoping, added explicit desktop/tablet guard rules, removed title-card internal scrolling on larger layouts, and reinforced the title Settings button contrast states so desktop visuals remain polished while mobile foundation classes stay available for future work.
 
 ### Latest HUD update
@@ -52,6 +52,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Reduced settings button size for phone-landscape and moved/shrunk prompt lower so it stays out of the elephant path and clear of thumb controls.
 - Forced phone-landscape touch controls to render visible at gameplay start (no extra touch needed), and raised their z-index over HUD layers.
 - Hid the dashed safe-frame in phone-landscape by default (treated as non-gameplay debug/decorative chrome).
+
+
+## Features
+
+- The title screen now shows three deployment labels: **Version / Build / Update**.
+- When the app starts, the DevTools console prints the same line for quick deployment verification.
 
 ## New: Device profile blueprint
 
