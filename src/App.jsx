@@ -549,7 +549,7 @@ export default function App() {
     const phoneLikeQuery = window.matchMedia("(max-width: 900px)");
     const wideDesktopQuery = window.matchMedia("(min-width: 1200px) and (hover: hover) and (pointer: fine)");
     const updateVisibility = () => {
-      if (touchControlsMode === "on") {
+      if (touchControlsMode === "on" || touchControlsMode === "always") {
         setTouchControlsVisible(true);
         return;
       }
@@ -603,7 +603,7 @@ export default function App() {
     if (!gameplayActive) return;
     if (layoutMode !== "phone-landscape") return;
 
-    if (touchControlsMode === "on" || touchControlsMode === "auto") {
+    if (touchControlsMode === "on" || touchControlsMode === "always" || touchControlsMode === "auto") {
       touchInputDetectedRef.current = true;
       setTouchControlsVisible(true);
     }
