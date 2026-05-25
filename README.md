@@ -13,6 +13,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Kept the key start-screen elements visible: title, description, **Settings**, **Begin the Trail**, and version/build marker.
 - No touch-control or gameplay logic was changed in this pass.
 
+### Latest short-height desktop scope safety update
+
+- Reviewed layout-mode detection in `src/App.jsx` and confirmed `phone-landscape` is assigned only to true phone-size landscape viewports.
+- Scoped short-height title-screen CSS rules in `src/styles.css` to `.app-shell.layout-desktop` so those compact desktop tweaks cannot leak into phone-landscape layouts.
+- Preserved existing phone-landscape behavior and controls/HUD visibility paths.
+
 ### Latest short-height desktop compact spacing pass
 
 - Tightened short-height desktop/laptop title layout with smaller card padding, tighter top badge spacing, and reduced section/control gaps to keep key actions visible on shorter screens.
