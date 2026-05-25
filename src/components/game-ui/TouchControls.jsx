@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 
 // Left cluster now uses a single charge pad with drag steering (joystick-like).
 const LEFT_CLUSTER_BUTTONS = [
-  { code: "ArrowUp", label: "Charge", icon: "CHARGE", hint: "Hold + drag", style: "joystick" },
+  { code: "ArrowUp", label: "Charge", icon: "CHARGE", hint: "Hold + drag (down = reverse)", style: "joystick" },
   { code: "ArrowDown", label: "Reverse", icon: "↩", hint: "Back up", style: "reverse" },
 ];
 
@@ -25,6 +25,7 @@ export function TouchControls({ visible, disabled, onControlChange }) {
   const activePointersByCodeRef = useRef(new Map());
   const chargeSteerPointerRef = useRef(null);
   const chargeSteerDirectionRef = useRef(0);
+  const chargeReverseRef = useRef(false);
 
   const releaseAll = useCallback(() => {
     for (const [code] of activePointersByCodeRef.current.entries()) {
@@ -33,8 +34,10 @@ export function TouchControls({ visible, disabled, onControlChange }) {
     activePointersByCodeRef.current.clear();
     chargeSteerPointerRef.current = null;
     chargeSteerDirectionRef.current = 0;
+    chargeReverseRef.current = false;
     onControlChange("ArrowLeft", false);
     onControlChange("ArrowRight", false);
+    onControlChange("ArrowDown", false);
   }, [onControlChange]);
 
   useEffect(() => {
@@ -68,10 +71,18 @@ export function TouchControls({ visible, disabled, onControlChange }) {
     const centerX = controlRect.left + controlRect.width / 2;
     const offsetX = event.clientX - centerX;
     const deadZone = Math.max(18, controlRect.width * 0.14);
+    const centerY = controlRect.top + controlRect.height / 2;
+    const offsetY = event.clientY - centerY;
 
     let nextDirection = 0;
     if (offsetX < -deadZone) nextDirection = -1;
     if (offsetX > deadZone) nextDirection = 1;
+
+    const shouldReverse = offsetY > deadZone;
+    if (chargeReverseRef.current !== shouldReverse) {
+      onControlChange("ArrowDown", shouldReverse);
+      chargeReverseRef.current = shouldReverse;
+    }
 
     const previousDirection = chargeSteerDirectionRef.current;
     if (previousDirection === nextDirection) return;
@@ -106,7 +117,9 @@ export function TouchControls({ visible, disabled, onControlChange }) {
       chargeSteerPointerRef.current = null;
       if (chargeSteerDirectionRef.current === -1) onControlChange("ArrowLeft", false);
       if (chargeSteerDirectionRef.current === 1) onControlChange("ArrowRight", false);
+      if (chargeReverseRef.current) onControlChange("ArrowDown", false);
       chargeSteerDirectionRef.current = 0;
+      chargeReverseRef.current = false;
     }
   };
   const handlePointerCancel = (event, code) => {
@@ -117,7 +130,9 @@ export function TouchControls({ visible, disabled, onControlChange }) {
       chargeSteerPointerRef.current = null;
       if (chargeSteerDirectionRef.current === -1) onControlChange("ArrowLeft", false);
       if (chargeSteerDirectionRef.current === 1) onControlChange("ArrowRight", false);
+      if (chargeReverseRef.current) onControlChange("ArrowDown", false);
       chargeSteerDirectionRef.current = 0;
+      chargeReverseRef.current = false;
     }
   };
 
