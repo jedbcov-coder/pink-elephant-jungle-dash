@@ -69,6 +69,7 @@ const nl = String.fromCharCode(10);
 // Development-only helper: turn this on locally to inspect generated texture canvases.
 const SHOW_TEXTURE_PREVIEW = false;
 const JUNGLE_LAYOUT_SEED = 0x5eed2026;
+const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
 
 const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
 const TOUCH_CONTROLS_MODES = ["always", "auto", "off"];
@@ -324,6 +325,7 @@ export default function App() {
   const keyRef = useRef(createKeys());
   const startedRef = useRef(false);
   const completeRef = useRef(false);
+  const completeScreenOpenedAtRef = useRef(0);
   const gameOverRef = useRef(false);
   const debugRef = useRef(false);
   const pausedRef = useRef(false);
@@ -774,6 +776,10 @@ export default function App() {
       return;
     }
     setKeyState(keyRef.current, code, isPressed);
+  }
+
+  function isCompleteScreenInputLocked() {
+    return performance.now() - completeScreenOpenedAtRef.current < COMPLETE_SCREEN_INPUT_LOCK_MS;
   }
 
   function releaseTouchInputs() {
@@ -2547,7 +2553,11 @@ export default function App() {
         const results = snapshotResults();
         setFinalResults(results);
         setPausedState(false);
-          setGameOver(true);
+        keyRef.current = createKeys();
+        releaseTouchInputs();
+        completeScreenOpenedAtRef.current = performance.now();
+        console.debug("[complete-screen-opened] game-over overlay opened", { at: completeScreenOpenedAtRef.current });
+        setGameOver(true);
       }
     }
 
@@ -2574,6 +2584,10 @@ export default function App() {
       playTone("gate");
       setFinalResults(results);
       setShowFinalReward(!hasNextLevel);
+      keyRef.current = createKeys();
+      releaseTouchInputs();
+      completeScreenOpenedAtRef.current = performance.now();
+      console.debug("[complete-screen-opened] complete overlay opened", { at: completeScreenOpenedAtRef.current });
       setComplete(true);
     }
 
@@ -3477,6 +3491,24 @@ export default function App() {
     setCurrentLevelId(levelId);
   };
 
+  function handleCompleteActionKeyDown(event) {
+    if (!["Enter", " ", "Spacebar"].includes(event.key)) return;
+    if (!isCompleteScreenInputLocked()) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function handleContinueClick(event, action, tag) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isCompleteScreenInputLocked()) {
+      console.debug("[complete-action-blocked] action blocked during lock", { tag });
+      return;
+    }
+    console.debug(tag);
+    action();
+  }
+
   return (
     <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} ${touchControlsVisible ? "touch-controls-active" : ""} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
       <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
@@ -3694,15 +3726,18 @@ export default function App() {
             </div>
             <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
               {hasNextLevel ? (
-                <button onClick={() => startLevelById(nextLevelId)}
-                  disabled={isLevelTransitioning}
+                <button onClick={(event) => handleContinueClick(event, () => startLevelById(nextLevelId), "[continue-clicked]")}
+                  onKeyDown={handleCompleteActionKeyDown}
+                  disabled={isLevelTransitioning || isCompleteScreenInputLocked()}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
-                  Continue to {nextLevelConfig?.name ?? "Next Level"}
+                  {isCompleteScreenInputLocked() ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
                 </button>
               ) : (
-                <button onClick={startDemo}
+                <button onClick={(event) => handleContinueClick(event, startDemo, "[continue-clicked]")}
+                  onKeyDown={handleCompleteActionKeyDown}
+                  disabled={isCompleteScreenInputLocked()}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  Restart the Trail
+                  {isCompleteScreenInputLocked() ? "Get Ready..." : "Restart the Trail"}
                 </button>
               )}
             </div>
@@ -3728,9 +3763,11 @@ export default function App() {
               <span>🐘 <span>{finalResults?.lives ?? 0}</span></span>
               <span>⏱ <span>{formatElapsed(finalResults?.elapsedMs ?? 0)}</span></span>
             </div>
-            <button onClick={startDemo}
+            <button onClick={(event) => handleContinueClick(event, startDemo, "[continue-clicked]")}
+              onKeyDown={handleCompleteActionKeyDown}
+              disabled={isCompleteScreenInputLocked()}
               className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              Try Again
+              {isCompleteScreenInputLocked() ? "Get Ready..." : "Try Again"}
             </button>
           </div>
         </section>

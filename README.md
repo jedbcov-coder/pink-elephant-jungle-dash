@@ -9,6 +9,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 
 
+### Latest completion/game-over input lock update (2026-05-25)
+
+- Added a short 900ms input lock when the **Level Complete** or **Game Over** overlay opens to prevent accidental instant button activation from stale keyboard/touch input.
+- During the lock window, primary actions now show **Get Ready...**, are disabled, and block Enter/Space activation; after unlock they restore normal labels and behavior.
+- Added temporary debug logs for overlay open, blocked action clicks, and accepted continue/restart actions.
+
+
 ### Latest level transition stability fix (2026-05-25)
 
 - Fixed a level progression bug where pressing **Continue** after Level 1 could repeatedly trigger completion and skip playable runs.
