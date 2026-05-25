@@ -264,12 +264,10 @@ function getSafeElapsedMs(startTime, now = performance.now()) {
   return Math.max(0, now - safeStartTime);
 }
 
-function StatusMarker({ summaryRef }) {
+function StatusMarker() {
   useEffect(() => {
     const results = runSelfTests();
     const passCount = results.filter((r) => r.pass).length;
-    const nextSummary = `${passCount}/${results.length} self-tests passed`;
-    summaryRef.current = nextSummary;
     if (passCount !== results.length) {
       const failedResults = results.filter((result) => !result.pass).map((result) => ({
         test: result.name,
@@ -282,7 +280,7 @@ function StatusMarker({ summaryRef }) {
       console.table(failedResults);
       console.groupEnd();
     }
-  }, [summaryRef]);
+  }, []);
 
   return (
     <div className="mt-4 space-y-0.5 text-[10px] font-semibold tracking-wide text-emerald-100/45" aria-label="Build status marker">
@@ -3707,7 +3705,7 @@ export default function App() {
             <div className="title-advanced-note mx-auto mt-3 rounded-full px-4 py-2 text-center text-[11px] font-bold tracking-wide text-emerald-100/50">
               Trail markings telegraph hazards early; smash crates for score streaks without covering the road.
             </div>
-            <div className="title-selftest-note"><StatusMarker summaryRef={testSummaryRef} /></div>
+            <div className="title-selftest-note"><StatusMarker /></div>
           </div>
         </section>
       )}

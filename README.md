@@ -90,6 +90,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Title-screen status marker now keeps Version/Build/Update lines only, while self-test pass counts remain console/debug-only (no player-facing pass counter).
 - Startup flow now logs a single boot message in the browser console: `Pink Elephant version: [version] | [build label] | [update note]`, sourced from `src/appInfo.js` for one clear release marker per app load.
 - Updated the title-screen deployment marker source (`src/appInfo.js`) to keep one authoritative Version/Build/Update export set, plus a maintainer note to bump it for every visible deployment (especially GitHub Pages publishes).
 - Title-screen status marker update: replaced the player-visible self-test summary text with three compact build lines (**Version**, **Build**, **Update**) so the title area keeps a subtle release/status indicator without looking like gameplay HUD.
