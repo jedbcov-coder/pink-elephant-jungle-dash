@@ -82,9 +82,9 @@ export function SettingsPanel({
           <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile:</strong> Hold Charge and drag left or right to steer, then use Jump and Smash.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              ["auto", "Touch: Auto"],
-              ["always", "Touch: Always"],
-              ["off", "Touch: Off"],
+              ["always", "Always show"],
+              ["auto", "Auto"],
+              ["off", "Off"],
             ].map(([value, label]) => (
               <button
                 key={value}
@@ -101,7 +101,7 @@ export function SettingsPanel({
               </button>
             ))}
           </div>
-          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: touch layouts show buttons; desktop layout keeps keyboard focus.</p>
+          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: touch layouts show buttons. Always show keeps controls visible during gameplay on all layouts.</p>
           <p className="mt-1 text-xs text-emerald-100/50">Always mode keeps touch buttons visible everywhere.</p>
           <p className="mt-1 text-xs text-emerald-100/50">Tip: Play in landscape on phones.</p>
         </div>

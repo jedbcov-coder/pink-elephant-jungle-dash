@@ -14,6 +14,17 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - **Begin the Trail** is now wider as the primary action, while **Settings** is narrower as the secondary action.
 - Shortened the title description text and added more breathing room before the buttons.
 - Kept jungle art style and gameplay/settings logic unchanged; this pass is layout and visual hierarchy only.
+### Latest touch controls default visibility update (2026-05-25)
+
+- Touch controls now default to **Always show** for fresh installs and for any player without a valid saved touch-controls setting.
+- Legacy saved value **on** now maps to **always**; invalid saved values also fall back to **always**.
+- During active gameplay, **Always show** now keeps touch controls visible immediately on desktop/laptop, 2-in-1, tablet landscape, phone landscape, and installed PWA layouts.
+- Added a gameplay-start console log: `Touch controls mode: [mode], visible: [true/false], layout: [layoutMode]` for quick verification.
+### Latest level progression + final reward flow update (2026-05-25)
+
+- Level completion flow is now linear and clear: Level 1 only shows **Continue to Sunset Temple Run**, Level 2 only shows **Continue to Night Run**.
+- Completing Level 3 now shows a final reward ending panel with a media placeholder area for future animation/video.
+- After the final reward panel, players get one clear action: **Restart the Trail**, which restarts from Level 1.
 
 ### Latest mobile readability update (2026-05-25)
 

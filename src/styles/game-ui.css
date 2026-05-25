@@ -2615,3 +2615,21 @@ button:disabled {
     padding: clamp(0.7rem, 0.95vh + 0.3rem, 1.05rem);
   }
 }
+
+.final-reward-screen {
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.layout-phone-landscape .final-reward-screen {
+  margin-top: 0.42rem !important;
+  padding: 0.38rem 0.5rem;
+}
+
+.layout-phone-landscape .reward-media-placeholder {
+  margin-top: 0.3rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.58rem;
+  line-height: 1.2;
+}
