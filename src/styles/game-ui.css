@@ -2363,6 +2363,23 @@ button:disabled {
 
 
 /* Touch-capable tablet/laptop fullscreen HUD: medium density, keep center lane clear. */
+
+.layout-tablet-landscape .mobile-left-cluster,
+.layout-tablet-landscape .mobile-right-cluster {
+  gap: clamp(12px, 2vw, 18px);
+}
+
+.layout-tablet-landscape .touch-control-hitbox {
+  margin: -8px;
+  padding: 8px;
+}
+
+.layout-tablet-landscape .touch-control-badge,
+.layout-tablet-landscape .touch-control-button {
+  min-width: clamp(94px, 13vw, 122px);
+  min-height: clamp(94px, 13vw, 122px);
+}
+
 .layout-tablet-landscape .hud-top-left-score {
   top: calc(var(--hud-safe-top) + 3.9rem);
   left: calc(0.9rem + var(--hud-safe-left));
@@ -2384,7 +2401,7 @@ button:disabled {
 .layout-tablet-landscape .hud-primary-panel { flex-basis: 13.5rem; max-width: 14rem; padding: 0.62rem 0.72rem; }
 .layout-tablet-landscape .hud-secondary-panel { flex-basis: 11rem; max-width: 11.8rem; padding: 0.62rem 0.72rem; }
 .layout-tablet-landscape .hud-secondary-panel .text-2xl { font-size: 1.38rem; }
-.layout-tablet-landscape .hud-prompt-layer { bottom: calc(0.5rem + var(--hud-safe-bottom)); width: min(62vw, 23rem); }
+.layout-tablet-landscape .hud-prompt-layer { bottom: calc(1.15rem + var(--hud-safe-bottom)); width: min(62vw, 23rem); }
 .layout-tablet-landscape .hud-prompt { font-size: 0.82rem; padding: 0.38rem 0.82rem; }
 .layout-tablet-landscape .hud-speedometer { width: 86px; height: 86px; }
 .layout-tablet-landscape .hud-elephant-ability-badge { width: 68px; height: 68px; right: calc(0.72rem + var(--hud-safe-right)); bottom: calc(0.72rem + var(--hud-safe-bottom)); }

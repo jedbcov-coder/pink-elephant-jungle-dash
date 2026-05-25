@@ -10,6 +10,8 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ### Latest stabilisation update (2026-05-25)
 
+- Startup fix: removed duplicate app version/build exports in `src/appInfo.js` that could break startup/build, and bumped release marker to `1.0.3 / docs-tablet-startup-fix-2026-05-25`.
+- Tablet polish pass: rotate overlay now says “phone or tablet” for clearer portrait guidance, tablet-landscape touch controls are slightly larger for easier taps, display settings now label **Balanced** as **Recommended for Tablets**, and tablet prompt positioning was raised to reduce overlap with bottom controls on medium tablets.
 - Fixed the startup crash `complete is not defined` by removing a misplaced pause callback from `AudioControls` and keeping pause logic in the main app scope.
 - Updated touch controls modes so `always` reliably shows controls during gameplay on desktop/laptop/2-in-1/phone/tablet, while `auto` now supports phone-landscape, tablet-landscape, and touch-capable 2-in-1 layouts.
 - Hid debug-only visual overlays in normal gameplay by making the dashed safe-zone frame and center pause label fully invisible while keeping their tap functionality.

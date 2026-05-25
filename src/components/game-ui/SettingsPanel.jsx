@@ -97,7 +97,7 @@ export function SettingsPanel({
           <div className="mt-2 flex flex-wrap gap-2">
             {[
               ["high", "High"],
-              ["balanced", "Balanced"],
+              ["balanced", "Balanced (Recommended for Tablets)"],
               ["battery-saver", "Battery Saver"],
             ].map(([value, label]) => (
               <button key={value} type="button" onClick={() => onGraphicsQualityChange(value)} aria-pressed={graphicsQuality === value} className="rounded-full px-4 py-2 text-xs font-black" style={{ background: graphicsQuality === value ? "rgba(167,243,208,0.95)" : "rgba(255,255,255,0.12)", color: graphicsQuality === value ? "#022c22" : "rgba(255,255,255,0.85)" }}>{label}</button>
