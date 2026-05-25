@@ -364,12 +364,13 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
-- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run + Left/Right steering**. Right thumb: **Jump/Slide, Charge, Smash**.
-- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or Always). Left thumb: **Run + Left/Right steering**. Right thumb: **Jump/Slide, Charge, Smash**.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or Always). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
 - **Tablet:** touch controls stay enabled with **tablet-optimized spacing and button sizing** for easier taps.
 - **Desktop:** **keyboard-first controls are preserved** (same key mappings as before).
-- **2-in-1 laptops:** default behavior is **Auto** (touch controls on tablet/phone-like layouts, keyboard-first on desktop-wide layouts). You can override this in **Settings → Controls** with **Touch: Auto / On / Always / Off**.
-- **Touch mode compatibility:** **On** still keeps controls always visible (legacy behavior), and the new **Always** option does the same thing with a clearer name for testing.
+- **2-in-1 laptops:** default behavior is **Auto** (touch controls on tablet/phone-like layouts, keyboard-first on desktop-wide layouts). You can override this in **Settings → Controls** with **Touch: Auto / Always / Off**.
+- **How to turn on Always mode:** open **Settings** (title screen or pause menu) → **Controls** → set **Touch** to **Always**.
+- **What Always mode does:** on-screen touch buttons stay visible during active gameplay, including desktop/laptop if you want touch buttons shown at all times.
 
 ## Mobile layout notes
 
