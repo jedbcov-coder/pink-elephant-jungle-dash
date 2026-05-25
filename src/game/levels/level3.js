@@ -2,13 +2,13 @@ import { CONFIG, MOVEMENT } from "../config.js";
 import { OBSTACLE_LOG_PRESETS, OBSTACLE_VINE_PRESETS, OBSTACLE_CROC_RIVER_PRESETS } from "../level-elements/obstacle-presets.js";
 import { ENEMY_MONKEY_PATROL_PRESETS } from "../level-elements/enemy-presets.js";
 import { COLLECTIBLE_PINEAPPLE_PRESETS } from "../level-elements/collectible-presets.js";
-import { LEVEL_2 } from "./level2.js";
+import { NIGHT_RUN_THEME } from "./sharedThemes.js";
 
 export const LEVEL_3 = {
   id: "level-3",
   name: "Night Run",
-  background: "sunset-temple-run",
-  theme: LEVEL_2.theme,
+  background: "night-run",
+  theme: NIGHT_RUN_THEME,
   speed: { ...MOVEMENT, maxSpeed: 42 },
   course: {
     floorLength: 1500,

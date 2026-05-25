@@ -8,9 +8,70 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+### Latest Settings button readability pass
+
+- Root cause fixed: the in-game pause/settings shortcut was combining `hud-gold-frame-button` (gold/bright style) with `hud-settings-button`, causing style conflicts and occasional white/pale-yellow rendering in some layouts.
+- Added one shared Settings button theme for both `.hud-settings-button` and legacy `.title-settings-button`, including readable hover/focus/active/disabled states.
+- Added `.hud-settings-icon-button` so icon-only Settings/Pause stays dark, bordered, high-contrast, and touch-friendly on desktop/tablet/phone-landscape.
+
+### Latest timer stability fix
+
+- Fixed the negative gameplay timer bug (for example `TIME -1166:41`) by hardening elapsed-time math during pause/resume, fullscreen focus changes, and lifecycle restore events.
+- Timer display now always clamps to a safe non-negative `mm:ss` value, and restart now clears lifecycle timing snapshots so a new run always starts cleanly at `00:00`.
+
+### Latest 2-in-1 fullscreen HUD + Settings fix
+
+- Unified all **Settings** buttons under one shared high-contrast jungle style (title screen, pause overlay, in-game pause shortcut, and settings panel close) to remove the white/pale-yellow unreadable variant.
+- Fixed negative timer output by clamping elapsed time at zero and preventing lifecycle resume from double-applying paused duration during focus/fullscreen transitions.
+- Added a touch-capable **tablet/2-in-1 medium HUD mode**: less dense side panels, separated score/crate visuals, smaller trail-depth/timer footprint, smaller charge badge, and cleaner center play lane.
+- Hid floating audio controls during active gameplay; audio toggles remain available in Pause + Settings.
+
+### Latest desktop-layout repair
+
+- Restored desktop/laptop UI after mobile HUD regression: tightened phone-landscape CSS scoping, added explicit desktop/tablet guard rules, removed title-card internal scrolling on larger layouts, and reinforced the title Settings button contrast states so desktop visuals remain polished while mobile foundation classes stay available for future work.
+
+### Latest HUD update
+
+- Phone-landscape now uses a **separate minimal gameplay HUD** (not the desktop HUD): top-left fruit/lives, top-center state pill, top-right timer + pause, tiny bottom-center prompt, and corner thumb controls so the center track stays clear on Samsung S23 landscape fullscreen.
+
+
+
+### Latest phone-landscape polish
+
+- Removed the last phone-landscape left-edge gutter source by hard-forcing full-viewport width (`100vw`) and zero side padding/margins on the phone-landscape shell/frame/canvas path, plus matching backdrop color and horizontal overflow lock.
+- Tightened top-left Fruit/Lives badges and converted timer + settings into a compact single top-right row.
+- Reduced settings button size for phone-landscape and moved/shrunk prompt lower so it stays out of the elephant path and clear of thumb controls.
+- Forced phone-landscape touch controls to render visible at gameplay start (no extra touch needed), and raised their z-index over HUD layers.
+- Hid the dashed safe-frame in phone-landscape by default (treated as non-gameplay debug/decorative chrome).
+
+## New: Device profile blueprint
+
+Need separate settings for phone/tablet/desktop/2-in-1? Copy the ready-to-paste guide in `docs/DEVICE_PROFILE_BLUEPRINT.md`.
+
+
+For browser/install quality testing (install prompt, standalone launch, fullscreen behavior, orientation, address-bar resize, and wake/resume), use `PWA_TESTING.md`.
+
+
+
+## Device compatibility update
+
+The app now uses a stricter universal-device baseline:
+
+- mobile-first responsive layout that scales up to tablet and desktop
+- safe-area-aware shell/frame for notch and home-bar devices
+- minimum 48px touch target baseline for on-screen controls
+- responsive typography with `clamp()` sizing
+- orientation + resize handling that keeps active run state
+- install + offline behavior validated through manifest and service worker
+
+Use `DEVICE_TESTING.md` for manual validation across phone, tablet, and desktop before release.
+For tablet sign-off before each update, complete every required item in the tablet release gate inside `DEVICE_TESTING.md`.
+
 ## Install as an app (PWA)
 
 This game can now be installed from Chrome/Edge using the browser install button when opened from GitHub Pages.
+
+Offline mode is configured so previously loaded game files can be used without a network connection, and the app shows an **Update available** prompt when a newer deployment is ready.
 
 - Manifest file: `manifest.webmanifest`
 - Service worker: `service-worker.js`
@@ -21,6 +82,48 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 ## Recent update
 
 - Removed CSS `@import` chaining for game UI styles: `src/main.jsx` now imports `src/styles.css` and `src/styles/game-ui.css` directly to avoid `postcss-import` parsing failures during build.
+- Samsung S23 phone-landscape HUD hardening: removed the desktop right-side HUD slab from phone-landscape gameplay, forced full viewport fill with no side blue strip, tightened a true mini top-row (fruit/lives, level, timer + smaller pause), kept prompt as a bottom-center pill, and forced touch controls to render immediately above HUD overlays.
+- Touch-zone alignment fix for phone-landscape gameplay: movement controls now live in the bottom-left zone, while Jump/Slide + Charge + Smash live in the bottom-right zone for clearer two-thumb play.
+- Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.
+- Phone-landscape gameplay HUD split: desktop-heavy HUD panels are now fully hidden on `layout-phone-landscape`, replaced by a minimal gameplay-first HUD (top-left fruit/lives, top-center state pill, top-right timer + pause, bottom-center tiny prompt, and highest-priority corner touch controls) to keep the center lane clear on Samsung S23 landscape.
+- Settings button readability fix: replaced conflicting title-button color path with a hard-scoped title selector (including phone-landscape override) so the button now keeps a dark translucent background, clear border, and high-contrast cream/white text on both desktop and Samsung S23 landscape.
+- Phone-landscape title-fit pass (Samsung S23 fullscreen): removed title-card scrolling risk, tightened title spacing/typography, hid extra helper panels/self-test note in phone-landscape, and kept only the core title content + Settings + Begin button visible without scrolling.
+- Viewport root-sizing hard reset for phone-landscape fullscreen (Samsung S23 target): normalized `html/body/#root` and app shell/frame sizing to `100%` width with `100dvh` height, removed root safe-area side padding from the viewport container path, and prevented horizontal background peeking so gameplay now fills edge-to-edge without blue side strips.
+- Added a stable layout-mode system (`desktop`, `tablet-landscape`, `phone-landscape`, `phone-portrait`) on the root app shell, fixed Samsung S23 phone-landscape title fitting so Settings + Begin the Trail stay visible without scrolling, corrected Settings button contrast states, and added HUD mobile hook classes for the next phone-landscape HUD pass without changing gameplay logic.
+- Ran a focused contrast/readability pass for gameplay clarity: increased HUD label/pill contrast (removing low-contrast gray-on-gray combinations), boosted critical warning telegraph visibility and border strength, brightened obstacle warning accents, and darkened/desaturated mid/far background foliage/stone layers so player + hazards + pickups separate more clearly from scenery (including reduced-brightness / glare readability checks).
+
+- Added gameplay performance profiling and adaptive visual scaling for obstacle-heavy moments: the game now samples sustained frame rate, tracks nearby obstacle density, and automatically lowers non-essential effects first (particle burst counts, bloom strength, mist/telegraph intensity, snake accent animation frequency, and shadow quality) when performance drops, while keeping core obstacle readability and gameplay responsiveness stable during longer runs.
+
+- Added lifecycle-safe auto-pause/resume for app/tab focus changes (tab switch, app switch, lock/unlock, notification interruptions): active runs now pause automatically, keep current run progress in memory, restore without duplicate timers, and apply a short post-resume safety window to avoid unfair instant hits.
+
+- HUD safe-zone refactor: top HUD is now floating/translucent instead of full-width bars, critical gameplay HUD is kept inside an inner safe-zone rectangle, score moved to top-left, pause/settings stays top-right, movement stays bottom-left, and action controls stay bottom-right for better tablet and wide-screen consistency.
+
+- Tablet comfort/accessibility pass: enlarged touch targets for gameplay and HUD utility controls (48px minimum, 56px+ on primary controls), increased HUD text scale into an 18–28px-friendly range with heavier readable weights, added larger control spacing/invisible hitbox padding, and kept primary gameplay center clear by pinning utility controls to safe edge zones.
+
+- Mobile/PWA viewport hardening pass: gameplay wrappers now use modern dynamic viewport units (`100svh` fallback + `100dvh`), safe-area padding is enforced on the game frame + HUD edges, and portrait on phones/tablets now shows rotate guidance instead of cramped play.
+
+- Fixed mobile landscape viewport sizing for edge-to-edge play (including Galaxy S23): root/layout containers now lock to `100vw` + `100dvh`, body margin/overflow are constrained, the gameplay canvas fills the visible viewport, and horizontal scrolling is blocked during gameplay.
+- Added a dedicated mobile-landscape control pattern for screens up to 900px wide: desktop keyboard-help overlays are now hidden in that view, and on-screen touch controls are pinned to the left/right edges with safer button sizing and spacing for thumbs.
+
+- Audited and tightened the PWA manifest for install quality: kept manifest links in installable HTML, switched app display mode to `standalone` for a cleaner installed experience, and added explicit 192x192 + 512x512 icon entries required by installability checks.
+
+- Added responsive typography scaling for headings, HUD counters, labels, and buttons using `clamp()`.
+- Raised text baseline readability on small phones and set form input fonts to at least 16px to prevent mobile auto-zoom.
+- Shortened gameplay-facing helper copy to keep overlays easier to scan during play.
+
+- Added a universal responsive game frame: phones use full safe screen area, while tablets/desktops keep a centered 16:9 gameplay frame with optional side-panel space and preserved HUD readability.
+- Added explicit orientation behavior rules: portrait/landscape detection is now always tracked, normal menus remain usable in both orientations, and active gameplay on touch devices shows a clear rotate-device overlay in portrait while preserving your current run state through rotation changes.
+- Standardized interactive touch targets to a 48px minimum across buttons and form controls, added visible keyboard focus rings, and increased mobile control spacing so nearby controls keep at least an 8px gap.
+- Added explicit safe-area protection coverage across the main app shell and bottom HUD anchors so top and bottom UI stay clear of notches and iOS home indicators, including standalone PWA display mode handling.
+- Audited the layout for mobile-first responsiveness and added exact breakpoint tiers for small phones (320–480px), large phones (481–767px), tablets (768–1023px), and desktop (1024px+), backed by shared CSS variables for spacing, fonts, radii, and max layout width.
+- Strengthened viewport safety rules with flexible units (`rem`, `%`, `vw`, `svh`, `dvh`, `min()`, `max()`, `clamp()`) so major containers avoid fixed widths, stay centered on large displays, and prevent horizontal scrolling.
+- Added a dedicated **Level 3: Night Run** base theme with a purple night sky plus a white moon backdrop so the third level now has its own clear nighttime look.
+- Reduced expected browser permission noise: fullscreen and audio resume calls now run only from user gestures, and rejected permission attempts are logged as short development-only debug messages so gameplay continues without noisy console warnings.
+- Fixed branch-collision self-test failures by requiring actual AABB overlap before branch damage/blocking is applied, which aligns branch hit handling with visual overlap and keeps valid slide clearances passing.
+- Improved self-test failure logging in the browser console so each failed test now prints as its own readable warning line with a test name and reason, plus a compact failure table for quick debugging.
+- Added the modern `<meta name="mobile-web-app-capable" content="yes">` tag above the existing Apple tag in `index.html`, while keeping iOS compatibility and fixing the Chrome deprecation warning.
+- Added the modern `<meta name="mobile-web-app-capable" content="yes">` tag in both source and deployed HTML so PWA capability checks no longer rely only on the deprecated iOS-only tag.
+- Fixed a startup crash in `src/App.jsx` by removing a call to an undefined development texture preview helper (`createTexturePreviewPanel`), so the live scene now starts normally.
 - Simplified install stability by removing unused ESLint package dependencies from `package.json` (the project checks already run TypeScript + CSS checks), eliminating the recurring ESLint peer-conflict path during `npm install`.
 - Added a project `.npmrc` with `legacy-peer-deps=true` as a safety fallback so `npm install` can proceed even if npm encounters transient peer-resolution conflicts in some environments.
 - Removed unused React ESLint plugins from devDependencies to eliminate the recurring npm peer-dependency (`ERESOLVE`) conflict path while keeping lint/check behavior unchanged for this project.
@@ -98,6 +201,9 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 - Improved PWA update flow for installed players: update banner now supports session-level **Later** dismissal, **Refresh** sends `SKIP_WAITING`, and reload happens only after the new worker takes control to avoid reload loops.
 - Updated service-worker lifecycle for safer releases: removed automatic `skipWaiting()` during install, kept versioned cache cleanup on activate, and switched static asset fetches to stale-while-revalidate behavior.
+
+
+- Added `DEVICE_TESTING_MATRIX.md` with a simple pass/fail device checklist covering phone/tablet/desktop in portrait and landscape.
 
 ## Mobile touch regression checklist
 
@@ -204,7 +310,8 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 - **Jump:** tap `Space`
 - **Slide:** hold `Space`
 - **Trunk smash:** `Shift`
-- **Phone/mobile:** compact thumb layout with **left-side Run/Charge** and a **right-side action cluster** for movement/actions.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run + Left/Right steering**. Right thumb: **Jump/Slide, Charge, Smash**.
+- **Phone/mobile (landscape):** controls appear immediately after you press **Begin the Trail** (when Touch mode is Auto or On). Left thumb: **Run/Charge**. Right thumb: **Left, Right, Slide, Smash**.
 - **Tablet:** touch controls stay enabled with **tablet-optimized spacing and button sizing** for easier taps.
 - **Desktop:** **keyboard-first controls are preserved** (same key mappings as before).
 - **2-in-1 laptops:** default behavior is **Auto** (touch controls on tablet/phone-like layouts, keyboard-first on desktop-wide layouts). You can override this in **Settings → Controls** with **Touch: Auto / On / Off**.
@@ -212,6 +319,7 @@ Before release, re-test every fixed mobile issue on at least **two real devices*
 ## Mobile layout notes
 
 - The mobile UI is optimized for **landscape play** so your thumbs have more room and the center view stays clear.
+- In phone-landscape gameplay, the app uses a **minimal HUD** to keep the elephant path visible: top-left fruit/lives, top-center state, top-right timer/pause, and a small bottom prompt only when needed.
 - Controls and HUD respect **safe-area insets** (notch/cutout areas), so important buttons and stats stay visible and tappable on modern phones.
 
 ## Main features

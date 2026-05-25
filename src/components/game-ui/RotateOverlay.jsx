@@ -16,7 +16,7 @@ export function RotateOverlay({ visible }) {
       >
         <div className="text-4xl" aria-hidden="true">📱↻</div>
         <h2 className="display-title mt-2 text-2xl font-black text-emerald-200">Rotate your device</h2>
-        <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">This game plays best in landscape mode. Turn your device sideways to continue.</p>
+        <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">Best view: landscape mode. Turn your phone sideways.</p>
       </div>
     </section>
   );

@@ -6,10 +6,11 @@
 
 body {
   margin: 0;
-  width: 100%;
+  width: 100vw;
+  height: 100dvh;
   min-height: 100dvh;
-  overflow-x: hidden;
-  background: #60b0ff;
+  overflow: hidden;
+  background: #04140a;
   color: #fff;
 }
 
@@ -30,8 +31,8 @@ body {
 .z-20 { z-index: 20; }
 .z-30 { z-index: 30; }
 .z-40 { z-index: 40; }
-.h-screen { height: 100%; min-height: 100dvh; }
-.w-screen { width: 100%; }
+.h-screen { height: 100dvh; min-height: 100dvh; }
+.w-screen { width: 100vw; }
 .w-full { width: 100%; }
 .w-48 { width: 12rem; }
 .w-52 { width: 13rem; }
@@ -118,10 +119,19 @@ body {
 
 html, body, #root {
   width: 100%;
-  height: 100%;
+  max-width: 100%;
+  height: 100dvh;
   min-height: 100dvh;
   margin: 0;
+  padding: 0;
+  overflow: hidden;
   overscroll-behavior: none;
+}
+
+#root {
+  position: fixed;
+  inset: 0;
+  background: #04140a;
 }
 
 body.immersive-playing {

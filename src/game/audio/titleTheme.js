@@ -322,7 +322,11 @@ export function createTitleThemePlayer(ctx, output = ctx.destination) {
 
   function start() {
     if (playing) return;
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") {
+      ctx.resume().catch((error) => {
+        if (import.meta.env.DEV) console.debug("[audio] Title theme resume skipped.", error);
+      });
+    }
     playing = true;
     stepIndex = 0;
     nextStepTime = ctx.currentTime + 0.05;

@@ -48,9 +48,9 @@ export function SettingsPanel({
           <div>
             <div className="text-xs font-black uppercase tracking-[0.32em] text-emerald-200/70">Settings</div>
             <h2 id="settings-title" className="display-title mt-1 text-3xl font-black text-pink-200">Game Settings</h2>
-            <p className="mt-1 text-xs text-amber-50/65">Opened from {context === "pause" ? "Pause" : "Title"}. Press Esc to close.</p>
+            <p className="mt-1 text-xs text-amber-50/65">From {context === "pause" ? "Pause" : "Title"}. Esc closes this panel.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-50 transition hover:scale-105 active:scale-95">Close</button>
+          <button type="button" onClick={onClose} className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Close</button>
         </div>
 
         <div className="mt-5 border-t border-amber-100/20 pt-4">
@@ -64,8 +64,8 @@ export function SettingsPanel({
 
         <div className="mt-5 border-t border-amber-100/20 pt-4">
           <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Controls</h3>
-          <p className="mt-2 text-xs text-amber-50/75"><strong>Desktop:</strong> Arrow keys or WASD move, Space jumps (hold to slide), and F smashes.</p>
-          <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile/Tablet:</strong> Compact thumb controls appear for touch-first layouts.</p>
+          <p className="mt-2 text-xs text-amber-50/75"><strong>Desktop:</strong> Move: Arrows/WASD · Jump/Slide: Space · Smash: F.</p>
+          <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile:</strong> Use the on-screen buttons.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {[
               ["auto", "Touch: Auto"],
@@ -87,8 +87,8 @@ export function SettingsPanel({
               </button>
             ))}
           </div>
-          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: phone/tablet-like layouts or touch + tablet posture show touch controls; desktop-wide stays keyboard-first.</p>
-          <p className="mt-1 text-xs text-emerald-100/50">Tip: Landscape mode is recommended on mobile.</p>
+          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: touch layouts show buttons; desktop layout keeps keyboard focus.</p>
+          <p className="mt-1 text-xs text-emerald-100/50">Tip: Play in landscape on phones.</p>
         </div>
 
         <div className="mt-5 border-t border-amber-100/20 pt-4">

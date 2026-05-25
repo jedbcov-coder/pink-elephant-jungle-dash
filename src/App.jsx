@@ -6,7 +6,7 @@ import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
 import { SettingsPanel } from "./components/game-ui/SettingsPanel.jsx";
 import { TouchControls } from "./components/game-ui/TouchControls.jsx";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt.js";
-import { CAMERA_FEEDBACK, CONFIG, HUD_TIMING, MOVEMENT, PARTICLES, PICKUPS, SCORING } from "./game/config.js";
+import { CAMERA_FEEDBACK, CONFIG, HUD_TIMING, MOVEMENT, PARTICLES, PERFORMANCE, PICKUPS, SCORING } from "./game/config.js";
 import {
   canRetreatFromObstacle,
   enemyBox,
@@ -81,14 +81,22 @@ function requestImmersiveMobileMode() {
 
   const requestFullscreen = async () => {
     if (!document.fullscreenElement && root.requestFullscreen) {
-      await root.requestFullscreen({ navigationUI: "hide" });
+      try {
+        await root.requestFullscreen({ navigationUI: "hide" });
+      } catch (error) {
+        if (import.meta.env.DEV) console.debug("[immersive] Fullscreen request skipped.", error);
+      }
     }
   };
 
   const lockLandscape = async () => {
     const orientation = window.screen?.orientation;
     if (orientation?.lock) {
-      await orientation.lock("landscape");
+      try {
+        await orientation.lock("landscape");
+      } catch (error) {
+        if (import.meta.env.DEV) console.debug("[immersive] Orientation lock skipped.", error);
+      }
     }
   };
 
@@ -106,6 +114,22 @@ function getIsPortraitViewport() {
   const orientationType = window.screen?.orientation?.type;
   if (orientationType) return orientationType.startsWith("portrait");
   return window.innerHeight > window.innerWidth;
+}
+
+function detectLayoutMode() {
+  if (typeof window === "undefined") return "desktop";
+  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const orientationType = window.screen?.orientation?.type ?? "";
+  const isLandscape = orientationType ? orientationType.startsWith("landscape") : viewportWidth >= viewportHeight;
+  const hasTouch = (window.matchMedia?.("(any-pointer: coarse)")?.matches ?? false) || navigator.maxTouchPoints > 0;
+  const finePointer = window.matchMedia?.("(pointer: fine)")?.matches ?? false;
+
+  if (!hasTouch && finePointer && viewportWidth >= 1024) return "desktop";
+  if (!isLandscape) return "phone-portrait";
+  if (viewportWidth <= 932 || viewportHeight <= 520) return "phone-landscape";
+  if (viewportWidth <= 1280 || hasTouch) return "tablet-landscape";
+  return "desktop";
 }
 
 function createBroadBananaLeafGeometry() {
@@ -214,10 +238,25 @@ function AudioControls({ audioState, onToggle, compact = false }) {
 }
 
 function formatElapsed(elapsedMs) {
-  const elapsed = Math.floor(elapsedMs / 1000);
+  const safeElapsedMs = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const elapsed = Math.floor(safeElapsedMs / 1000);
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
   return `${mm}:${ss}`;
+}
+
+
+function sanitizeGameStartTime(startTime, now = performance.now()) {
+  if (!Number.isFinite(startTime) || startTime === null) return null;
+  if (!Number.isFinite(now)) return startTime;
+  return Math.min(startTime, now);
+}
+
+function getSafeElapsedMs(startTime, now = performance.now()) {
+  if (!Number.isFinite(now)) return 0;
+  const safeStartTime = sanitizeGameStartTime(startTime, now);
+  if (safeStartTime === null) return 0;
+  return Math.max(0, now - safeStartTime);
 }
 
 function SelfTestStatus({ summaryRef }) {
@@ -229,7 +268,18 @@ function SelfTestStatus({ summaryRef }) {
     const nextSummary = `${passCount}/${results.length} self-tests passed`;
     summaryRef.current = nextSummary;
     setSummary(nextSummary);
-    if (passCount !== results.length) console.warn("Pink Elephant self-tests failed", results);
+    if (passCount !== results.length) {
+      const failedResults = results.filter((result) => !result.pass).map((result) => ({
+        test: result.name,
+        reason: "Assertion returned false.",
+      }));
+      console.groupCollapsed(`Pink Elephant self-tests failed (${failedResults.length}/${results.length})`);
+      failedResults.forEach((failedResult, index) => {
+        console.warn(`${index + 1}. ${failedResult.test} — ${failedResult.reason}`);
+      });
+      console.table(failedResults);
+      console.groupEnd();
+    }
   }, [summaryRef]);
 
   return <div className="mt-4 text-[11px] tracking-wide text-emerald-100/50">{summary}</div>;
@@ -271,6 +321,9 @@ export default function App() {
   const debugRef = useRef(false);
   const pausedRef = useRef(false);
   const pauseStartedAtRef = useRef(null);
+  const lifecycleSnapshotRef = useRef(null);
+  const lifecyclePauseReasonRef = useRef(null);
+  const resumeSafetyUntilRef = useRef(0);
   const audioManagerRef = useRef(null);
   if (!audioManagerRef.current) audioManagerRef.current = createAudioManager();
   const resetGameRef = useRef(null);
@@ -279,9 +332,9 @@ export default function App() {
   const touchInputDetectedRef = useRef(false);
   const immersiveRequestedRef = useRef(false);
 
-  const tryImmersiveMode = useCallback(() => {
+  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
     immersiveRequestedRef.current = true;
-    requestImmersiveMobileMode();
+    if (fromUserGesture) requestImmersiveMobileMode();
     setImmersiveReady(true);
   }, []);
 
@@ -314,7 +367,10 @@ export default function App() {
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
+  const [isPortrait, setIsPortrait] = useState(() => getIsPortraitViewport());
   const [showRotateOverlay, setShowRotateOverlay] = useState(false);
+  // Layout mode source of truth for responsive UI buckets from the audit findings.
+  const [layoutMode, setLayoutMode] = useState(() => detectLayoutMode());
   const [graphicsQuality, setGraphicsQuality] = useState(() => loadSettings()?.display?.graphicsQuality ?? "balanced");
   const activeLevelRef = useRef(buildLevelById("level-1"));
   const profileSnapshotRef = useRef(null);
@@ -364,12 +420,44 @@ export default function App() {
       pauseStartedAtRef.current = performance.now();
       audioManagerRef.current?.updateGameplayMusic({ charge: 0, isPlaying: false });
     } else {
-      if (pauseStartedAtRef.current !== null && gameStartTimeRef.current) {
-        gameStartTimeRef.current += performance.now() - pauseStartedAtRef.current;
+      const now = performance.now();
+      gameStartTimeRef.current = sanitizeGameStartTime(gameStartTimeRef.current, now);
+      if (pauseStartedAtRef.current !== null && gameStartTimeRef.current !== null) {
+        gameStartTimeRef.current += Math.max(0, now - pauseStartedAtRef.current);
       }
       pauseStartedAtRef.current = null;
     }
     setPaused(shouldPause);
+  }
+
+
+  function captureLifecycleSnapshot(reason = "unknown") {
+    if (!startedRef.current || completeRef.current || gameOverRef.current) return;
+    lifecyclePauseReasonRef.current = reason;
+    lifecycleSnapshotRef.current = {
+      reason,
+      capturedAt: performance.now(),
+      gameStartTime: gameStartTimeRef.current,
+      stampedeNextStepTime: stampedeRef.current?.nextStepTime ?? 0,
+    };
+  }
+
+  function restoreLifecycleSnapshot() {
+    const snapshot = lifecycleSnapshotRef.current;
+    if (!snapshot) return;
+    lifecycleSnapshotRef.current = null;
+    const now = performance.now();
+    gameStartTimeRef.current = sanitizeGameStartTime(gameStartTimeRef.current ?? snapshot.gameStartTime, now);
+    const pausedFor = Math.max(0, now - (snapshot.capturedAt ?? now));
+    if (Number.isFinite(pausedFor) && pausedFor > 0) {
+      if (pausedRef.current && pauseStartedAtRef.current !== null) {
+        pauseStartedAtRef.current += pausedFor;
+      } else if (gameStartTimeRef.current !== null) {
+        gameStartTimeRef.current += pausedFor;
+      }
+    }
+    if (stampedeRef.current) stampedeRef.current.nextStepTime = audioManagerRef.current?.getCurrentTime?.() ?? snapshot.stampedeNextStepTime ?? 0;
+    resumeSafetyUntilRef.current = performance.now() + 850;
   }
 
   function resumeGame() {
@@ -447,7 +535,7 @@ export default function App() {
 
     const handlePointerForImmersive = (event) => {
       if (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen") return;
-      if (!immersiveRequestedRef.current) tryImmersiveMode();
+      if (!immersiveRequestedRef.current) tryImmersiveMode(true);
     };
 
     const touchDeviceQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
@@ -489,7 +577,8 @@ export default function App() {
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
     window.addEventListener("pointerdown", handlePointerForImmersive, { passive: true });
     window.addEventListener("touchstart", showForTouchStart, { passive: true });
-    window.addEventListener("touchstart", tryImmersiveMode, { passive: true });
+    const immersiveFromTouchStart = () => tryImmersiveMode(true);
+    window.addEventListener("touchstart", immersiveFromTouchStart, { passive: true });
 
     return () => {
       touchDeviceQuery.removeEventListener?.("change", updateVisibility);
@@ -499,9 +588,20 @@ export default function App() {
       window.removeEventListener("pointerdown", showForTouchInput);
       window.removeEventListener("pointerdown", handlePointerForImmersive);
       window.removeEventListener("touchstart", showForTouchStart);
-      window.removeEventListener("touchstart", tryImmersiveMode);
+      window.removeEventListener("touchstart", immersiveFromTouchStart);
     };
   }, [touchControlsMode, tryImmersiveMode]);
+
+  useEffect(() => {
+    const gameplayActive = started && !paused && !complete && !gameOver;
+    if (!gameplayActive) return;
+    if (layoutMode !== "phone-landscape") return;
+
+    if (touchControlsMode === "on" || touchControlsMode === "auto") {
+      touchInputDetectedRef.current = true;
+      setTouchControlsVisible(true);
+    }
+  }, [started, paused, complete, gameOver, layoutMode, touchControlsMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -509,7 +609,7 @@ export default function App() {
     const refreshImmersiveMode = () => {
       if (!immersiveRequestedRef.current || !startedRef.current || pausedRef.current || completeRef.current || gameOverRef.current) return;
       window.setTimeout(() => {
-        tryImmersiveMode();
+        tryImmersiveMode(false);
       }, 120);
     };
 
@@ -541,7 +641,7 @@ export default function App() {
 
   useEffect(() => {
     if (started && !paused && !complete && !gameOver) {
-      tryImmersiveMode();
+      tryImmersiveMode(false);
     }
   }, [complete, gameOver, paused, started, tryImmersiveMode]);
 
@@ -561,33 +661,60 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
+    // Layout mode detection: updates root classes so CSS can target phone/tablet/desktop safely.
+    const updateLayoutMode = () => setLayoutMode(detectLayoutMode());
+    const viewport = window.visualViewport;
+    updateLayoutMode();
+    window.addEventListener("resize", updateLayoutMode);
+    window.addEventListener("orientationchange", updateLayoutMode);
+    viewport?.addEventListener?.("resize", updateLayoutMode);
+    return () => {
+      window.removeEventListener("resize", updateLayoutMode);
+      window.removeEventListener("orientationchange", updateLayoutMode);
+      viewport?.removeEventListener?.("resize", updateLayoutMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
 
     const pointerQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
-    const updateRotateOverlay = () => {
+    const updateOrientationUi = () => {
+      const portraitNow = getIsPortraitViewport();
       const isLikelyMobile = pointerQuery.matches || touchInputDetectedRef.current;
-      setShowRotateOverlay(isLikelyMobile && getIsPortraitViewport());
+      const showDuringGameplay = startedRef.current && !completeRef.current && !gameOverRef.current;
+      setIsPortrait(portraitNow);
+      setShowRotateOverlay(isLikelyMobile && portraitNow && showDuringGameplay);
     };
 
-    const onOrientationChange = () => updateRotateOverlay();
-    const onResize = () => updateRotateOverlay();
+    const onOrientationChange = () => updateOrientationUi();
+    const onResize = () => updateOrientationUi();
     const onTouchStart = () => {
       touchInputDetectedRef.current = true;
-      updateRotateOverlay();
+      updateOrientationUi();
     };
 
-    updateRotateOverlay();
-    pointerQuery.addEventListener?.("change", updateRotateOverlay);
+    updateOrientationUi();
+    pointerQuery.addEventListener?.("change", updateOrientationUi);
     window.addEventListener("orientationchange", onOrientationChange);
     window.addEventListener("resize", onResize);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
 
     return () => {
-      pointerQuery.removeEventListener?.("change", updateRotateOverlay);
+      pointerQuery.removeEventListener?.("change", updateOrientationUi);
       window.removeEventListener("orientationchange", onOrientationChange);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
+
+  useEffect(() => {
+    const isLikelyMobile = typeof window !== "undefined"
+      ? window.matchMedia?.("(hover: none) and (pointer: coarse)")?.matches || touchInputDetectedRef.current
+      : false;
+    const showDuringGameplay = started && !complete && !gameOver;
+    setShowRotateOverlay(Boolean(isLikelyMobile && isPortrait && showDuringGameplay));
+  }, [started, complete, gameOver, isPortrait]);
 
   useEffect(() => {
     if (started && !paused && !complete && !gameOver && immersiveRequestedRef.current) setImmersiveReady(true);
@@ -598,7 +725,7 @@ export default function App() {
     if (typeof document === "undefined") return undefined;
     const mount = mountRef.current;
     if (!mount) return undefined;
-    mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh";
+    mount.style.minHeight = viewportHeight ? `${Math.round(viewportHeight)}px` : "100svh";
     return undefined;
   }, [viewportHeight]);
 
@@ -631,7 +758,7 @@ export default function App() {
 
   useEffect(() => {
     if (!started || paused || complete || gameOver) return;
-    const reapply = () => tryImmersiveMode();
+    const reapply = () => tryImmersiveMode(false);
     const timer = window.setInterval(reapply, 5000);
     return () => window.clearInterval(timer);
   }, [complete, gameOver, paused, started, tryImmersiveMode]);
@@ -731,6 +858,7 @@ export default function App() {
     let lastFpsTime = performance.now();
     let frames = 0;
     let fps = 60;
+    const perfState = { frameWindowMs: 0, frameWindowCount: 0, windowFps: 60, effectQuality: 1, nearbyObstacleCount: 0 };
 
     const scene = new THREE.Scene();
     const activeCourse = currentLevelConfig.course ?? {};
@@ -797,9 +925,20 @@ export default function App() {
     sun.shadow.camera.bottom = -34;
     scene.add(sun);
 
+    if (activeTheme.moon) {
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(activeTheme.moon.radius ?? 3.8, 24, 24),
+        new THREE.MeshBasicMaterial({ color: activeTheme.moon.color ?? "#ffffff", fog: false })
+      );
+      moon.position.set(activeTheme.moon.x ?? -22, activeTheme.moon.y ?? 23, activeTheme.moon.z ?? -88);
+      scene.add(moon);
+
+      const moonGlow = new THREE.PointLight(activeTheme.moon.glow ?? "#d9ccff", 0.9, 140, 2);
+      moonGlow.position.copy(moon.position);
+      scene.add(moonGlow);
+    }
+
     const textures = createSceneTextures();
-    const texturePreviewPanel = createTexturePreviewPanel(textures);
-    if (texturePreviewPanel) mount.appendChild(texturePreviewPanel);
 
     const jungle = new THREE.Mesh(new THREE.BoxGeometry(CONFIG.floorWidth, 1.2, courseFloorLength), new THREE.MeshStandardMaterial({ map: textures.ground, roughness: 0.98 }));
     jungle.position.set(0, -0.62, -courseFloorLength / 2 + 20);
@@ -1164,16 +1303,16 @@ export default function App() {
     const depthEdgeMossMat = makeMaterial("#72f052", { map: textures.moss, roughness: 0.96, emissive: "#efff9a", emissiveIntensity: 0.1 });
     const depthEdgeRockMat = makeMaterial("#9f986f", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1, emissive: "#ffd36c", emissiveIntensity: 0.08 });
     const depthEdgeRuinMat = makeMaterial("#8f936c", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.96, emissive: "#ffe08a", emissiveIntensity: 0.07 });
-    const depthMidLeafMat = makeMaterial("#1f7b42", { map: textures.leafVeins, roughness: 0.9, side: THREE.DoubleSide });
-    const depthMidVineMat = makeMaterial("#23683b", { roughness: 0.96 });
-    const depthMidMossMat = makeMaterial("#3f7f35", { map: textures.moss, roughness: 1 });
-    const depthMidRockMat = makeMaterial("#696b58", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
-    const depthMidRuinMat = makeMaterial("#5d6651", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.98 });
-    const depthFarLeafMat = makeMaterial("#18351f", { map: textures.leafVeins, roughness: 1, side: THREE.DoubleSide });
-    const depthFarVineMat = makeMaterial("#142b1c", { roughness: 1 });
-    const depthFarMossMat = makeMaterial("#223a21", { map: textures.moss, roughness: 1 });
-    const depthFarRockMat = makeMaterial("#343a31", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
-    const depthFarRuinMat = makeMaterial("#30372f", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthMidLeafMat = makeMaterial("#1a5f35", { map: textures.leafVeins, roughness: 0.94, side: THREE.DoubleSide });
+    const depthMidVineMat = makeMaterial("#1d5630", { roughness: 0.98 });
+    const depthMidMossMat = makeMaterial("#2f612b", { map: textures.moss, roughness: 1 });
+    const depthMidRockMat = makeMaterial("#535746", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthMidRuinMat = makeMaterial("#4d5544", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.99 });
+    const depthFarLeafMat = makeMaterial("#102417", { map: textures.leafVeins, roughness: 1, side: THREE.DoubleSide });
+    const depthFarVineMat = makeMaterial("#0e1f14", { roughness: 1 });
+    const depthFarMossMat = makeMaterial("#182a18", { map: textures.moss, roughness: 1 });
+    const depthFarRockMat = makeMaterial("#242a25", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
+    const depthFarRuinMat = makeMaterial("#202720", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 1 });
 
     function trackCurvatureCue(z) {
       return Math.abs(trackAngle(z - 18) - trackAngle(z + 18));
@@ -1491,7 +1630,7 @@ export default function App() {
     const branchLeafMat = makeMaterial("#1d7a42", { map: textures.leafVeins, roughness: 0.86, emissive: "#0b351b", emissiveIntensity: 0.12 });
     const branchVineMat = makeMaterial("#2f5f2d", { roughness: 0.9 });
     const snakeBodyMat = makeMaterial("#708625", { roughness: 0.62, emissive: "#2f3f16", emissiveIntensity: 0.2 });
-    const branchWarningStripeMat = makeMaterial("#cab147", { roughness: 0.72, emissive: "#6f4f11", emissiveIntensity: 0.24 });
+    const branchWarningStripeMat = makeMaterial("#f2cf4f", { roughness: 0.66, emissive: "#8a5d00", emissiveIntensity: 0.38 });
     const snakeBellyMat = makeMaterial("#c9ab63", { roughness: 0.68, emissive: "#4b3f1f", emissiveIntensity: 0.12 });
     const snakeTongueMat = new THREE.MeshStandardMaterial({ color: "#ff4b7a", emissive: "#cc2d56", emissiveIntensity: 0.5 });
     const snakeStripeMat = makeMaterial("#1e2e12", { roughness: 0.75 });
@@ -1500,9 +1639,9 @@ export default function App() {
     const cueStoneBlockMarkerMat = makeMaterial("#d0c27f", { roughness: 0.9 });
     const cueRippleMat = makeMaterial("#9de7ff", { transparent: true, opacity: 0.68, roughness: 0.45, emissive: "#124d66", emissiveIntensity: 0.2 });
     const cueEyeMat = new THREE.MeshStandardMaterial({ color: "#ff2a1c", emissive: "#ff1200", emissiveIntensity: 2.8 });
-    const telegraphRingMat = new THREE.MeshBasicMaterial({ color: "#ffe08a", transparent: true, opacity: 0.22, depthWrite: false });
-    const telegraphArrowMat = new THREE.MeshBasicMaterial({ color: "#ffd34a", transparent: true, opacity: 0.34, depthWrite: false });
-    const telegraphDangerMat = new THREE.MeshBasicMaterial({ color: "#ff7a45", transparent: true, opacity: 0.26, depthWrite: false });
+    const telegraphRingMat = new THREE.MeshBasicMaterial({ color: "#fff1a8", transparent: true, opacity: 0.34, depthWrite: false });
+    const telegraphArrowMat = new THREE.MeshBasicMaterial({ color: "#ffe067", transparent: true, opacity: 0.48, depthWrite: false });
+    const telegraphDangerMat = new THREE.MeshBasicMaterial({ color: "#ff8f5f", transparent: true, opacity: 0.42, depthWrite: false });
     const CUE_PREVIEW_DISTANCE = 5.8;
     const TELEGRAPH_VISIBLE_DISTANCE = 54;
 
@@ -2169,7 +2308,7 @@ export default function App() {
     const body = createPlayerBody();
 
     function snapshotResults(overrides = {}) {
-      const elapsedMs = gameStartTimeRef.current ? performance.now() - gameStartTimeRef.current : 0;
+      const elapsedMs = getSafeElapsedMs(gameStartTimeRef.current, performance.now());
       const z = overrides.z ?? body.z;
       return {
         fruit: body.fruit,
@@ -2252,6 +2391,9 @@ export default function App() {
       gameOverRef.current = false;
       pausedRef.current = false;
       pauseStartedAtRef.current = null;
+      lifecycleSnapshotRef.current = null;
+      lifecyclePauseReasonRef.current = null;
+      resumeSafetyUntilRef.current = 0;
       gameStartTimeRef.current = start ? performance.now() : null;
       setFinalResults(null);
       setStarted(start);
@@ -2281,7 +2423,8 @@ export default function App() {
     }
 
     function burst(x, y, z, colour, count = PARTICLES.defaultBurstCount, scale = 0.28) {
-      for (let i = 0; i < count; i++) activateParticle(x, y, z, colour, scale, 0.8 + Math.random() * 0.4);
+      const adjustedCount = Math.max(2, Math.round(count * perfState.effectQuality));
+      for (let i = 0; i < adjustedCount; i++) activateParticle(x, y, z, colour, scale, 0.8 + Math.random() * 0.4);
     }
 
     function createPopTexture(text, colour) {
@@ -2361,6 +2504,7 @@ export default function App() {
     }
 
     function hurt(croc = false) {
+      if (performance.now() < resumeSafetyUntilRef.current) return;
       if (body.hurtTimer > 0 || body.completed || body.lives <= 0) return;
       body.health = Math.max(0, body.health - (croc ? 34 : 22));
       body.hurtTimer = 0.45;
@@ -2458,14 +2602,27 @@ export default function App() {
       setKeyState(keyRef.current, e.code, false);
     }
 
-    function blur() {
+    function suspendGameplay(reason = "background") {
       keyRef.current = createKeys();
+      captureLifecycleSnapshot(reason);
       if (startedRef.current && !completeRef.current && !gameOverRef.current) setPausedState(true);
+    }
+
+    function handleWindowBlur() { suspendGameplay("blur"); }
+    function handleDocumentHidden() {
+      if (document.visibilityState === "hidden") suspendGameplay("hidden");
+    }
+    function handlePageHide() { suspendGameplay("pagehide"); }
+    function handleWindowFocus() {
+      restoreLifecycleSnapshot();
     }
 
     window.addEventListener("keydown", keyDown);
     window.addEventListener("keyup", keyUp);
-    window.addEventListener("blur", blur);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("visibilitychange", handleDocumentHidden);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("focus", handleWindowFocus);
     window.addEventListener("resize", resize);
 
     function updateCrocs(now) {
@@ -2601,8 +2758,10 @@ export default function App() {
       activeObstacles.length = 0;
       for (let i = 0; i < colliders.length; i += 1) activeObstacles.push(colliders[i]);
       for (let i = 0; i < crocs.length; i += 1) activeObstacles.push(crocs[i]);
+      let nearbyObstacleCount = 0;
       for (const obs of activeObstacles) {
         if (!obs.active) continue;
+        if (obs.z < body.z + 2 && obs.z > body.z - PERFORMANCE.obstacleHeavyDistance) nearbyObstacleCount += 1;
         const oBox = obstacleBox(obs, obstacleAabb);
         let collisionBox = aabb(pBox, oBox) ? pBox : null;
         if (!collisionBox && (obs.type === "log" || obs.type === "branch" || obs.type === "crate" || obs.type === "croc")) {
@@ -2640,6 +2799,7 @@ export default function App() {
           if (result.blocked && (body.y <= oBox.maxY + 0.2 || body.yVelocity <= 0.5)) shouldForceGroundReset = true;
         }
       }
+      perfState.nearbyObstacleCount = nearbyObstacleCount;
 
       for (const item of pickups) {
         if (!item.active) continue;
@@ -2785,7 +2945,7 @@ export default function App() {
         if (!visible) return;
         const proximity = 1 - clamp(distanceAhead / TELEGRAPH_VISIBLE_DISTANCE, 0, 1);
         const pulse = 0.72 + Math.sin(t * 7.5 + index * 0.9) * 0.18;
-        const opacity = telegraph.baseOpacity * (0.35 + proximity * 0.65) * pulse;
+        const opacity = telegraph.baseOpacity * (0.35 + proximity * 0.65) * pulse * lerp(0.72, 1, perfState.effectQuality);
         telegraph.group.position.y = Math.sin(t * 5.5 + index) * 0.035;
         telegraph.materials.forEach((material, materialIndex) => {
           material.opacity = Math.min(materialIndex === 0 ? 0.28 : 0.46, opacity * (materialIndex === 0 ? 0.7 : 1));
@@ -2805,6 +2965,7 @@ export default function App() {
       });
 
       branchHazardAccents.forEach((accent, index) => {
+        if (perfState.effectQuality < 0.7 && index % 2 === 1) return;
         const eyePulse = 2.2 + Math.sin(t * 7.8 + index * 0.75) * 1.3;
         if (accent.eye) accent.eye.material.emissiveIntensity = eyePulse;
         accent.head.position.y = accent.baseHeadY + Math.sin(t * 3.4 + index * 0.6) * 0.08;
@@ -2863,6 +3024,8 @@ export default function App() {
           pops.splice(i, 1);
         }
       }
+      jungleMistMat.opacity = lerp(0.05, 0.16, perfState.effectQuality);
+      shadow.material.opacity = lerp(0.26, lerp(0.4, 0.16, air), perfState.effectQuality);
     }
 
     const cameraDesired = new THREE.Vector3();
@@ -3094,8 +3257,8 @@ export default function App() {
         hudRefresh.lastSpeedometerCharge = charge;
       }
 
-      if (gameStartTimeRef.current && startedRef.current && !gameOverRef.current) {
-        setTextIfChanged(ui.timerDisplay, "timerDisplay", formatElapsed(now - gameStartTimeRef.current));
+      if (startedRef.current && !gameOverRef.current) {
+        setTextIfChanged(ui.timerDisplay, "timerDisplay", formatElapsed(getSafeElapsedMs(gameStartTimeRef.current, now)));
       }
 
       const section = sectionLabel();
@@ -3114,6 +3277,7 @@ export default function App() {
       if (ui.debug.current) {
         setTextIfChanged(ui.debug, "debug", [
           `FPS ${fps}`,
+          `Perf ${perfState.windowFps}fps / FX ${Math.round(perfState.effectQuality * 100)}% / Near obs ${perfState.nearbyObstacleCount}`,
           `Section ${section}`,
           `X ${body.x.toFixed(2)}  Y ${body.y.toFixed(2)}  Z ${body.z.toFixed(2)}`,
           `Speed ${body.speed.toFixed(2)}  Charge ${roundedCharge}%`,
@@ -3144,6 +3308,24 @@ export default function App() {
         frames = 0;
         lastFpsTime = now;
       }
+      perfState.frameWindowMs += dt * 1000;
+      perfState.frameWindowCount += 1;
+      if (perfState.frameWindowMs >= PERFORMANCE.sampleWindowMs) {
+        perfState.windowFps = Math.round((perfState.frameWindowCount * 1000) / perfState.frameWindowMs);
+        const heavyMoment = perfState.nearbyObstacleCount >= PERFORMANCE.obstacleHeavyCount;
+        if (perfState.windowFps <= PERFORMANCE.veryLowFpsThreshold) perfState.effectQuality = 0.52;
+        else if (perfState.windowFps <= PERFORMANCE.lowFpsThreshold && heavyMoment) perfState.effectQuality = 0.68;
+        else perfState.effectQuality = 1;
+        renderer.shadowMap.enabled = perfState.effectQuality >= 0.68;
+        const nextShadowSize = perfState.effectQuality >= 0.68 ? 1024 : 512;
+        if (sun.shadow.mapSize.x !== nextShadowSize) {
+          sun.shadow.mapSize.set(nextShadowSize, nextShadowSize);
+          sun.shadow.needsUpdate = true;
+        }
+        if (postProcessing?.bloomPass) postProcessing.bloomPass.strength = 0.34 * perfState.effectQuality;
+        perfState.frameWindowMs = 0;
+        perfState.frameWindowCount = 0;
+      }
       if (pausedRef.current) {
         renderFrame();
         frame = requestAnimationFrame(animate);
@@ -3165,7 +3347,10 @@ export default function App() {
       cancelAnimationFrame(frame);
       window.removeEventListener("keydown", keyDown);
       window.removeEventListener("keyup", keyUp);
-      window.removeEventListener("blur", blur);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("visibilitychange", handleDocumentHidden);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("resize", resize);
       resetGameRef.current = null;
 
@@ -3218,7 +3403,6 @@ export default function App() {
       renderer.dispose();
       renderer.forceContextLoss();
       scene.clear();
-      if (texturePreviewPanel?.parentElement === mount) mount.removeChild(texturePreviewPanel);
       if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
       audioManagerRef.current?.dispose();
     };
@@ -3254,8 +3438,10 @@ export default function App() {
   };
 
   return (
-    <main className={`relative h-screen w-screen overflow-hidden bg-[#60b0ff] text-white ${immersiveReady ? "immersive-ready" : ""}`} style={{ fontFamily: "system-ui, -apple-system, sans-serif", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100vh" }}>
-      <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
+    <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
+      <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
+        <div className="game-frame-stage" aria-hidden="true" />
+        <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
 
       {sceneError && (
         <section className="app-fallback-screen absolute inset-0 z-30 flex items-center justify-center px-6">
@@ -3269,13 +3455,13 @@ export default function App() {
       )}
 
       {/* TOP STRIP — tally, section, timer */}
-      {started && !complete && !gameOver && (
-        <div className="hud-audio-dock pointer-events-auto absolute bottom-4 left-3 z-20">
+      {started && paused && !complete && !gameOver && (
+        <div className="game-hud-slot hud-audio-dock hud-safe-bottom-left hud-decorative-edge pointer-events-auto absolute z-20" aria-label="Decorative audio dock">
           <AudioControls audioState={audioState} onToggle={toggleAudioState} compact />
         </div>
       )}
       {started && !complete && !gameOver && (
-        <div className="hud-elephant-ability-badge pointer-events-none absolute bottom-4 right-4 z-20"
+        <div className="game-hud-slot hud-elephant-ability-badge hud-safe-bottom-right hud-decorative-edge pointer-events-none absolute z-20"
           aria-label="Elephant charge ability status" role="img">
           <img
             src={`${import.meta.env.BASE_URL}favicon.png`}
@@ -3287,8 +3473,10 @@ export default function App() {
         </div>
       )}
       {started && !complete && !gameOver && (
-        <div className="hud-top-strip hud-safe-top pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
-          <div className="hud-counter-stack flex flex-col gap-2">
+        <>
+        <div className="game-safe-zone" aria-hidden="true" />
+        <div className="game-hud-shell hud-top-strip hud-safe-top pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-4 py-2">
+          <div className="hud-left-critical-stack">
             <div className="hud-icon-row hud-panel-dark">
               <span className="hud-icon-bubble" aria-hidden="true">🍋</span>
               <span className="hud-icon-row-label">Fruit</span>
@@ -3308,19 +3496,16 @@ export default function App() {
               </span>
             </div>
           </div>
-          <div ref={ui.sectionBadge} className="hud-section-pill rounded-full px-4 py-1 text-xs font-black uppercase tracking-[0.28em] text-emerald-200">
-            Learning Trail
-          </div>
           <div className="hud-right-cluster">
+            <div className="hud-timer-pill flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black text-amber-100">
+              <Icon label="⏱" />
+              <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "rgba(255,200,100,0.6)" }}>TIME</span>
+              <span ref={ui.timerDisplay} style={{ fontVariantNumeric: "tabular-nums" }}>00:00</span>
+            </div>
             <div className="hud-control-row pointer-events-auto">
-              <div className="hud-timer-pill flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black text-amber-100">
-                <Icon label="⏱" />
-                <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "rgba(255,200,100,0.6)" }}>TIME</span>
-                <span ref={ui.timerDisplay} style={{ fontVariantNumeric: "tabular-nums" }}>00:00</span>
-              </div>
               <button
                 type="button"
-                className="hud-gold-frame-button"
+                className="hud-settings-button hud-settings-icon-button"
                 onClick={() => setPausedState(true)}
                 aria-label="Pause game and open settings"
                 title="Pause / Settings"
@@ -3328,17 +3513,28 @@ export default function App() {
                 ⚙
               </button>
             </div>
-            <div className="hud-score-stack" title="Score from fruit, crates, pineapples, and monkeys">
-              <span className="hud-score-label">Score</span>
-              <span className="hud-score-emphasis hud-gold-outline-text hud-gold-gradient-text" ref={ui.scoreTally}>0</span>
-            </div>
-            <div ref={ui.multiplierBadge}
+          </div>
+        </div>
+        <div className="hud-center-strip pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2">
+          <div ref={ui.sectionBadge} className="hud-section-pill rounded-full px-4 py-1 text-xs font-black uppercase tracking-[0.28em] text-emerald-200">
+            Learning Trail
+          </div>
+        </div>
+        </>
+      )}
+
+      {started && !complete && !gameOver && (
+        <div className="hud-top-left-score pointer-events-none absolute z-20">
+          <div className="hud-score-stack" title="Score from fruit, crates, pineapples, and monkeys">
+            <span className="hud-score-label">Score</span>
+            <span className="hud-score-emphasis hud-gold-outline-text hud-gold-gradient-text" ref={ui.scoreTally}>0</span>
+          </div>
+          <div ref={ui.multiplierBadge}
               className="hud-multiplier-badge hud-gold-outline-text hud-gold-gradient-text transition-all duration-200"
               style={{ opacity: 0, transform: "scale(0.85)", color: "#ffd34a" }}>
               1x COMBO
             </div>
-            <div className="hud-crate-chip hud-panel-dark" title="Crates smashed">📦 <span ref={ui.cratesTally}>0</span></div>
-          </div>
+          <div className="hud-crate-chip hud-panel-dark" title="Crates smashed">📦 <span ref={ui.cratesTally}>0</span></div>
         </div>
       )}
 
@@ -3395,7 +3591,7 @@ export default function App() {
 
       {/* BOTTOM CENTRE — prompt + speedometer */}
       {started && !complete && !gameOver && (
-        <div className="hud-prompt-layer pointer-events-none absolute bottom-5 left-1/2 z-20 flex flex-col items-center gap-2">
+        <div className="hud-prompt-layer hud-safe-bottom-center pointer-events-none absolute left-1/2 z-20 flex flex-col items-center gap-2">
           <div ref={ui.prompt}
             className="hud-prompt overflow-hidden text-ellipsis whitespace-nowrap rounded-full px-5 py-2 text-center text-sm font-black tracking-wide text-amber-50">
             Hold ↑ to build Elephant Charge.
@@ -3408,12 +3604,22 @@ export default function App() {
         <TouchControls visible={touchControlsVisible} onControlChange={handleTouchControlChange} />
       )}
 
+      {import.meta.env.DEV && layoutMode === "phone-landscape" && (
+        <div className="hud-debug-mini" aria-hidden="true">
+          <div>layout: {layoutMode}</div>
+          <div>viewport: {Math.round(viewportWidth)}x{Math.round(viewportHeight)}</div>
+          <div>touch visible: {String(touchControlsVisible)}</div>
+          <div>touch mode: {touchControlsMode}</div>
+          <div>fullscreen: {String(Boolean(document.fullscreenElement))}</div>
+        </div>
+      )}
+
       {/* START SCREEN */}
       {!started && !complete && !gameOver && !sceneError && (
         <section className="absolute inset-0 z-30 flex items-center justify-center px-6"
           style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(15,28,12,0.45) 50%, rgba(0,0,0,0.8) 100%)", backdropFilter: "blur(2px)" }}>
-          <div className="w-full max-w-3xl rounded-[2rem] p-8 text-center"
-            style={{ background: "rgba(12,20,10,0.78)", border: "1px solid rgba(246,210,138,0.25)", boxShadow: "0 0 55px rgba(255,180,80,0.15)", maxHeight: "92vh", overflowY: "auto" }}>
+          <div className="title-card w-full max-w-3xl rounded-[2rem] p-8 text-center"
+            style={{ background: "rgba(12,20,10,0.78)", border: "1px solid rgba(246,210,138,0.25)", boxShadow: "0 0 55px rgba(255,180,80,0.15)" }}>
             <div className="mb-2 text-xs font-black uppercase tracking-[0.38em] text-emerald-200/75">Three-Loop Jungle Trial</div>
             <div className="title-elephant-badge mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
               aria-label="Pink elephant mascot" role="img">
@@ -3425,7 +3631,7 @@ export default function App() {
               Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="rounded-full bg-white/10 px-6 py-3 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:scale-105 active:scale-95">Settings</button>
+              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="hud-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
               <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
@@ -3442,7 +3648,7 @@ export default function App() {
             <div className="title-advanced-note mx-auto mt-3 rounded-full px-4 py-2 text-center text-[11px] font-bold tracking-wide text-emerald-100/50">
               Trail markings telegraph hazards early; smash crates for score streaks without covering the road.
             </div>
-            <SelfTestStatus summaryRef={testSummaryRef} />
+            <div className="title-selftest-note"><SelfTestStatus summaryRef={testSummaryRef} /></div>
           </div>
         </section>
       )}
@@ -3538,7 +3744,7 @@ export default function App() {
                 Restart
               </button>
               <button type="button" onClick={() => { setSettingsContext("pause"); setSettingsOpen(true); }}
-                className="rounded-full bg-white/10 px-5 py-2 text-sm font-black text-amber-100 transition hover:scale-105 active:scale-95">
+                className="hud-settings-button rounded-full px-5 py-2 text-sm font-black transition hover:scale-105 active:scale-95">
                 Settings
               </button>
             </div>
@@ -3585,6 +3791,7 @@ export default function App() {
         <pre ref={ui.debug} className="pointer-events-none absolute bottom-4 right-4 z-10 min-w-56 rounded-2xl p-4 text-xs leading-relaxed text-lime-200"
           style={{ background: "rgba(0,0,0,0.75)", border: "1px solid rgba(100,220,80,0.18)" }} />
       )}
+      </div>
     </main>
   );
 }

@@ -43,6 +43,14 @@ export const HUD_TIMING = {
   speedometerRedrawDelta: 0.01,
 };
 
+export const PERFORMANCE = {
+  sampleWindowMs: 2500,
+  lowFpsThreshold: 52,
+  veryLowFpsThreshold: 46,
+  obstacleHeavyDistance: 65,
+  obstacleHeavyCount: 7,
+};
+
 export const PARTICLES = {
   defaultBurstCount: 8,
   hurtBurstScale: 0.25,

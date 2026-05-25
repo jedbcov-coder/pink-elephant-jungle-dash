@@ -105,6 +105,17 @@ function getAudioContextConstructor() {
   return window.AudioContext || window.webkitAudioContext || null;
 }
 
+function debugAudioPermission(message, error) {
+  if (import.meta.env.DEV) console.debug(message, error);
+}
+
+function resumeAudioContext(context) {
+  if (!context || context.state !== "suspended") return;
+  context.resume().catch((error) => {
+    debugAudioPermission("[audio] Audio context resume skipped.", error);
+  });
+}
+
 export function createAudioManager() {
   let ctx = null;
   let master = null;
@@ -127,7 +138,7 @@ export function createAudioManager() {
   function ensureContext() {
     if (disposed) disposed = false;
     if (ctx) {
-      if (ctx.state === "suspended") void ctx.resume();
+      resumeAudioContext(ctx);
       return ctx;
     }
 
@@ -138,7 +149,7 @@ export function createAudioManager() {
     master = ctx.createGain();
     master.gain.setValueAtTime(audioState.muted ? 0.0001 : 0.78, ctx.currentTime);
     master.connect(ctx.destination);
-    if (ctx.state === "suspended") void ctx.resume();
+    resumeAudioContext(ctx);
     return ctx;
   }
 

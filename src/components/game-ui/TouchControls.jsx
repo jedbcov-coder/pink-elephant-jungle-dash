@@ -2,10 +2,14 @@ import React, { useRef } from "react";
 
 const RUN_CONTROL_BUTTON = { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" };
 
-const ACTION_CLUSTER_BUTTONS = [
+const MOVEMENT_CLUSTER_BUTTONS = [
   { code: "ArrowLeft", label: "Left", icon: "◀", hint: "Steer" },
   { code: "ArrowRight", label: "Right", icon: "▶", hint: "Steer" },
-  { code: "Space", label: "Slide", icon: "↧", hint: "Hold" },
+];
+
+const ACTION_CLUSTER_BUTTONS = [
+  { code: "Space", label: "JumpSlide", icon: "⤒↧", hint: "Tap/Hold" },
+  { code: "ArrowUp", label: "Charge", icon: "⬆", hint: "Hold" },
   { code: "KeyF", label: "Smash", icon: "💥", hint: "Hit" },
 ];
 
@@ -54,9 +58,9 @@ export function TouchControls({ visible, onControlChange }) {
   return (
     <div className="touch-controls mobile-controls" aria-label="Touch game controls">
       <div className="mobile-run-control" aria-label="Run control">
-        {[RUN_CONTROL_BUTTON].map(({ code, label, icon, hint }) => (
+        {[RUN_CONTROL_BUTTON, ...MOVEMENT_CLUSTER_BUTTONS].map(({ code, label, icon, hint }) => (
+          <div key={`${code}-${label}`} className="touch-control-hitbox">
           <button
-            key={`${code}-${label}`}
             type="button"
             className={`touch-control-button touch-control-${label.toLowerCase()}`}
             aria-label={`${label} control`}
@@ -70,12 +74,13 @@ export function TouchControls({ visible, onControlChange }) {
             <span className="touch-control-label">{label}</span>
             <span className="touch-control-hint">{hint}</span>
           </button>
+          </div>
         ))}
       </div>
       <div className="mobile-action-cluster" aria-label="Movement and action controls">
         {ACTION_CLUSTER_BUTTONS.map(({ code, label, icon, hint }) => (
+        <div key={`${code}-${label}`} className="touch-control-hitbox">
         <button
-          key={`${code}-${label}`}
           type="button"
           className={`touch-control-button touch-control-${label.toLowerCase()}`}
           aria-label={`${label} control`}
@@ -89,6 +94,7 @@ export function TouchControls({ visible, onControlChange }) {
           <span className="touch-control-label">{label}</span>
           <span className="touch-control-hint">{hint}</span>
         </button>
+          </div>
         ))}
       </div>
     </div>
