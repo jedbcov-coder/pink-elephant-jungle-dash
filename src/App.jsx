@@ -245,6 +245,20 @@ function formatElapsed(elapsedMs) {
   return `${mm}:${ss}`;
 }
 
+
+function sanitizeGameStartTime(startTime, now = performance.now()) {
+  if (!Number.isFinite(startTime) || startTime === null) return null;
+  if (!Number.isFinite(now)) return startTime;
+  return Math.min(startTime, now);
+}
+
+function getSafeElapsedMs(startTime, now = performance.now()) {
+  if (!Number.isFinite(now)) return 0;
+  const safeStartTime = sanitizeGameStartTime(startTime, now);
+  if (safeStartTime === null) return 0;
+  return Math.max(0, now - safeStartTime);
+}
+
 function SelfTestStatus({ summaryRef }) {
   const [summary, setSummary] = useState(() => summaryRef.current);
 
@@ -406,8 +420,10 @@ export default function App() {
       pauseStartedAtRef.current = performance.now();
       audioManagerRef.current?.updateGameplayMusic({ charge: 0, isPlaying: false });
     } else {
-      if (pauseStartedAtRef.current !== null && gameStartTimeRef.current) {
-        gameStartTimeRef.current += performance.now() - pauseStartedAtRef.current;
+      const now = performance.now();
+      gameStartTimeRef.current = sanitizeGameStartTime(gameStartTimeRef.current, now);
+      if (pauseStartedAtRef.current !== null && gameStartTimeRef.current !== null) {
+        gameStartTimeRef.current += Math.max(0, now - pauseStartedAtRef.current);
       }
       pauseStartedAtRef.current = null;
     }
@@ -431,11 +447,12 @@ export default function App() {
     if (!snapshot) return;
     lifecycleSnapshotRef.current = null;
     const now = performance.now();
+    gameStartTimeRef.current = sanitizeGameStartTime(gameStartTimeRef.current ?? snapshot.gameStartTime, now);
     const pausedFor = Math.max(0, now - (snapshot.capturedAt ?? now));
     if (Number.isFinite(pausedFor) && pausedFor > 0) {
       if (pausedRef.current && pauseStartedAtRef.current !== null) {
         pauseStartedAtRef.current += pausedFor;
-      } else if (gameStartTimeRef.current) {
+      } else if (gameStartTimeRef.current !== null) {
         gameStartTimeRef.current += pausedFor;
       }
     }
@@ -2291,7 +2308,7 @@ export default function App() {
     const body = createPlayerBody();
 
     function snapshotResults(overrides = {}) {
-      const elapsedMs = gameStartTimeRef.current ? performance.now() - gameStartTimeRef.current : 0;
+      const elapsedMs = getSafeElapsedMs(gameStartTimeRef.current, performance.now());
       const z = overrides.z ?? body.z;
       return {
         fruit: body.fruit,
@@ -2374,6 +2391,9 @@ export default function App() {
       gameOverRef.current = false;
       pausedRef.current = false;
       pauseStartedAtRef.current = null;
+      lifecycleSnapshotRef.current = null;
+      lifecyclePauseReasonRef.current = null;
+      resumeSafetyUntilRef.current = 0;
       gameStartTimeRef.current = start ? performance.now() : null;
       setFinalResults(null);
       setStarted(start);
@@ -3237,8 +3257,8 @@ export default function App() {
         hudRefresh.lastSpeedometerCharge = charge;
       }
 
-      if (gameStartTimeRef.current && startedRef.current && !gameOverRef.current) {
-        setTextIfChanged(ui.timerDisplay, "timerDisplay", formatElapsed(now - gameStartTimeRef.current));
+      if (startedRef.current && !gameOverRef.current) {
+        setTextIfChanged(ui.timerDisplay, "timerDisplay", formatElapsed(getSafeElapsedMs(gameStartTimeRef.current, now)));
       }
 
       const section = sectionLabel();

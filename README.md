@@ -14,6 +14,11 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Added one shared Settings button theme for both `.hud-settings-button` and legacy `.title-settings-button`, including readable hover/focus/active/disabled states.
 - Added `.hud-settings-icon-button` so icon-only Settings/Pause stays dark, bordered, high-contrast, and touch-friendly on desktop/tablet/phone-landscape.
 
+### Latest timer stability fix
+
+- Fixed the negative gameplay timer bug (for example `TIME -1166:41`) by hardening elapsed-time math during pause/resume, fullscreen focus changes, and lifecycle restore events.
+- Timer display now always clamps to a safe non-negative `mm:ss` value, and restart now clears lifecycle timing snapshots so a new run always starts cleanly at `00:00`.
+
 ### Latest 2-in-1 fullscreen HUD + Settings fix
 
 - Unified all **Settings** buttons under one shared high-contrast jungle style (title screen, pause overlay, in-game pause shortcut, and settings panel close) to remove the white/pale-yellow unreadable variant.
