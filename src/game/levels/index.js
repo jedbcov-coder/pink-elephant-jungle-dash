@@ -12,3 +12,7 @@ export const LEVEL_REGISTRY = {
 export function getLevelConfig(levelId) {
   return LEVEL_REGISTRY[levelId] ?? level1;
 }
+
+export function getLevelConfigStrict(levelId) {
+  return LEVEL_REGISTRY[levelId] ?? null;
+}

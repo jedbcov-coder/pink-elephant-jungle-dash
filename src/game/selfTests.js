@@ -17,7 +17,7 @@ import { TITLE_THEME, noteNameToFrequency } from "./audio/titleTheme.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./track.js";
 import { CONFIG, MOVEMENT, PICKUPS, SCORING } from "./config.js";
 import { buildLevelById, LEVEL } from "./level.js";
-import { getLevelConfig } from "./levels/index.js";
+import { LEVEL_REGISTRY, getLevelConfig, getLevelConfigStrict } from "./levels/index.js";
 import level2 from "./levels/level2.js";
 import level3 from "./levels/level3.js";
 import { LOOP_DIFFICULTIES, LOOP_PROMPT_PLANS, LEVEL_SECTIONS, promptPlanHasCue, sectionDifficulty, sectionMetadata } from "./levelPromptMetadata.js";
@@ -94,6 +94,17 @@ export function runSelfTests() {
   assert("track has visible left-right bends", maxCenter - minCenter > 12);
   assert("track bends stay readable", maxReadableAngle < 0.35);
 
+
+  const levelIds = ["level-1", "level-2", "level-3"];
+  assert("all registered levels exist", levelIds.every((levelId) => Boolean(getLevelConfigStrict(levelId))));
+  assert("level chain keeps level-1 -> level-2", getLevelConfigStrict("level-1")?.nextLevel === "level-2");
+  assert("level chain keeps level-2 -> level-3", getLevelConfigStrict("level-2")?.nextLevel === "level-3");
+  assert("level chain keeps level-3 terminal", getLevelConfigStrict("level-3")?.nextLevel === null);
+  assert("all levels have loops and matching loopPlans", Object.values(LEVEL_REGISTRY).every((level) => Array.isArray(level.loops) && Array.isArray(level.loopPlans) && level.loops.length === level.loopPlans.length));
+  assert("level 1 keeps default course values", !getLevelConfigStrict("level-1")?.course);
+  assert("level 2 keeps extended course values", getLevelConfigStrict("level-2")?.course?.floorLength === 1500 && getLevelConfigStrict("level-2")?.course?.finishLineZ === -1330 && getLevelConfigStrict("level-2")?.course?.endOfCourseZ === -1352);
+  assert("level 3 keeps extended course values", getLevelConfigStrict("level-3")?.course?.floorLength === 1500 && getLevelConfigStrict("level-3")?.course?.finishLineZ === -1330 && getLevelConfigStrict("level-3")?.course?.endOfCourseZ === -1352);
+
   const builtLevel1 = buildLevelById("level-1");
   const builtLevel2 = buildLevelById("level-2");
   const builtLevel3 = buildLevelById("level-3");
@@ -117,6 +128,8 @@ export function runSelfTests() {
   assert("level 3 id stays level-3", level3.id === "level-3");
   assert("level 3 finish/gate use level overrides after build", builtLevel3.finish.z === level3.course.finishLineZ && builtLevel3.gate.z === level3.course.gateZ && builtLevel3.finish.z === builtLevel3.gate.z);
   assert("getLevelConfig resolves level-3", getLevelConfig("level-3")?.id === "level-3");
+  assert("buildLevelById level-2 has obstacles and finish", builtLevel2.logs.length > 0 && builtLevel2.branches.length > 0 && builtLevel2.crates.length > 0 && Boolean(builtLevel2.finish));
+  assert("buildLevelById level-3 has obstacles and finish", builtLevel3.logs.length > 0 && builtLevel3.branches.length > 0 && builtLevel3.crates.length > 0 && Boolean(builtLevel3.finish));
 
   ["level-1", "level-2", "level-3"].forEach((levelId) => {
     const builtLevel = buildLevelById(levelId);

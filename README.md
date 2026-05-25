@@ -9,6 +9,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 
 
+### Latest level transition stability fix (2026-05-25)
+
+- Fixed a level progression bug where pressing **Continue** after Level 1 could repeatedly trigger completion and skip playable runs.
+- Continue now waits for the next level scene to fully rebuild before starting the run, so Level 2 and Level 3 begin as normal gameplay.
+- Added stricter next-level validation and expanded self-tests for level chain integrity and Level 2/3 build outputs.
+
+
 ### Latest settings menu redesign (2026-05-25)
 
 - Rebuilt the Settings panel into a compact card grid so Audio, Controls, Graphics, and Save Data are visible together without the old long-scroll layout on desktop/tablet.

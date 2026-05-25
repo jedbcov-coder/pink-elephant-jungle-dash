@@ -23,7 +23,7 @@ import {
 } from "./game/collisionHelpers.js";
 import { createKeys, isAllowedKey, setKeyState } from "./game/input.js";
 import { buildLevelById } from "./game/level.js";
-import { getLevelConfig } from "./game/levels/index.js";
+import { getLevelConfig, getLevelConfigStrict } from "./game/levels/index.js";
 import { promptForZ } from "./game/prompts.js";
 import { aabb, clamp, createSeededRandom, lerp } from "./game/math.js";
 import { DEFAULT_AUDIO_STATE, createAudioManager, normalizeAudioState } from "./game/audio/audioManager.js";
@@ -373,6 +373,7 @@ export default function App() {
   const [touchControlsVisible, setTouchControlsVisible] = useState(false);
   const [touchControlsMode, setTouchControlsMode] = useState(() => normalizeTouchControlsMode(loadSettings()?.display?.touchControlsMode));
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
+  const [isLevelTransitioning, setIsLevelTransitioning] = useState(false);
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
   const [isPortrait, setIsPortrait] = useState(() => getIsPortraitViewport());
@@ -386,7 +387,7 @@ export default function App() {
   const [saveSystemReady, setSaveSystemReady] = useState(false);
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
-  const nextLevelConfig = nextLevelId ? getLevelConfig(nextLevelId) : null;
+  const nextLevelConfig = nextLevelId ? getLevelConfigStrict(nextLevelId) : null;
   const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const { canShowInstallPrompt, installGame, dismissInstallPrompt } = usePwaInstallPrompt();
@@ -529,11 +530,6 @@ export default function App() {
 
   useEffect(() => {
     activeLevelRef.current = buildLevelById(currentLevelId);
-    if (pendingLevelStartRef.current && pendingLevelStartRef.current.levelId === currentLevelId) {
-      const { start } = pendingLevelStartRef.current;
-      pendingLevelStartRef.current = null;
-      resetGameRef.current?.({ start });
-    }
   }, [currentLevelId]);
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -2449,6 +2445,12 @@ export default function App() {
     }
 
     resetGameRef.current = resetGame;
+    if (pendingLevelStartRef.current && pendingLevelStartRef.current.levelId === currentLevelId) {
+      const { start } = pendingLevelStartRef.current;
+      pendingLevelStartRef.current = null;
+      resetGame({ start });
+      setIsLevelTransitioning(false);
+    }
 
     function activateParticle(x, y, z, colour, scale = 0.28, life = 1, velocity = {}) {
       let particle = particlePool.find((entry) => !entry.active);
@@ -3449,14 +3451,28 @@ export default function App() {
   };
 
   const startLevelById = (levelId) => {
-    if (!levelId) return;
+    const nextConfig = levelId ? getLevelConfigStrict(levelId) : null;
+    if (!nextConfig || isLevelTransitioning) return;
+
+    completeRef.current = false;
+    setComplete(false);
+    setShowFinalReward(false);
+    setFinalResults(null);
+    pausedRef.current = false;
+    gameOverRef.current = false;
+    setPaused(false);
+    setGameOver(false);
+
     stopTitleTheme(0.18);
     startAudio();
     if (levelId === currentLevelId) {
       resetGameRef.current?.({ start: true });
       pendingLevelStartRef.current = null;
+      setIsLevelTransitioning(false);
       return;
     }
+
+    setIsLevelTransitioning(true);
     pendingLevelStartRef.current = { levelId, start: true };
     setCurrentLevelId(levelId);
   };
@@ -3679,6 +3695,7 @@ export default function App() {
             <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
               {hasNextLevel ? (
                 <button onClick={() => startLevelById(nextLevelId)}
+                  disabled={isLevelTransitioning}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
                   Continue to {nextLevelConfig?.name ?? "Next Level"}
                 </button>
