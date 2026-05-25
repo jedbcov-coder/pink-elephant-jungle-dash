@@ -878,8 +878,9 @@ button:disabled {
   pointer-events: none;
   z-index: 6;
   inset: calc(var(--hud-safezone-inset) + var(--hud-safe-top)) calc(var(--hud-safezone-inset) + var(--hud-safe-right)) calc(var(--hud-safezone-inset) + var(--hud-safe-bottom)) calc(var(--hud-safezone-inset) + var(--hud-safe-left));
-  border: 1px dashed rgba(255, 248, 220, 0.14);
   border-radius: 1.1rem;
+  border: none;
+  opacity: 0;
 }
 
 .hud-decorative-edge { opacity: 0.7; }
@@ -2479,21 +2480,19 @@ button:disabled {
   min-width: 5.5rem;
   min-height: 5.5rem;
   border-radius: 999px;
-  border: 1px dashed rgba(255, 230, 170, 0.35);
-  background: rgba(8, 16, 10, 0.06);
-  color: rgba(255, 238, 200, 0.55);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  border: none;
+  background: transparent;
+  color: transparent;
+  font-size: 0;
   touch-action: manipulation;
+  opacity: 0;
 }
 
 .center-pause-tap-target:hover,
 .center-pause-tap-target:focus-visible {
-  background: rgba(8, 16, 10, 0.18);
-  color: rgba(255, 244, 217, 0.92);
-  border-color: rgba(255, 230, 170, 0.75);
+  background: transparent;
+  color: transparent;
+  border-color: transparent;
   outline: none;
 }
 
@@ -2501,5 +2500,25 @@ button:disabled {
   .center-pause-tap-target {
     min-width: 6.2rem;
     min-height: 6.2rem;
+  }
+}
+
+
+@media (min-width: 1024px) and (pointer: fine) and (max-height: 920px) {
+  .app-shell.layout-desktop { padding: clamp(0.35rem, 1.2vw, 0.7rem); }
+  .layout-desktop .app-frame {
+    width: 100%;
+    aspect-ratio: auto;
+    height: 100%;
+    max-height: 100%;
+  }
+  .layout-desktop .game-frame-stage { display: none; }
+  .layout-desktop .start-screen-overlay {
+    padding-top: clamp(0.35rem, 1.1vh, 0.7rem);
+    padding-bottom: clamp(0.35rem, 1.1vh, 0.7rem);
+  }
+  .layout-desktop .title-card {
+    max-height: min(94dvh, 42rem);
+    padding: clamp(0.7rem, 0.95vh + 0.3rem, 1.05rem);
   }
 }

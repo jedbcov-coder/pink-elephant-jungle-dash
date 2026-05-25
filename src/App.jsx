@@ -204,11 +204,6 @@ function AudioControls({ audioState, onToggle, compact = false }) {
     event.stopPropagation();
   };
 
-  const openPauseFromCenterTap = useCallback(() => {
-    if (!started || paused || complete || gameOver || settingsOpen) return;
-    setPausedState(true);
-  }, [complete, gameOver, paused, setPausedState, settingsOpen, started]);
-
   return (
     <div className={wrapClass} onPointerDown={stopGestureStart} onKeyDown={stopGestureStart}>
       <button
@@ -551,9 +546,9 @@ export default function App() {
     };
 
     const touchDeviceQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
-    const tabletLikeQuery = window.matchMedia("(max-width: 1100px) and (orientation: landscape)");
+    const touchCapableQuery = window.matchMedia("(any-pointer: coarse)");
+    const tabletLikeQuery = window.matchMedia("(max-width: 1280px) and (orientation: landscape)");
     const phoneLikeQuery = window.matchMedia("(max-width: 900px)");
-    const wideDesktopQuery = window.matchMedia("(min-width: 1200px) and (hover: hover) and (pointer: fine)");
     const updateVisibility = () => {
       if (touchControlsMode === "on" || touchControlsMode === "always") {
         setTouchControlsVisible(true);
@@ -563,12 +558,12 @@ export default function App() {
         setTouchControlsVisible(false);
         return;
       }
-      const touchDetected = touchDeviceQuery.matches || touchInputDetectedRef.current;
-      const isPhoneOrTabletWidth = phoneLikeQuery.matches;
-      const isTabletPosture = tabletLikeQuery.matches && touchDetected;
-      const isWideDesktopLayout = wideDesktopQuery.matches;
-      const shouldShowAuto = isPhoneOrTabletWidth || isTabletPosture;
-      setTouchControlsVisible(shouldShowAuto && !isWideDesktopLayout);
+      const hasTouchCapability = navigator.maxTouchPoints > 0 || touchCapableQuery.matches;
+      const touchDetected = touchDeviceQuery.matches || hasTouchCapability || touchInputDetectedRef.current;
+      const isLandscape = (window.visualViewport?.width ?? window.innerWidth) >= (window.visualViewport?.height ?? window.innerHeight);
+      const isPhoneOrTabletWidth = phoneLikeQuery.matches || tabletLikeQuery.matches;
+      const shouldShowAuto = touchDetected && (layoutMode === "phone-landscape" || layoutMode === "tablet-landscape" || (isLandscape && isPhoneOrTabletWidth));
+      setTouchControlsVisible(shouldShowAuto);
     };
     const showForTouchInput = (event) => {
       if (event.pointerType === "touch" || event.pointerType === "pen") {
@@ -585,7 +580,6 @@ export default function App() {
     touchDeviceQuery.addEventListener?.("change", updateVisibility);
     tabletLikeQuery.addEventListener?.("change", updateVisibility);
     phoneLikeQuery.addEventListener?.("change", updateVisibility);
-    wideDesktopQuery.addEventListener?.("change", updateVisibility);
     window.addEventListener("pointerdown", showForTouchInput, { passive: true });
     window.addEventListener("pointerdown", handlePointerForImmersive, { passive: true });
     window.addEventListener("touchstart", showForTouchStart, { passive: true });
@@ -596,20 +590,19 @@ export default function App() {
       touchDeviceQuery.removeEventListener?.("change", updateVisibility);
       tabletLikeQuery.removeEventListener?.("change", updateVisibility);
       phoneLikeQuery.removeEventListener?.("change", updateVisibility);
-      wideDesktopQuery.removeEventListener?.("change", updateVisibility);
       window.removeEventListener("pointerdown", showForTouchInput);
       window.removeEventListener("pointerdown", handlePointerForImmersive);
       window.removeEventListener("touchstart", showForTouchStart);
       window.removeEventListener("touchstart", immersiveFromTouchStart);
     };
-  }, [touchControlsMode, tryImmersiveMode]);
+  }, [layoutMode, touchControlsMode, tryImmersiveMode]);
 
   useEffect(() => {
     const gameplayActive = started && !paused && !complete && !gameOver;
     if (!gameplayActive) return;
-    if (layoutMode !== "phone-landscape") return;
+    const autoShouldShow = layoutMode === "phone-landscape" || layoutMode === "tablet-landscape" || (navigator.maxTouchPoints > 0 && layoutMode === "desktop");
 
-    if (touchControlsMode === "on" || touchControlsMode === "always" || touchControlsMode === "auto") {
+    if (touchControlsMode === "on" || touchControlsMode === "always" || (touchControlsMode === "auto" && autoShouldShow)) {
       touchInputDetectedRef.current = true;
       setTouchControlsVisible(true);
     }
@@ -3479,11 +3472,6 @@ export default function App() {
     setCurrentLevelId(levelId);
   };
 
-  const openPauseFromCenterTap = useCallback(() => {
-    if (!started || paused || complete || gameOver || settingsOpen) return;
-    setPausedState(true);
-  }, [complete, gameOver, paused, setPausedState, settingsOpen, started]);
-
   return (
     <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
       <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
@@ -3497,9 +3485,7 @@ export default function App() {
           onClick={openPauseFromCenterTap}
           aria-label="Pause game from center of screen"
           title="Tap center to pause"
-        >
-          Pause
-        </button>
+        />
       )}
 
       {sceneError && (

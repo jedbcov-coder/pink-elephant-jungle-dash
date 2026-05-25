@@ -7,6 +7,15 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
+
+### Latest stabilisation update (2026-05-25)
+
+- Fixed the startup crash `complete is not defined` by removing a misplaced pause callback from `AudioControls` and keeping pause logic in the main app scope.
+- Updated touch controls modes so `always` reliably shows controls during gameplay on desktop/laptop/2-in-1/phone/tablet, while `auto` now supports phone-landscape, tablet-landscape, and touch-capable 2-in-1 layouts.
+- Hid debug-only visual overlays in normal gameplay by making the dashed safe-zone frame and center pause label fully invisible while keeping their tap functionality.
+- Added short-height laptop fit rules so title, Settings, Begin button, and version/build marker stay visible at common laptop sizes (1366x768, 1536x864, 1600x900).
+- Bumped deployment marker to `1.0.1 / docs-touch-test-2026-05-25` with update note `always touch controls and laptop title fit`.
+
 ### Latest short-height desktop/laptop controls visibility update
 
 - Also hides the optional advanced helper note (`title-advanced-note`) on short-height desktop/laptop viewports so the primary start actions stay visible without crowding.
