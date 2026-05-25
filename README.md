@@ -10,6 +10,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 
 ### Latest stabilisation update (2026-05-25)
 
+
+### Console note (sandbox/iframe testing)
+
+- If you test inside some embedded sandbox previews, you may see this console error: `Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Window>'`.
+- This is a known iframe restriction issue in sandboxed preview environments and is safe to ignore.
+
+
 - Startup fix: removed duplicate app version/build exports in `src/appInfo.js` that could break startup/build, and bumped release marker to `1.0.3 / docs-tablet-startup-fix-2026-05-25`.
 - Tablet polish pass: rotate overlay now says “phone or tablet” for clearer portrait guidance, tablet-landscape touch controls are slightly larger for easier taps, display settings now label **Balanced** as **Recommended for Tablets**, and tablet prompt positioning was raised to reduce overlap with bottom controls on medium tablets.
 - Fixed the startup crash `complete is not defined` by removing a misplaced pause callback from `AudioControls` and keeping pause logic in the main app scope.
