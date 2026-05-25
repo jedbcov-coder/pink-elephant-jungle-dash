@@ -2247,6 +2247,30 @@ button:disabled {
   pointer-events: auto;
 }
 
+
+.layout-tablet-landscape .mobile-controls {
+  display: block !important;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.layout-tablet-landscape .hud-control-row,
+.layout-tablet-landscape .mobile-controls button,
+.layout-tablet-landscape .touch-control-button,
+.layout-tablet-landscape .touch-control-hitbox {
+  pointer-events: auto;
+}
+
+/* Reduce HUD clutter while touch controls are active on tablet landscape. */
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-side-panels-row,
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-top-left-score,
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-center-strip,
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-prompt-layer,
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-elephant-ability-badge,
+.app-shell.layout-tablet-landscape.touch-controls-active .hud-debug-mini {
+  display: none !important;
+}
 .layout-phone-landscape .mobile-controls {
   display: block !important;
   position: fixed;
