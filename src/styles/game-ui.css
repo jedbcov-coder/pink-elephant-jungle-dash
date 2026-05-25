@@ -2289,3 +2289,76 @@ button:disabled {
 .pause-overlay-active .hud-top-left-score,
 .pause-overlay-active .hud-prompt-layer,
 .pause-overlay-active .hud-elephant-ability-badge { opacity: 0.32; }
+
+/* Complete screen responsive fit, with compact phone-landscape layout. */
+.complete-overlay {
+  padding-top: calc(var(--hud-safe-top) + 0.5rem);
+  padding-bottom: calc(var(--hud-safe-bottom) + 0.5rem);
+}
+.complete-card {
+  width: min(96vw, 48rem);
+}
+.complete-title {
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+}
+.complete-stats {
+  gap: 0.62rem;
+}
+.complete-stat-chip {
+  padding: 0.48rem 0.72rem;
+}
+.complete-primary-action {
+  min-height: 2.75rem;
+}
+
+.layout-phone-landscape .complete-overlay {
+  align-items: center;
+  padding-left: max(0.5rem, var(--hud-safe-left));
+  padding-right: max(0.5rem, var(--hud-safe-right));
+  padding-top: max(0.4rem, var(--hud-safe-top));
+  padding-bottom: max(0.4rem, var(--hud-safe-bottom));
+}
+.layout-phone-landscape .complete-card {
+  width: min(96vw, 40rem);
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 0.82rem 0.9rem !important;
+  border-radius: 1.1rem;
+}
+.layout-phone-landscape .complete-trophy {
+  margin-bottom: 0.2rem;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+.layout-phone-landscape .complete-title {
+  font-size: clamp(1.03rem, 2.8vw, 1.28rem);
+  line-height: 1.12;
+}
+.layout-phone-landscape .complete-message {
+  margin-top: 0.22rem;
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+.layout-phone-landscape .complete-stats {
+  margin-top: 0.46rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.28rem;
+  font-size: 0.62rem;
+}
+.layout-phone-landscape .complete-stat-chip {
+  border-radius: 0.62rem;
+  padding: 0.22rem 0.35rem;
+}
+.layout-phone-landscape .complete-stat-distance {
+  grid-column: auto !important;
+}
+.layout-phone-landscape .complete-actions {
+  margin-top: 0.56rem;
+  gap: 0.35rem;
+}
+.layout-phone-landscape .complete-primary-action {
+  min-height: 2.2rem;
+  width: min(88vw, 22rem);
+  padding: 0.48rem 0.95rem;
+  font-size: 0.8rem;
+}

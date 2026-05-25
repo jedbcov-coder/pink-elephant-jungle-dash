@@ -90,6 +90,8 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Level-complete overlay mobile-fit pass: added compact phone-landscape result card sizing (smaller trophy/title/text/stats spacing), removed complete-card scrolling on short landscape phones, and kept the next-level primary button visible without scrolling.
+- Progression flow polish: after finishing a level with a next level available, the completion screen now shows only the next-level primary action (for example **Start Sunset Temple Run**, then **Start Night Run**) and hides level-restart actions there; restart flows in pause/game-over remain available.
 - Removed CSS `@import` chaining for game UI styles: `src/main.jsx` now imports `src/styles.css` and `src/styles/game-ui.css` directly to avoid `postcss-import` parsing failures during build.
 - Samsung S23 phone-landscape HUD hardening: removed the desktop right-side HUD slab from phone-landscape gameplay, forced full viewport fill with no side blue strip, tightened a true mini top-row (fruit/lives, level, timer + smaller pause), kept prompt as a bottom-center pill, and forced touch controls to render immediately above HUD overlays.
 - Touch-zone alignment fix for phone-landscape gameplay: movement controls now live in the bottom-left zone, while Jump/Slide + Charge + Smash live in the bottom-right zone for clearer two-thumb play.
