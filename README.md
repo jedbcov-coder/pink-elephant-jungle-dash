@@ -90,6 +90,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Title-screen status marker update: replaced the player-visible self-test summary text with three compact build lines (**Version**, **Build**, **Update**) so the title area keeps a subtle release/status indicator without looking like gameplay HUD.
 - Level-complete overlay mobile-fit pass: added compact phone-landscape result card sizing (smaller trophy/title/text/stats spacing), removed complete-card scrolling on short landscape phones, and kept the next-level primary button visible without scrolling.
 - Progression flow polish: after finishing a level with a next level available, the completion screen now shows only the next-level primary action (for example **Start Sunset Temple Run**, then **Start Night Run**) and hides level-restart actions there; restart flows in pause/game-over remain available.
 - Removed CSS `@import` chaining for game UI styles: `src/main.jsx` now imports `src/styles.css` and `src/styles/game-ui.css` directly to avoid `postcss-import` parsing failures during build.

@@ -63,7 +63,7 @@ import {
   saveSettings,
 } from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
-import { APP_VERSION } from "./appInfo.js";
+import { APP_BUILD_LABEL, APP_UPDATE_NOTE, APP_VERSION } from "./appInfo.js";
 
 const nl = String.fromCharCode(10);
 // Development-only helper: turn this on locally to inspect generated texture canvases.
@@ -264,15 +264,12 @@ function getSafeElapsedMs(startTime, now = performance.now()) {
   return Math.max(0, now - safeStartTime);
 }
 
-function SelfTestStatus({ summaryRef }) {
-  const [summary, setSummary] = useState(() => summaryRef.current);
-
+function StatusMarker({ summaryRef }) {
   useEffect(() => {
     const results = runSelfTests();
     const passCount = results.filter((r) => r.pass).length;
     const nextSummary = `${passCount}/${results.length} self-tests passed`;
     summaryRef.current = nextSummary;
-    setSummary(nextSummary);
     if (passCount !== results.length) {
       const failedResults = results.filter((result) => !result.pass).map((result) => ({
         test: result.name,
@@ -287,7 +284,13 @@ function SelfTestStatus({ summaryRef }) {
     }
   }, [summaryRef]);
 
-  return <div className="mt-4 text-[11px] tracking-wide text-emerald-100/50">{summary}</div>;
+  return (
+    <div className="mt-4 space-y-0.5 text-[10px] font-semibold tracking-wide text-emerald-100/45" aria-label="Build status marker">
+      <div>Version: {APP_VERSION}</div>
+      <div>Build: {APP_BUILD_LABEL}</div>
+      <div>Update: {APP_UPDATE_NOTE}</div>
+    </div>
+  );
 }
 
 function createTrackRibbonGeometry(innerLocalX, outerLocalX, startZ = 14, endZ = -824, step = 3.2) {
@@ -3704,7 +3707,7 @@ export default function App() {
             <div className="title-advanced-note mx-auto mt-3 rounded-full px-4 py-2 text-center text-[11px] font-bold tracking-wide text-emerald-100/50">
               Trail markings telegraph hazards early; smash crates for score streaks without covering the road.
             </div>
-            <div className="title-selftest-note"><SelfTestStatus summaryRef={testSummaryRef} /></div>
+            <div className="title-selftest-note"><StatusMarker summaryRef={testSummaryRef} /></div>
           </div>
         </section>
       )}
