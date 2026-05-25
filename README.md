@@ -390,3 +390,6 @@ Notes:
 - `build:pages` creates a production build directly in `docs/`.
 - Deployment does **not** use GitHub Actions workflows.
 - `docs/.nojekyll` must stay in the repo as an empty file.
+
+
+- Touch quick pause: tap/click center gameplay area to open pause menu with quick audio controls.

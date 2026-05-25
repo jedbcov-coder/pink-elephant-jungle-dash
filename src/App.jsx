@@ -198,6 +198,11 @@ function AudioControls({ audioState, onToggle, compact = false }) {
     event.stopPropagation();
   };
 
+  const openPauseFromCenterTap = useCallback(() => {
+    if (!started || paused || complete || gameOver || settingsOpen) return;
+    setPausedState(true);
+  }, [complete, gameOver, paused, setPausedState, settingsOpen, started]);
+
   return (
     <div className={wrapClass} onPointerDown={stopGestureStart} onKeyDown={stopGestureStart}>
       <button
@@ -3467,11 +3472,28 @@ export default function App() {
     setCurrentLevelId(levelId);
   };
 
+  const openPauseFromCenterTap = useCallback(() => {
+    if (!started || paused || complete || gameOver || settingsOpen) return;
+    setPausedState(true);
+  }, [complete, gameOver, paused, setPausedState, settingsOpen, started]);
+
   return (
     <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
       <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
         <div className="game-frame-stage" aria-hidden="true" />
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
+
+      {started && !paused && !complete && !gameOver && !sceneError && (
+        <button
+          type="button"
+          className="center-pause-tap-target"
+          onClick={openPauseFromCenterTap}
+          aria-label="Pause game from center of screen"
+          title="Tap center to pause"
+        >
+          Pause
+        </button>
+      )}
 
       {sceneError && (
         <section className="app-fallback-screen absolute inset-0 z-30 flex items-center justify-center px-6">
@@ -3770,6 +3792,10 @@ export default function App() {
             <div className="text-xs font-black uppercase tracking-[0.32em] text-emerald-200/70">Trail Paused</div>
             <h2 id="pause-title" className="display-title mt-1 text-3xl font-black text-pink-200">Take a Jungle Breather</h2>
             <p className="mt-2 text-sm text-amber-50/65">Press Esc or P to resume. Input was cleared so no move sticks after focus changes.</p>
+            <div className="mt-5 rounded-xl border border-amber-100/20 bg-black/20 px-4 py-3">
+              <div className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-100/80">Quick Audio</div>
+              <AudioControls audioState={audioState} onToggle={toggleAudioState} />
+            </div>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
               <button type="button" onClick={resumeGame}
                 className="rounded-full bg-emerald-200 px-5 py-2 text-sm font-black text-emerald-950 transition hover:scale-105 active:scale-95">

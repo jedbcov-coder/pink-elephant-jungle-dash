@@ -2362,3 +2362,38 @@ button:disabled {
   padding: 0.48rem 0.95rem;
   font-size: 0.8rem;
 }
+
+
+.center-pause-tap-target {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  min-width: 5.5rem;
+  min-height: 5.5rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(255, 230, 170, 0.35);
+  background: rgba(8, 16, 10, 0.06);
+  color: rgba(255, 238, 200, 0.55);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+
+.center-pause-tap-target:hover,
+.center-pause-tap-target:focus-visible {
+  background: rgba(8, 16, 10, 0.18);
+  color: rgba(255, 244, 217, 0.92);
+  border-color: rgba(255, 230, 170, 0.75);
+  outline: none;
+}
+
+@media (max-width: 767px) {
+  .center-pause-tap-target {
+    min-width: 6.2rem;
+    min-height: 6.2rem;
+  }
+}
