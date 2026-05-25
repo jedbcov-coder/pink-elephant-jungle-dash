@@ -368,6 +368,7 @@ export default function App() {
   const [isStandaloneApp, setIsStandaloneApp] = useState(false);
   const testSummaryRef = useRef("Self-tests pending");
   const [finalResults, setFinalResults] = useState(null);
+  const [showFinalReward, setShowFinalReward] = useState(false);
   const [audioState, setAudioState] = useState(readStoredAudioState);
   const [touchControlsVisible, setTouchControlsVisible] = useState(false);
   const [touchControlsMode, setTouchControlsMode] = useState(() => normalizeTouchControlsMode(loadSettings()?.display?.touchControlsMode));
@@ -386,6 +387,7 @@ export default function App() {
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfig(nextLevelId) : null;
+  const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const { canShowInstallPrompt, installGame, dismissInstallPrompt } = usePwaInstallPrompt();
   const showInstallCard = canShowInstallPrompt;
@@ -2439,6 +2441,7 @@ export default function App() {
       resumeSafetyUntilRef.current = 0;
       gameStartTimeRef.current = start ? performance.now() : null;
       setFinalResults(null);
+      setShowFinalReward(false);
       setStarted(start);
       setComplete(false);
       setGameOver(false);
@@ -2568,6 +2571,7 @@ export default function App() {
       popText("JUNGLE GATE!", body.x, body.y + 3, popZ - 2, "#fff1a6");
       playTone("gate");
       setFinalResults(results);
+      setShowFinalReward(!hasNextLevel);
       setComplete(true);
     }
 
@@ -3646,13 +3650,23 @@ export default function App() {
             style={{ background: "rgba(12,20,10,0.88)", border: "1px solid rgba(255,200,80,0.35)", boxShadow: "0 0 65px rgba(255,190,80,0.22)", maxHeight: "92vh", overflowY: "auto" }}>
             <div className="complete-trophy mb-4 text-6xl">🏆</div>
             <h2 className="complete-title display-title text-4xl font-black text-amber-200">
-              {nextLevelId ? `${currentLevelConfig.name} Complete!` : "Jungle Gate Reached!"}
+              {showFinalReward ? "Final Trail Complete" : `${currentLevelConfig.name} Complete!`}
             </h2>
             <p className="complete-message mt-3 max-w-sm text-sm leading-relaxed text-amber-50/70">
-              {nextLevelId
-                ? `Great run! You're ready for ${nextLevelConfig?.name ?? "the next level"}.`
-                : "The herd made it through. The jungle is yours."}
+              {showFinalReward
+                ? "The Pink Elephant has completed the jungle trail."
+                : `Great run! You're ready for ${nextLevelConfig?.name ?? "the next level"}.`}
             </p>
+            {showFinalReward && (
+              <section className="final-reward-screen mt-5 rounded-2xl border border-amber-200/35 bg-black/30 p-4 text-left">
+                <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Reward sequence unlocked</h3>
+                <p className="mt-1 text-xs text-amber-50/80">Final trail complete</p>
+                <div className="reward-media-placeholder mt-3 rounded-xl border border-dashed border-amber-100/45 bg-black/35 px-4 py-5 text-center text-xs text-amber-50/75">
+                  Future reward animation / video placeholder
+                </div>
+              </section>
+            )}
+
             <div className="complete-stats mt-5 grid grid-cols-2 gap-3 text-left text-sm font-black text-amber-100 sm:grid-cols-3">
               <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">🍋 Fruit <span>{finalResults?.fruit ?? 0}</span></span>
               <span className="complete-stat-chip rounded-2xl bg-white/5 px-3 py-2">🍍 Bonus <span>{finalResults?.fruitLifeCounter ?? 0}</span>/100</span>
@@ -3663,21 +3677,15 @@ export default function App() {
               <span className="complete-stat-chip complete-stat-distance rounded-2xl bg-white/5 px-3 py-2 sm:col-span-3">🌿 Distance <span>{Math.round(finalResults?.distance ?? 0)}</span>m</span>
             </div>
             <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
-              {nextLevelId ? (
+              {hasNextLevel ? (
                 <button onClick={() => startLevelById(nextLevelId)}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
-                  Start {nextLevelConfig?.name ?? "Next Level"}
+                  Continue to {nextLevelConfig?.name ?? "Next Level"}
                 </button>
               ) : (
                 <button onClick={startDemo}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  Restart Trail
-                </button>
-              )}
-              {!nextLevelId && (
-                <button onClick={() => startLevelById(currentLevelId)}
-                  className="rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  Restart {currentLevelConfig.name}
+                  Restart the Trail
                 </button>
               )}
             </div>
