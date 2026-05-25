@@ -81,6 +81,7 @@ If you publish updates and a browser shows an older cached version, follow `OFFL
 
 ## Recent update
 
+- Removed CSS `@import` chaining for game UI styles: `src/main.jsx` now imports `src/styles.css` and `src/styles/game-ui.css` directly to avoid `postcss-import` parsing failures during build.
 - Samsung S23 phone-landscape HUD hardening: removed the desktop right-side HUD slab from phone-landscape gameplay, forced full viewport fill with no side blue strip, tightened a true mini top-row (fruit/lives, level, timer + smaller pause), kept prompt as a bottom-center pill, and forced touch controls to render immediately above HUD overlays.
 - Touch-zone alignment fix for phone-landscape gameplay: movement controls now live in the bottom-left zone, while Jump/Slide + Charge + Smash live in the bottom-right zone for clearer two-thumb play.
 - Phone-landscape touch-controls startup fix: when gameplay begins after **Begin the Trail**, controls now appear immediately in `auto`/`on` mode (no second touch required), while desktop keyboard-first behavior stays unchanged.

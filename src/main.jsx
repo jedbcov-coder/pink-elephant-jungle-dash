@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import { setupServiceWorkerUpdatePrompt } from "./pwa/setupServiceWorkerUpdatePrompt.js";
 import "./styles.css";
+import "./styles/game-ui.css";
 
 class AppErrorBoundary extends React.Component {
   constructor(props) {
