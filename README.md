@@ -7,6 +7,12 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
+### Latest HUD declutter update (2026-05-25)
+
+- Removed the large left-side floating HUD panels in gameplay so the play corridor stays clear in fullscreen on desktop, tablet-landscape, phone-landscape, and touch-capable 2-in-1 devices.
+- Kept the center speedometer/charge gauge as the primary Charge indicator (no Charge gameplay logic changed).
+- Added a compact Energy bar into the left stat stack and kept Score in its own compact row so Score and Lives do not overlap.
+
 ### Latest fullscreen HUD cleanup update (2026-05-25)
 
 - Removed the large left-side Charge buildup panel to reduce HUD overlap in fullscreen and touch-capable landscape play.

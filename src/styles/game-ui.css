@@ -967,6 +967,27 @@ button:disabled {
   overflow: hidden;
 }
 
+
+.hud-energy-row {
+  min-height: 2.25rem;
+}
+
+.hud-energy-track {
+  margin-left: auto;
+  width: clamp(4.2rem, 16vw, 5.6rem);
+  height: 0.52rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 251, 235, 0.12);
+  overflow: hidden;
+}
+
+.hud-energy-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+}
 .hud-fruit-life-fill {
   background: linear-gradient(90deg, #facc15, #84cc16);
   border-radius: inherit;

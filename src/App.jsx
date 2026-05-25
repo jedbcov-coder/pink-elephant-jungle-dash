@@ -395,9 +395,6 @@ export default function App() {
   const ui = {
     health: useRef(null),
     lives: useRef(null),
-    charge: useRef(null),
-    chargeText: useRef(null),
-    stateBadge: useRef(null),
     speedo: useRef(null),
     timerDisplay: useRef(null),
     sectionBadge: useRef(null),
@@ -408,7 +405,6 @@ export default function App() {
     fruitTally: useRef(null),
     cratesTally: useRef(null),
     multiplierBadge: useRef(null),
-    momentumLabel: useRef(null),
     scoreTally: useRef(null),
     debug: useRef(null),
   };
@@ -3240,12 +3236,6 @@ export default function App() {
       const healthBackground = `linear-gradient(90deg, hsl(${hue},90%,52%), hsl(${Math.max(0, hue - 20)},95%,42%))`;
       setStyleIfChanged(ui.health, "healthBackground", "background", healthBackground);
 
-      // Keep the visual charge bar on the animation-frame path so acceleration feels immediate.
-      const chargeWidth = `${(charge * 100).toFixed(1)}%`;
-      setStyleIfChanged(ui.charge, "chargeWidth", "width", chargeWidth);
-      const chargeFilter = charge > MOVEMENT.mightyChargeThreshold ? "drop-shadow(0 0 8px #ff89d2)" : "none";
-      setStyleIfChanged(ui.charge, "chargeFilter", "filter", chargeFilter);
-
       const fruitLifeWidth = `${body.fruitLifeCounter}%`;
       setStyleIfChanged(ui.fruitLife, "fruitLifeWidth", "width", fruitLifeWidth);
     }
@@ -3259,13 +3249,6 @@ export default function App() {
       };
 
       setTextIfChanged(ui.lives, "lives", "🐘".repeat(Math.max(0, body.lives)));
-      setTextIfChanged(ui.chargeText, "chargeText", `${Math.round(charge * 100)}%`);
-
-      const stateColour = stateColours[body.state] || "#fff";
-      setTextIfChanged(ui.stateBadge, "stateBadge", body.state);
-      setStyleIfChanged(ui.stateBadge, "stateBadgeColor", "color", stateColour);
-      setStyleIfChanged(ui.stateBadge, "stateBadgeBorder", "borderColor", `${stateColour}55`);
-
       const showMultiplier = body.multiplier > 1;
       setTextIfChanged(ui.multiplierBadge, "multiplierBadge", `${body.multiplier}x COMBO`);
       setStyleIfChanged(ui.multiplierBadge, "multiplierOpacity", "opacity", showMultiplier ? "1" : "0");
@@ -3276,16 +3259,6 @@ export default function App() {
         "color",
         body.multiplier >= 4 ? "#ff4fb3" : body.multiplier >= 3 ? "#fb923c" : "#ffd34a",
       );
-
-      const momentumText = charge > 0.85
-        ? "STAMPEDE — HOLD YOUR GROUND"
-        : charge > 0.5
-        ? "BUILDING MOMENTUM"
-        : charge > 0.1
-        ? "WARMING UP"
-        : "READY TO CHARGE";
-      setTextIfChanged(ui.momentumLabel, "momentumLabel", momentumText);
-      setStyleIfChanged(ui.momentumLabel, "momentumColor", "color", charge > 0.85 ? "#ff89d2" : charge > 0.5 ? "#ffd34a" : "rgba(255,255,255,0.4)");
 
       setTextIfChanged(ui.scoreTally, "scoreTally", body.score);
 
@@ -3546,6 +3519,13 @@ export default function App() {
                 <span ref={ui.fruitLife} className="hud-fruit-life-fill transition-all duration-150" />
               </span>
             </div>
+            <div className="hud-icon-row hud-panel-dark hud-energy-row" title="Energy helps absorb bumps">
+              <span className="hud-icon-bubble" aria-hidden="true">⚡</span>
+              <span className="hud-icon-row-label">Energy</span>
+              <span className="hud-energy-track" aria-hidden="true">
+                <span ref={ui.health} className="hud-energy-fill transition-all duration-150" />
+              </span>
+            </div>
             <div className="hud-score-compact hud-panel-dark" title="Score from fruit, crates, pineapples, and monkeys">
               <span className="hud-score-compact-label">Score</span>
               <span className="hud-score-compact-value hud-gold-outline-text hud-gold-gradient-text" ref={ui.scoreTally}>0</span>
@@ -3582,35 +3562,6 @@ export default function App() {
           </div>
         </div>
         </>
-      )}
-
-      {/* SIDE HUD PANELS — energy + depth */}
-      {started && !complete && !gameOver && (
-        <div className="hud-side-panels-row hud-safe-inline pointer-events-none absolute left-3 right-3 top-12 z-20">
-          <div className="hud-primary-panel">
-            <div className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-pink-200/70">
-              <Icon label="⚡" size={12} /> Energy
-            </div>
-            <div className="h-3 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div ref={ui.health} className="h-full w-full rounded-full transition-all duration-150" />
-            </div>
-            <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/50">
-              Keep energy up to absorb bumps.
-            </div>
-          </div>
-
-          <div className="hud-secondary-panel">
-            <div className="mb-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-200/70">
-              <Icon label="🧭" size={12} /> Trail Depth
-            </div>
-            <div className="text-2xl font-black leading-none text-amber-100">
-              <span ref={ui.distance}>0</span><span className="ml-1 text-sm text-amber-100/50">m</span>
-            </div>
-            <div className="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-100/40">
-              <Icon label="🎯" size={12} /> Gate at {Math.round(Math.abs(activeLevelRef.current.gate.z))} m
-            </div>
-          </div>
-        </div>
       )}
 
       {/* BOTTOM CENTRE — prompt + speedometer */}
