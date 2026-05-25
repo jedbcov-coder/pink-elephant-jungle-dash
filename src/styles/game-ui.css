@@ -2127,6 +2127,9 @@ button:disabled {
 .layout-phone-landscape .mobile-right-cluster {
   right: calc(var(--hud-safe-right) + 0.42rem);
   bottom: calc(var(--hud-safe-bottom) + 0.42rem);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(8px, 1.6vw, 12px);
 }
 .layout-phone-landscape .mobile-controls button,
 .layout-phone-landscape .touch-control-button,
@@ -2214,6 +2217,15 @@ button:disabled {
 .layout-phone-landscape .touch-control-button {
   min-width: clamp(52px, 8vw, 70px);
   min-height: clamp(52px, 8vw, 70px);
+}
+
+/* Reduce HUD clutter while touch controls are active on phone landscape. */
+.app-shell.layout-phone-landscape.touch-controls-active .hud-side-panels-row,
+.app-shell.layout-phone-landscape.touch-controls-active .hud-top-left-score,
+.app-shell.layout-phone-landscape.touch-controls-active .hud-center-strip,
+.app-shell.layout-phone-landscape.touch-controls-active .hud-prompt-layer,
+.app-shell.layout-phone-landscape.touch-controls-active .hud-elephant-ability-badge {
+  display: none !important;
 }
 
 .layout-phone-landscape .game-safe-zone {
