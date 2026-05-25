@@ -8,6 +8,14 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+
+### Latest settings menu redesign (2026-05-25)
+
+- Rebuilt the Settings panel into a compact card grid so Audio, Controls, Graphics, and Save Data are visible together without the old long-scroll layout on desktop/tablet.
+- Removed the debug-like top section links and removed duplicate bottom **Back to Game** action; the panel now has one clear close action.
+- Replaced mixed-color audio pills with consistent ON/OFF toggles, simplified touch mode labels to **Automatic / Always Visible / Disabled**, and tightened controls copy into compact Desktop/Mobile blocks.
+- Restyled Save Tools actions to match the dark jungle glass theme and moved version/build text to a small muted footer.
+
 ### Latest pause menu UX cleanup (2026-05-25)
 
 - Redesigned the pause overlay into a clean vertical action stack: **Resume**, **Settings**, **Restart Run**.

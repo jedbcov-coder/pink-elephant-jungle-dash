@@ -3,6 +3,9 @@ import React, { useEffect } from "react";
 import { PwaInstallCard } from "./PwaInstallCard.jsx";
 import { SaveDebugTools } from "./SaveDebugTools.jsx";
 
+const sectionCardClass = "rounded-2xl border border-amber-100/20 bg-black/20 p-4";
+const segmentedButtonClass = "rounded-xl border border-emerald-100/30 bg-emerald-950/45 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-emerald-100 transition hover:bg-emerald-900/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/80 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-950";
+
 export function SettingsPanel({
   open,
   context,
@@ -42,102 +45,107 @@ export function SettingsPanel({
   const modeLabel = isStandalone ? "Installed app mode" : "Browser tab mode";
 
   return (
-    <section className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-6" style={{ background: "rgba(7,12,8,0.6)", backdropFilter: "blur(3px)" }} aria-modal="true" role="dialog" aria-labelledby="settings-title">
-      <div className="w-full max-w-4xl rounded-[1.5rem] p-6 text-left text-amber-50" style={{ background: "rgba(12,20,10,0.95)", border: "1px solid rgba(246,210,138,0.28)", boxShadow: "0 0 45px rgba(0,0,0,0.32)", maxHeight: "92vh", overflowY: "auto" }}>
-        <div className="flex items-center justify-between gap-3">
+    <section className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-4 sm:px-6" style={{ background: "rgba(7,12,8,0.6)", backdropFilter: "blur(3px)" }} aria-modal="true" role="dialog" aria-labelledby="settings-title">
+      <div className="w-full max-w-5xl rounded-[1.5rem] p-4 text-left text-amber-50 sm:p-5" style={{ background: "rgba(12,20,10,0.95)", border: "1px solid rgba(246,210,138,0.28)", boxShadow: "0 0 45px rgba(0,0,0,0.32)" }}>
+        <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-xs font-black uppercase tracking-[0.32em] text-emerald-200/70">Settings</div>
-            <h2 id="settings-title" className="display-title mt-1 text-3xl font-black text-pink-200">Game Settings</h2>
+            <h2 id="settings-title" className="display-title mt-1 text-2xl font-black text-pink-200 sm:text-3xl">Game Settings</h2>
             <p className="mt-1 text-xs text-amber-50/65">From {context === "pause" ? "Pause" : "Title"}. Esc closes this panel.</p>
           </div>
-          <button type="button" onClick={onClose} className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Close</button>
+          <button type="button" onClick={onClose} aria-label="Close settings" className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Close</button>
         </div>
 
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          <div id="settings-audio" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Audio</h3>
+            <div className="mt-3 space-y-2">
+              {[
+                ["Master Audio", !(audioState.muted), "muted"],
+                ["Music", !(audioState.muted || audioState.musicMuted), "musicMuted"],
+                ["SFX", !(audioState.muted || audioState.sfxMuted), "sfxMuted"],
+              ].map(([label, enabled, key]) => (
+                <div key={key} className="flex items-center justify-between gap-3 rounded-xl border border-emerald-100/20 bg-emerald-950/25 px-3 py-2">
+                  <span className="text-sm font-semibold text-amber-50">{label}</span>
+                  <button
+                    type="button"
+                    onClick={() => onToggleAudio(key)}
+                    aria-pressed={Boolean(enabled)}
+                    className={`${segmentedButtonClass} min-w-[74px] ${enabled ? "border-emerald-200/70 bg-emerald-200/90 text-emerald-950" : ""}`}
+                  >
+                    {enabled ? "ON" : "OFF"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <nav className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-6" aria-label="Settings sections">
-          {[
-            ["#settings-audio", "Audio"],
-            ["#settings-controls", "Controls"],
-            ["#settings-display", "Display"],
-            ["#settings-pwa", "App"],
-            ["#settings-save", "Save"],
-            ["#settings-about", "About"],
-          ].map(([href, label]) => (
-            <a key={href} href={href} className="rounded-full border border-emerald-100/25 bg-emerald-950/35 px-3 py-2 text-center text-[11px] font-black uppercase tracking-[0.16em] text-emerald-100/90 transition hover:bg-emerald-900/45">{label}</a>
-          ))}
-        </nav>
+          <div id="settings-controls" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Controls</h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-amber-100/20 bg-black/20 p-3 text-xs text-amber-50/85">
+                <p className="text-sm font-black uppercase tracking-[0.14em] text-emerald-100">Desktop</p>
+                <p className="mt-1">Move: WASD / Arrows</p>
+                <p>Jump / Slide: Space</p>
+                <p>Smash: F</p>
+              </div>
+              <div className="rounded-xl border border-amber-100/20 bg-black/20 p-3 text-xs text-amber-50/85">
+                <p className="text-sm font-black uppercase tracking-[0.14em] text-emerald-100">Mobile</p>
+                <p className="mt-1">Drag: Steer</p>
+                <p>Buttons: Jump / Smash</p>
+              </div>
+            </div>
+            <fieldset className="mt-3">
+              <legend className="text-xs font-black uppercase tracking-[0.14em] text-amber-100">Touch Controls</legend>
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                {[
+                  ["auto", "Automatic"],
+                  ["always", "Always Visible"],
+                  ["off", "Disabled"],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => onTouchControlsModeChange(value)}
+                    aria-pressed={touchControlsMode === value}
+                    className={`${segmentedButtonClass} w-full text-center ${touchControlsMode === value ? "border-emerald-200/70 bg-emerald-200/90 text-emerald-950" : ""}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
 
-        <div id="settings-audio" className="mt-5 border-t border-amber-100/20 pt-4">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Audio</h3>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => onToggleAudio("muted")} className="rounded-full px-4 py-2 text-xs font-black" style={{ background: audioState.muted ? "rgba(248,113,113,0.92)" : "rgba(134,239,172,0.92)", color: "#082f1a" }}>{audioState.muted ? "Master: Off" : "Master: On"}</button>
-            <button type="button" onClick={() => onToggleAudio("musicMuted")} className="rounded-full px-4 py-2 text-xs font-black" style={{ background: audioState.muted || audioState.musicMuted ? "rgba(255,255,255,0.14)" : "rgba(251,191,36,0.9)", color: audioState.muted || audioState.musicMuted ? "rgba(255,255,255,0.75)" : "#422006" }}>Music {audioState.muted || audioState.musicMuted ? "Off" : "On"}</button>
-            <button type="button" onClick={() => onToggleAudio("sfxMuted")} className="rounded-full px-4 py-2 text-xs font-black" style={{ background: audioState.muted || audioState.sfxMuted ? "rgba(255,255,255,0.14)" : "rgba(244,114,182,0.9)", color: audioState.muted || audioState.sfxMuted ? "rgba(255,255,255,0.75)" : "#4a044e" }}>SFX {audioState.muted || audioState.sfxMuted ? "Off" : "On"}</button>
+          <div id="settings-display" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Graphics</h3>
+            <p className="mt-2 text-xs text-amber-50/75">Graphics Quality</p>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {[
+                ["high", "High", ""],
+                ["balanced", "Balanced", "Recommended"],
+                ["battery-saver", "Saver", ""],
+              ].map(([value, label, sub]) => (
+                <button key={value} type="button" onClick={() => onGraphicsQualityChange(value)} aria-pressed={graphicsQuality === value} className={`${segmentedButtonClass} min-h-[56px] px-2 py-2 normal-case tracking-normal ${graphicsQuality === value ? "border-emerald-200/70 bg-emerald-200/90 text-emerald-950" : ""}`}>
+                  <span className="block text-sm font-bold">{label}</span>
+                  {sub ? <span className="block text-[10px] opacity-85">({sub})</span> : null}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div id="settings-save" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Save Data</h3>
+            <SaveDebugTools visible={showSaveTools} onToggle={onToggleSaveTools} onExport={onExportSave} onImport={onImportSave} onReset={onResetSave} />
+            <div className="mt-3 border-t border-amber-100/20 pt-3 text-xs text-amber-50/70">
+              <p>{modeLabel}</p>
+              <PwaInstallCard visible={showInstallCard} canInstall={canInstall && !isStandalone} onInstall={onInstall} onDismiss={onDismissInstall} />
+            </div>
           </div>
         </div>
 
-        <div id="settings-controls" className="mt-5 border-t border-amber-100/20 pt-4">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Controls</h3>
-          <p className="mt-2 text-xs text-amber-50/75"><strong>Desktop:</strong> Move: Arrows/WASD · Jump/Slide: Space · Smash: F.</p>
-          <p className="mt-1 text-xs text-amber-50/75"><strong>Mobile:</strong> Hold Charge and drag left or right to steer, then use Jump and Smash.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[
-              ["always", "Always show"],
-              ["auto", "Auto"],
-              ["off", "Off"],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => onTouchControlsModeChange(value)}
-                aria-pressed={touchControlsMode === value}
-                className="rounded-full px-4 py-2 text-xs font-black"
-                style={{
-                  background: touchControlsMode === value ? "rgba(167,243,208,0.95)" : "rgba(255,255,255,0.12)",
-                  color: touchControlsMode === value ? "#022c22" : "rgba(255,255,255,0.85)",
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-emerald-100/60">Auto mode: touch layouts show buttons. Always show keeps controls visible during gameplay on all layouts.</p>
-          <p className="mt-1 text-xs text-emerald-100/50">Always mode keeps touch buttons visible everywhere.</p>
-          <p className="mt-1 text-xs text-emerald-100/50">Tip: Play in landscape on phones.</p>
-        </div>
-
-        <div id="settings-display" className="mt-5 border-t border-amber-100/20 pt-4">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Display</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {[
-              ["high", "High"],
-              ["balanced", "Balanced (Recommended for Tablets)"],
-              ["battery-saver", "Battery Saver"],
-            ].map(([value, label]) => (
-              <button key={value} type="button" onClick={() => onGraphicsQualityChange(value)} aria-pressed={graphicsQuality === value} className="rounded-full px-4 py-2 text-xs font-black" style={{ background: graphicsQuality === value ? "rgba(167,243,208,0.95)" : "rgba(255,255,255,0.12)", color: graphicsQuality === value ? "#022c22" : "rgba(255,255,255,0.85)" }}>{label}</button>
-            ))}
-          </div>
-        </div>
-
-        <div id="settings-pwa" className="mt-5 border-t border-amber-100/20 pt-4">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">PWA App</h3>
-          <p className="mt-2 text-xs text-amber-50/75">Current mode: {modeLabel}.</p>
-          <PwaInstallCard visible={showInstallCard} canInstall={canInstall && !isStandalone} onInstall={onInstall} onDismiss={onDismissInstall} />
-        </div>
-
-        <div id="settings-save" className="mt-5 border-t border-amber-100/20 pt-4">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Save Data</h3>
-          <SaveDebugTools visible={showSaveTools} onToggle={onToggleSaveTools} onExport={onExportSave} onImport={onImportSave} onReset={onResetSave} />
-        </div>
-
-        <div id="settings-about" className="mt-5 border-t border-amber-100/20 pt-4 text-xs text-amber-50/75">
-          <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">About</h3>
-          <p className="mt-2">Pink Elephant Jungle Dash</p>
-          <p className="mt-1">Version: {appVersion}</p>
-        </div>
-
-        <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-amber-100/20 pt-4">
-          <button type="button" onClick={onClose} className="rounded-full border border-emerald-100/40 bg-emerald-950/45 px-5 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-100">Back to Game</button>
+        <div className="mt-4 border-t border-amber-100/20 pt-2 text-center text-[11px] text-amber-50/50">
+          Pink Elephant Jungle Dash · Version {appVersion}
         </div>
       </div>
     </section>
