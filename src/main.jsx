@@ -3,10 +3,10 @@ window.__PEJD_BOOT__ = {
   moduleStarted: true,
 };
 
-import React from "react";
+import React, { Suspense } from "react";
 import { createRoot } from "react-dom/client";
 
-import App from "./App.jsx";
+const App = React.lazy(() => import("./App.jsx"));
 import { APP_BUILD_LABEL, APP_UPDATE_NOTE, APP_VERSION } from "./appInfo.js";
 import { setupServiceWorkerUpdatePrompt } from "./pwa/setupServiceWorkerUpdatePrompt.js";
 import "./styles.css";
@@ -57,7 +57,19 @@ if (!rootElement) {
 }
 
 createRoot(rootElement).render(
-  React.createElement(React.StrictMode, null, React.createElement(AppErrorBoundary, null, React.createElement(App))),
+  React.createElement(
+    React.StrictMode,
+    null,
+    React.createElement(
+      AppErrorBoundary,
+      null,
+      React.createElement(
+        Suspense,
+        { fallback: React.createElement("main", { className: "app-fallback-screen" }, React.createElement("section", { className: "app-fallback-card" }, React.createElement("p", null, "Loading Pink Elephant Jungle Dash…"))) },
+        React.createElement(App),
+      ),
+    ),
+  ),
 );
 
 setupServiceWorkerUpdatePrompt({

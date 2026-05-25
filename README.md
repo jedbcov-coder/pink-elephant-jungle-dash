@@ -8,6 +8,12 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+### Latest performance + startup split update (2026-05-25)
+
+- Added lazy-loading for the main game app module so the browser can render a lightweight loading shell before downloading the full gameplay code.
+- Added vendor chunk splitting in Vite so React and Three.js are emitted as separate cached files instead of one giant startup bundle.
+- Goal: reduce first-load startup cost on phones and improve repeat-load caching behavior.
+
 ### Latest iPad touch-controls visibility + HUD declutter update (2026-05-25)
 
 - Added a tablet-landscape touch overlay rule so on-screen controls are actually shown in iPad landscape gameplay when touch controls are active.
