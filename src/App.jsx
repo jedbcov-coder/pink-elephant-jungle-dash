@@ -71,10 +71,11 @@ const SHOW_TEXTURE_PREVIEW = false;
 const JUNGLE_LAYOUT_SEED = 0x5eed2026;
 
 const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
-const TOUCH_CONTROLS_MODES = ["auto", "on", "off", "always"];
+const TOUCH_CONTROLS_MODES = ["auto", "off", "always"];
 // Before adding Level 2, ensure Level 1 is loaded from level config (this is that checkpoint).
 
 function normalizeTouchControlsMode(mode) {
+  if (mode === "on") return "always";
   return TOUCH_CONTROLS_MODES.includes(mode) ? mode : "auto";
 }
 
