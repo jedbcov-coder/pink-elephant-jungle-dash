@@ -1973,6 +1973,14 @@ button:disabled {
   }
 }
 
+/* Short-height desktop/laptop: keep title card focused by hiding only the full controls/help list. */
+@media (min-width: 1024px) and (max-height: 1080px) and (pointer: fine) {
+  .layout-desktop .title-primary-controls,
+  .layout-tablet-landscape .title-primary-controls {
+    display: none !important;
+  }
+}
+
 /* Phone-landscape title sizing: keep the full title card visible without scroll on short viewports. */
 
 .app-shell.layout-phone-landscape .hud-settings-button {
