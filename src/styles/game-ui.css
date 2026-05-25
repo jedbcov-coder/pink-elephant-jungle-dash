@@ -1673,6 +1673,38 @@ button:disabled {
 }
 
 
+
+.hud-settings-button {
+  appearance: none;
+  background: rgba(10, 26, 18, 0.9);
+  border: 1px solid rgba(167, 243, 208, 0.5);
+  color: #fff7e6;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+.hud-settings-button:hover {
+  background: rgba(20, 49, 33, 0.95);
+  border-color: rgba(167, 243, 208, 0.64);
+  color: #ffffff;
+}
+.hud-settings-button:focus-visible {
+  background: rgba(17, 40, 28, 0.95);
+  border-color: rgba(196, 255, 227, 0.88);
+  color: #ffffff;
+  outline: 2px solid rgba(196, 255, 227, 0.5);
+  outline-offset: 2px;
+}
+.hud-settings-button:active {
+  background: rgba(8, 20, 14, 0.96);
+  border-color: rgba(134, 239, 172, 0.7);
+  color: #fff7e6;
+}
+.hud-settings-button:disabled {
+  background: rgba(12, 18, 14, 0.62);
+  border-color: rgba(209, 213, 219, 0.4);
+  color: rgba(255, 247, 230, 0.58);
+  cursor: not-allowed;
+}
+
 /* Phone-landscape title sizing: keep the full title card visible without scroll on short viewports. */
 .title-card {
   width: min(100%, 48rem);
@@ -1680,45 +1712,14 @@ button:disabled {
   overflow: hidden;
 }
 
-.title-card .title-settings-button {
-  appearance: none;
-  background: rgba(10, 26, 18, 0.9);
-  border: 1px solid rgba(167, 243, 208, 0.5);
-  color: #fff7e6;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 24px rgba(0, 0, 0, 0.28);
-}
-.title-card .title-settings-button:hover {
-  background: rgba(20, 49, 33, 0.95);
-  border-color: rgba(167, 243, 208, 0.64);
-  color: #ffffff;
-}
-.title-card .title-settings-button:focus-visible {
-  background: rgba(17, 40, 28, 0.95);
-  border-color: rgba(196, 255, 227, 0.88);
-  color: #ffffff;
-  outline: 2px solid rgba(196, 255, 227, 0.5);
-  outline-offset: 2px;
-}
-.title-card .title-settings-button:active {
-  background: rgba(8, 20, 14, 0.96);
-  border-color: rgba(134, 239, 172, 0.7);
-  color: #fff7e6;
-}
-.title-card .title-settings-button:disabled {
-  background: rgba(12, 18, 14, 0.62);
-  border-color: rgba(209, 213, 219, 0.4);
-  color: rgba(255, 247, 230, 0.58);
-  cursor: not-allowed;
-}
-
-.app-shell.layout-phone-landscape .title-card .title-settings-button {
+.app-shell.layout-phone-landscape .hud-settings-button {
   background: rgba(8, 20, 14, 0.94) !important;
   border-color: rgba(167, 243, 208, 0.66) !important;
   color: #fffbf0 !important;
 }
 
-.app-shell.layout-phone-landscape .title-card .title-settings-button:hover,
-.app-shell.layout-phone-landscape .title-card .title-settings-button:focus-visible {
+.app-shell.layout-phone-landscape .hud-settings-button:hover,
+.app-shell.layout-phone-landscape .hud-settings-button:focus-visible {
   background: rgba(16, 38, 26, 0.97) !important;
   border-color: rgba(196, 255, 227, 0.9) !important;
   color: #ffffff !important;
@@ -2085,3 +2086,39 @@ button:disabled {
   max-width: 100%;
   padding: 0.5rem 1rem;
 }
+
+
+/* Touch-capable tablet/laptop fullscreen HUD: medium density, keep center lane clear. */
+.layout-tablet-landscape .hud-top-left-score {
+  top: calc(var(--hud-safe-top) + 3.9rem);
+  left: calc(0.9rem + var(--hud-safe-left));
+}
+.layout-tablet-landscape .hud-score-stack { padding: 0.36rem 0.58rem; }
+.layout-tablet-landscape .hud-score-emphasis { font-size: clamp(1.02rem, 1.8vw, 1.35rem); }
+.layout-tablet-landscape .hud-crate-chip {
+  margin-top: 0.28rem;
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.2rem 0.62rem;
+  background: rgba(7, 18, 12, 0.78);
+  border: 1px solid rgba(255, 220, 160, 0.28);
+}
+.layout-tablet-landscape .hud-side-panels-row {
+  top: calc(var(--hud-safe-top) + 6.9rem);
+  gap: 0.65rem;
+}
+.layout-tablet-landscape .hud-primary-panel { flex-basis: 13.5rem; max-width: 14rem; padding: 0.62rem 0.72rem; }
+.layout-tablet-landscape .hud-secondary-panel { flex-basis: 11rem; max-width: 11.8rem; padding: 0.62rem 0.72rem; }
+.layout-tablet-landscape .hud-secondary-panel .text-2xl { font-size: 1.38rem; }
+.layout-tablet-landscape .hud-prompt-layer { bottom: calc(0.5rem + var(--hud-safe-bottom)); width: min(62vw, 23rem); }
+.layout-tablet-landscape .hud-prompt { font-size: 0.82rem; padding: 0.38rem 0.82rem; }
+.layout-tablet-landscape .hud-speedometer { width: 86px; height: 86px; }
+.layout-tablet-landscape .hud-elephant-ability-badge { width: 68px; height: 68px; right: calc(0.72rem + var(--hud-safe-right)); bottom: calc(0.72rem + var(--hud-safe-bottom)); }
+.layout-tablet-landscape .hud-ability-status { font-size: 0.55rem; }
+.layout-tablet-landscape .hud-audio-dock { display: none; }
+
+.pause-overlay-active .hud-top-strip,
+.pause-overlay-active .hud-side-panels-row,
+.pause-overlay-active .hud-top-left-score,
+.pause-overlay-active .hud-prompt-layer,
+.pause-overlay-active .hud-elephant-ability-badge { opacity: 0.32; }

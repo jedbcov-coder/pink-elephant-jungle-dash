@@ -50,7 +50,7 @@ export function SettingsPanel({
             <h2 id="settings-title" className="display-title mt-1 text-3xl font-black text-pink-200">Game Settings</h2>
             <p className="mt-1 text-xs text-amber-50/65">From {context === "pause" ? "Pause" : "Title"}. Esc closes this panel.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-50 transition hover:scale-105 active:scale-95">Close</button>
+          <button type="button" onClick={onClose} className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Close</button>
         </div>
 
         <div className="mt-5 border-t border-amber-100/20 pt-4">

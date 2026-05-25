@@ -238,7 +238,8 @@ function AudioControls({ audioState, onToggle, compact = false }) {
 }
 
 function formatElapsed(elapsedMs) {
-  const elapsed = Math.floor(elapsedMs / 1000);
+  const safeElapsedMs = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const elapsed = Math.floor(safeElapsedMs / 1000);
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
   return `${mm}:${ss}`;
@@ -431,8 +432,12 @@ export default function App() {
     lifecycleSnapshotRef.current = null;
     const now = performance.now();
     const pausedFor = Math.max(0, now - (snapshot.capturedAt ?? now));
-    if (gameStartTimeRef.current && Number.isFinite(pausedFor)) {
-      gameStartTimeRef.current += pausedFor;
+    if (Number.isFinite(pausedFor) && pausedFor > 0) {
+      if (pausedRef.current && pauseStartedAtRef.current !== null) {
+        pauseStartedAtRef.current += pausedFor;
+      } else if (gameStartTimeRef.current) {
+        gameStartTimeRef.current += pausedFor;
+      }
     }
     if (stampedeRef.current) stampedeRef.current.nextStepTime = audioManagerRef.current?.getCurrentTime?.() ?? snapshot.stampedeNextStepTime ?? 0;
     resumeSafetyUntilRef.current = performance.now() + 850;
@@ -3413,7 +3418,7 @@ export default function App() {
   };
 
   return (
-    <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
+    <main className={`app-shell layout-${layoutMode} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
       <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
         <div className="game-frame-stage" aria-hidden="true" />
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
@@ -3430,7 +3435,7 @@ export default function App() {
       )}
 
       {/* TOP STRIP — tally, section, timer */}
-      {started && !complete && !gameOver && (
+      {started && paused && !complete && !gameOver && (
         <div className="game-hud-slot hud-audio-dock hud-safe-bottom-left hud-decorative-edge pointer-events-auto absolute z-20" aria-label="Decorative audio dock">
           <AudioControls audioState={audioState} onToggle={toggleAudioState} compact />
         </div>
@@ -3480,7 +3485,7 @@ export default function App() {
             <div className="hud-control-row pointer-events-auto">
               <button
                 type="button"
-                className="hud-gold-frame-button"
+                className="hud-gold-frame-button hud-settings-button"
                 onClick={() => setPausedState(true)}
                 aria-label="Pause game and open settings"
                 title="Pause / Settings"
@@ -3606,7 +3611,7 @@ export default function App() {
               Charge, jump, slide, and smash through a low-poly jungle course. Look for small trail telegraphs before obstacles, then chase fruit, crates, and bonus score.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="title-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
+              <button type="button" onClick={() => { setSettingsContext("title"); setSettingsOpen(true); }} className="hud-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
               <button onClick={startDemo}
               className="mt-7 rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
               style={{ background: "#f472b6", boxShadow: "0 0 30px rgba(244,114,182,0.45)" }}>
@@ -3719,7 +3724,7 @@ export default function App() {
                 Restart
               </button>
               <button type="button" onClick={() => { setSettingsContext("pause"); setSettingsOpen(true); }}
-                className="rounded-full bg-white/10 px-5 py-2 text-sm font-black text-amber-100 transition hover:scale-105 active:scale-95">
+                className="hud-settings-button rounded-full px-5 py-2 text-sm font-black transition hover:scale-105 active:scale-95">
                 Settings
               </button>
             </div>
