@@ -392,6 +392,10 @@ export default function App() {
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
   const completeScreenOpenedAtRef = useRef(0);
 
+  function resetCompleteScreenInputLock() {
+    completeScreenOpenedAtRef.current = 0;
+  }
+
   function isCompleteScreenInputLocked() {
     return performance.now() - completeScreenOpenedAtRef.current < COMPLETE_SCREEN_INPUT_LOCK_MS;
   }
@@ -3477,6 +3481,7 @@ export default function App() {
   }, [currentLevelId, saveSystemReady]);
 
   const startNewGame = () => {
+    resetCompleteScreenInputLock();
     stopTitleTheme(0.18);
     startAudio();
     pendingLevelStartRef.current = { levelId: "level-1", start: true };
@@ -3496,6 +3501,7 @@ export default function App() {
     const nextConfig = levelId ? getLevelConfigStrict(levelId) : null;
     if (!nextConfig || isLevelTransitioning) return;
 
+    resetCompleteScreenInputLock();
     completeRef.current = false;
     setComplete(false);
     setShowFinalReward(false);
