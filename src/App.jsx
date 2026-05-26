@@ -377,6 +377,8 @@ export default function App() {
     update();
     media?.addEventListener?.("change", update);
     return () => media?.removeEventListener?.("change", update);
+  }, []);
+
   const tryImmersiveMode = useCallback((fromUserGesture = false) => {
     immersiveRequestedRef.current = true;
     if (fromUserGesture) requestImmersiveMobileMode();
@@ -389,12 +391,6 @@ export default function App() {
   const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
-
-  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
-    immersiveRequestedRef.current = true;
-    if (fromUserGesture) requestImmersiveMobileMode();
-    setImmersiveReady(true);
-  }, []);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
@@ -924,7 +920,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    function beginTitleThemeFromGesture() {
+    function beginTitleThemeFromGesture(event) {
+      if (event?.type === "keydown" && event.code === "F12") return;
       startTitleTheme();
     }
 
