@@ -371,7 +371,9 @@ export default function App() {
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfigStrict(nextLevelId) : null;
-  const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
+  const hasNextLevel = Boolean(nextLevelId);
+  const hasPlayableNextLevel = Boolean(nextLevelId && nextLevelConfig);
+  const hasNextLevelConfigMismatch = Boolean(hasNextLevel && (!nextLevelId || !nextLevelConfig));
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
 
@@ -2570,7 +2572,7 @@ export default function App() {
       popText("JUNGLE GATE!", body.x, body.y + 3, popZ - 2, "#fff1a6");
       playTone("gate");
       setFinalResults(results);
-      setShowFinalReward(!hasNextLevel);
+      setShowFinalReward(!hasPlayableNextLevel);
       closeSettingsPanel();
       setSettingsContext("title");
       keyRef.current = createKeys();
@@ -3646,6 +3648,24 @@ export default function App() {
                 ? "The Pink Elephant has completed the jungle trail."
                 : `Great run! You're ready for ${nextLevelConfig?.name ?? "the next level"}.`}
             </p>
+            {import.meta.env.DEV && (
+              <section
+                className="mx-auto mt-4 max-w-sm rounded-xl border border-amber-100/20 bg-black/20 px-3 py-2 text-left text-[11px] text-amber-100/70"
+                aria-label="Development complete-screen state"
+              >
+                <div className="font-semibold">DEV state</div>
+                <ul className="mt-1 space-y-0.5">
+                  <li>Current level: {currentLevelId}</li>
+                  <li>Next level id: {nextLevelId ?? "(none)"}</li>
+                  <li>Has next level: {String(hasNextLevel)}</li>
+                  <li>Transitioning: {String(isLevelTransitioning)}</li>
+                  <li>Input locked: {String(completeInputLocked)}</li>
+                </ul>
+                {hasNextLevelConfigMismatch && (
+                  <div className="mt-1 text-[11px] font-semibold text-amber-200">Next level config missing.</div>
+                )}
+              </section>
+            )}
             {showFinalReward && (
               <section className="final-reward-screen mt-5 rounded-2xl border border-amber-200/35 bg-black/30 p-4 text-left">
                 <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Reward sequence unlocked</h3>
@@ -3666,7 +3686,7 @@ export default function App() {
               <span className="complete-stat-chip complete-stat-distance rounded-2xl bg-white/5 px-3 py-2 sm:col-span-3">🌿 Distance <span>{Math.round(finalResults?.distance ?? 0)}</span>m</span>
             </div>
             <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
-              {hasNextLevel ? (
+              {hasPlayableNextLevel ? (
                 <button onClick={(event) => handleContinueClick(event, () => { startLevelById(nextLevelId); }, "[continue-clicked]", { currentLevelId, nextLevelId, actionLabel: "startLevelById" })}
                   onKeyDown={handleCompleteActionKeyDown}
                   disabled={completeButtonDisabled}
