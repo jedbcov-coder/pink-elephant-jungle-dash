@@ -3521,7 +3521,7 @@ export default function App() {
     };
   }, [currentLevelId, saveSystemReady]);
 
-  const startNewGame = () => {
+  function startNewGame() {
     resetCompleteScreenInputLock();
     stopTitleTheme(0.18);
     startAudio();
@@ -3532,13 +3532,13 @@ export default function App() {
       return;
     }
     setCurrentLevelId("level-1");
-  };
+  }
 
-  const startDemo = () => {
+  function startDemo() {
     startNewGame();
-  };
+  }
 
-  const startLevelById = (levelId) => {
+  function startLevelById(levelId) {
     const nextConfig = levelId ? getLevelConfigStrict(levelId) : null;
     if (!nextConfig || isLevelTransitioning) return;
 
@@ -3564,7 +3564,7 @@ export default function App() {
     setIsLevelTransitioning(true);
     pendingLevelStartRef.current = { levelId, start: true };
     setCurrentLevelId(levelId);
-  };
+  }
 
   return (
     <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} ${touchControlsVisible ? "touch-controls-active" : ""} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
