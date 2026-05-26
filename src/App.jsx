@@ -1087,7 +1087,8 @@ export default function App() {
         createPostProcessing,
         setSceneError,
       }));
-    } catch {
+    } catch (error) {
+      failSceneCreate(error);
       return undefined;
     }
 
