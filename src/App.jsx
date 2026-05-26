@@ -3485,7 +3485,14 @@ export default function App() {
       renderer.dispose();
       renderer.forceContextLoss();
       scene.clear();
-      if (mount && renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
+      try {
+        const canvas = renderer?.domElement;
+        if (canvas?.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+      } catch (error) {
+        console.warn("[scene-cleanup] Renderer canvas already removed", error);
+      }
       audioManagerRef.current?.dispose();
     };
   }, [currentLevelId, saveSystemReady]);
