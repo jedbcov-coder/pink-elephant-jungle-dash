@@ -13,6 +13,29 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run a
 - Restored a single, correctly ordered `tryImmersiveMode` declaration and closed the standalone display-mode effect cleanly.
 - Updated title-theme key handling so pressing **F12** is ignored by the game startup gesture listener and remains a browser/devtools action.
 
+### Latest scene cleanup safety fix (2026-05-26)
+
+- Fixed the Level 1 -> Level 2 crash by making Three.js canvas removal safe and idempotent during scene cleanup.
+- Added defensive cleanup guards so duplicate cleanup calls (StrictMode/re-renders/rapid level switches) do not throw.
+- Added temporary scene lifecycle debug logs for create/start/end cleanup and renderer DOM parent state.
+- No level data, obstacle data, course length, finish-line values, gameplay design, or menu design were changed.
+
+### Latest Level 1 continue runtime fix (2026-05-25)
+
+- Removed a duplicate early immersive callback block in `App.jsx` that could leave declarations in a bad order during runtime transitions.
+- Kept a single standalone-display `useEffect` and a single `tryImmersiveMode` callback source of truth, reducing Level 1 → Level 2 transition risk.
+- No level data, hazards, controls, or art assets were changed.
+### Latest post-Level-1 crash fix (2026-05-25)
+
+- Fixed a Level Complete runtime crash by restoring a broken `useEffect` closure and removing a duplicate callback declaration in `App.jsx`.
+- Kept complete-screen helpers as function declarations defined before JSX usage, so complete-screen actions are safe from initialization-order issues.
+- Added an explicit F12 pass-through in gameplay key handlers so opening DevTools does not affect game input state.
+### Latest Level Complete crash fix (2026-05-25)
+
+- Fixed a declaration-order bug in `src/App.jsx` that could trigger `ReferenceError: Cannot access 'ka' before initialization` when Level 1 completed.
+- Ensured complete-screen helper functions are declared before the JSX render path uses them.
+- Kept complete-screen button handlers as callbacks so Continue does not auto-fire during render.
+- Confirmed gameplay keyboard filtering still ignores F12 so browser DevTools can open normally.
 
 ### Latest startup crash fix (2026-05-25)
 
