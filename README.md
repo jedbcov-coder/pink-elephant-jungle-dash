@@ -846,3 +846,9 @@ Notes:
 - Updated `src/game/scene/createSceneCleanup.js` so normal level cleanup still disposes scene resources, listeners, and renderer internals, but no longer forces WebGL context loss by default.
 - Added an optional `hardDispose` flag to run `renderer.forceContextLoss?.()` only for full app-exit cleanup paths when explicitly requested.
 - Updated `src/App.jsx` level-transition cleanup call to use the normal (non-hard) cleanup path and kept existing `[scene-cleanup-start]` / `[scene-cleanup-end]` debug logs intact.
+
+### Latest complete-screen unlock fix (2026-05-26)
+
+- Updated `src/App.jsx` to move complete/game-over input locking to React state so the lock automatically expires after 900 ms.
+- Continue and Try Again buttons now use the same state-driven lock, so they switch from `Get Ready...` to active actions without requiring extra re-render triggers.
+- Kept existing level chain and gameplay behavior unchanged; this is a focused UI input-lock reliability fix.

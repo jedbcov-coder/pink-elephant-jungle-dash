@@ -339,6 +339,7 @@ export default function App() {
   const [touchControlsMode, setTouchControlsMode] = useState(() => normalizeTouchControlsMode(loadSettings()?.display?.touchControlsMode));
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [isLevelTransitioning, setIsLevelTransitioning] = useState(false);
+  const [completeInputLocked, setCompleteInputLocked] = useState(false);
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
   const [isPortrait, setIsPortrait] = useState(() => getIsPortraitViewport());
@@ -373,8 +374,22 @@ export default function App() {
   const hasNextLevelConfigMismatch = Boolean(hasNextLevel && (!nextLevelId || !nextLevelConfig));
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
-  const completeInputLocked = isCompleteScreenInputLocked();
   const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
+
+  useEffect(() => {
+    if (!complete && !gameOver) {
+      setCompleteInputLocked(false);
+      return undefined;
+    }
+
+    setCompleteInputLocked(true);
+
+    const timer = window.setTimeout(() => {
+      setCompleteInputLocked(false);
+    }, COMPLETE_SCREEN_INPUT_LOCK_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [complete, gameOver]);
 
   useEffect(() => {
     const didOpenComplete = !prevCompleteRef.current && complete;
@@ -395,24 +410,20 @@ export default function App() {
       showFinalReward,
       isLevelTransitioning,
       completeScreenOpenedAt: completeScreenOpenedAtRef.current,
-      completeScreenInputLocked: isCompleteScreenInputLocked(),
+      completeScreenInputLocked: completeInputLocked,
     });
 
     prevCompleteRef.current = complete;
     if (complete) prevCompleteLevelIdRef.current = currentLevelId;
-  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning]);
+  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeInputLocked]);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
   }
 
-  function isCompleteScreenInputLocked() {
-    return performance.now() - completeScreenOpenedAtRef.current < COMPLETE_SCREEN_INPUT_LOCK_MS;
-  }
-
   function handleCompleteActionKeyDown(event) {
     if (!["Enter", " ", "Spacebar"].includes(event.key)) return;
-    if (!isCompleteScreenInputLocked()) return;
+    if (!completeInputLocked) return;
     event.preventDefault();
     event.stopPropagation();
   }
@@ -439,7 +450,7 @@ export default function App() {
     event.preventDefault();
     event.stopPropagation();
 
-    const blockedByInputLock = isCompleteScreenInputLocked();
+    const blockedByInputLock = completeInputLocked;
     const blockedByTransition = isLevelTransitioning;
     const { currentLevelId: contextCurrentLevelId = currentLevelId, nextLevelId: contextNextLevelId = null, actionLabel = "continue" } = context;
 
@@ -2548,6 +2559,7 @@ export default function App() {
         releaseTouchInputs();
         completeScreenOpenedAtRef.current = performance.now();
         console.debug("[complete-screen-opened] game-over overlay opened", { at: completeScreenOpenedAtRef.current });
+        setCompleteInputLocked(true);
         setGameOver(true);
       }
     }
@@ -2582,6 +2594,7 @@ export default function App() {
       releaseTouchInputs();
       completeScreenOpenedAtRef.current = performance.now();
       console.debug("[complete-screen-opened] complete overlay opened", { at: completeScreenOpenedAtRef.current });
+      setCompleteInputLocked(true);
       setComplete(true);
     }
 
@@ -3733,9 +3746,9 @@ export default function App() {
             </div>
             <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
               onKeyDown={handleCompleteActionKeyDown}
-              disabled={isCompleteScreenInputLocked()}
+              disabled={completeButtonDisabled}
               className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              {isCompleteScreenInputLocked() ? "Get Ready..." : "Try Again"}
+              {completeInputLocked ? "Get Ready..." : "Try Again"}
             </button>
           </div>
         </section>
