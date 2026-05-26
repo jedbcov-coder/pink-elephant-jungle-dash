@@ -347,6 +347,8 @@ export default function App() {
   const [layoutMode, setLayoutMode] = useState(() => detectLayoutMode());
   const [graphicsQuality, setGraphicsQuality] = useState(() => loadSettings()?.display?.graphicsQuality ?? "balanced");
   const [saveSystemReady, setSaveSystemReady] = useState(false);
+  const prevCompleteRef = useRef(false);
+  const prevCompleteLevelIdRef = useRef("level-1");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -369,6 +371,32 @@ export default function App() {
   const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
+
+  useEffect(() => {
+    const didOpenComplete = !prevCompleteRef.current && complete;
+    const didChangeLevelWhileComplete = complete && prevCompleteLevelIdRef.current !== currentLevelId;
+    if (!didOpenComplete && !didChangeLevelWhileComplete) {
+      prevCompleteRef.current = complete;
+      if (complete) prevCompleteLevelIdRef.current = currentLevelId;
+      return;
+    }
+
+    console.debug("[complete-screen-state]", {
+      currentLevelId,
+      currentLevelName: currentLevelConfig?.name,
+      nextLevelId,
+      nextLevelName: nextLevelConfig?.name,
+      hasNextLevel,
+      complete,
+      showFinalReward,
+      isLevelTransitioning,
+      completeScreenOpenedAt: completeScreenOpenedAtRef.current,
+      completeScreenInputLocked: isCompleteScreenInputLocked(),
+    });
+
+    prevCompleteRef.current = complete;
+    if (complete) prevCompleteLevelIdRef.current = currentLevelId;
+  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning]);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
