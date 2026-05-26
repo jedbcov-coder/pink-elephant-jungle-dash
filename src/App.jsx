@@ -939,7 +939,23 @@ export default function App() {
     const mount = mountRef.current;
     if (!mount) return undefined;
 
+    function safeRemoveRendererDomElement(rendererInstance, expectedMount) {
+      const canvas = rendererInstance?.domElement;
+      if (!canvas) return;
+
+      try {
+        if (canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        } else if (expectedMount?.contains?.(canvas)) {
+          expectedMount.removeChild(canvas);
+        }
+      } catch (error) {
+        console.warn("[scene-cleanup] Renderer canvas was already detached.", error);
+      }
+    }
+
     let disposed = false;
+    let cleanupDone = false;
     let frame = 0;
     let last = performance.now();
     let lastFpsTime = performance.now();
@@ -3421,24 +3437,29 @@ export default function App() {
       frame = requestAnimationFrame(animate);
     }
 
+    console.debug("[scene-create]", currentLevelId);
     resize();
     frame = requestAnimationFrame(animate);
 
     return () => {
+      if (cleanupDone) return;
+      cleanupDone = true;
+      console.debug("[scene-cleanup-start]", currentLevelId);
       disposed = true;
-      cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", keyDown);
-      window.removeEventListener("keyup", keyUp);
-      window.removeEventListener("blur", handleWindowBlur);
-      document.removeEventListener("visibilitychange", handleDocumentHidden);
-      window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("focus", handleWindowFocus);
-      window.removeEventListener("resize", resize);
-      resetGameRef.current = null;
+      try {
+        cancelAnimationFrame(frame);
+        window.removeEventListener("keydown", keyDown);
+        window.removeEventListener("keyup", keyUp);
+        window.removeEventListener("blur", handleWindowBlur);
+        document.removeEventListener("visibilitychange", handleDocumentHidden);
+        window.removeEventListener("pagehide", handlePageHide);
+        window.removeEventListener("focus", handleWindowFocus);
+        window.removeEventListener("resize", resize);
+        resetGameRef.current = null;
 
-      const seenGeometries = new Set();
-      const seenMaterials = new Set();
-      const seenTextures = new Set();
+        const seenGeometries = new Set();
+        const seenMaterials = new Set();
+        const seenTextures = new Set();
 
       const collectTexture = (value) => {
         if (!value) return;
@@ -3472,28 +3493,30 @@ export default function App() {
         collectMaterial(object.material);
       };
 
-      collectTexture(scene.background);
-      collectTexture(scene.environment);
-      Object.values(textures).forEach(collectTexture);
-      scene.traverse(collectObjectResources);
+        collectTexture(scene.background);
+        collectTexture(scene.environment);
+        Object.values(textures).forEach(collectTexture);
+        scene.traverse(collectObjectResources);
 
-      seenGeometries.forEach((geometry) => geometry.dispose());
-      seenMaterials.forEach((material) => material.dispose?.());
-      seenTextures.forEach((texture) => texture.dispose());
-      postProcessing?.dispose();
-      renderer.renderLists?.dispose?.();
-      renderer.dispose();
-      renderer.forceContextLoss();
-      scene.clear();
-      try {
-        const canvas = renderer?.domElement;
-        if (canvas?.parentNode) {
-          canvas.parentNode.removeChild(canvas);
+        seenGeometries.forEach((geometry) => geometry.dispose());
+        seenMaterials.forEach((material) => material.dispose?.());
+        seenTextures.forEach((texture) => texture.dispose());
+        postProcessing?.dispose();
+        console.debug("[renderer-dom-parent]", renderer?.domElement?.parentNode);
+        safeRemoveRendererDomElement(renderer, mount);
+        renderer.renderLists?.dispose?.();
+        renderer.dispose();
+        try {
+          renderer.forceContextLoss?.();
+        } catch (error) {
+          console.warn("[scene-cleanup] forceContextLoss failed", error);
         }
+        scene.clear();
+        audioManagerRef.current?.dispose();
       } catch (error) {
-        console.warn("[scene-cleanup] Renderer canvas already removed", error);
+        console.warn("[scene-cleanup] Non-fatal cleanup error", error);
       }
-      audioManagerRef.current?.dispose();
+      console.debug("[scene-cleanup-end]", currentLevelId);
     };
   }, [currentLevelId, saveSystemReady]);
 
