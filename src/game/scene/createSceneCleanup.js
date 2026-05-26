@@ -18,6 +18,7 @@ export function createSceneCleanup({
   mount,
   safeRemoveRendererDomElement,
   audioManagerRef,
+  hardDispose = false,
 }) {
   console.debug("[scene-cleanup-start]", currentLevelId);
   try {
@@ -80,10 +81,12 @@ export function createSceneCleanup({
     safeRemoveRendererDomElement(renderer, mount);
     renderer.renderLists?.dispose?.();
     renderer.dispose();
-    try {
-      renderer.forceContextLoss?.();
-    } catch (error) {
-      console.warn("[scene-cleanup] forceContextLoss failed", error);
+    if (hardDispose) {
+      try {
+        renderer.forceContextLoss?.();
+      } catch (error) {
+        console.warn("[scene-cleanup] forceContextLoss failed", error);
+      }
     }
     scene.clear();
     audioManagerRef.current?.dispose();

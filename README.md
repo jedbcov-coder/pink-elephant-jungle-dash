@@ -832,3 +832,10 @@ Notes:
 ## Developer notes
 
 - Added level schema validation helpers in `src/game/levels/levelSchema.js` to validate and normalize level configuration objects.
+
+
+### Latest scene transition context-loss gating update (2026-05-26)
+
+- Updated `src/game/scene/createSceneCleanup.js` so normal level cleanup still disposes scene resources, listeners, and renderer internals, but no longer forces WebGL context loss by default.
+- Added an optional `hardDispose` flag to run `renderer.forceContextLoss?.()` only for full app-exit cleanup paths when explicitly requested.
+- Updated `src/App.jsx` level-transition cleanup call to use the normal (non-hard) cleanup path and kept existing `[scene-cleanup-start]` / `[scene-cleanup-end]` debug logs intact.

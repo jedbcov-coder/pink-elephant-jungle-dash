@@ -3402,6 +3402,7 @@ export default function App() {
         mount,
         safeRemoveRendererDomElement,
         audioManagerRef,
+        hardDispose: false,
       });
     };
   }, [currentLevelId, saveSystemReady]);
