@@ -434,14 +434,30 @@ export default function App() {
     setSettingsOpen(true);
   }
 
-  function handleContinueClick(event, action, tag) {
+  function handleContinueClick(event, action, tag, context = {}) {
     event.preventDefault();
     event.stopPropagation();
-    if (isCompleteScreenInputLocked()) {
-      console.debug("[complete-action-blocked] action blocked during lock", { tag });
+
+    const blockedByInputLock = isCompleteScreenInputLocked();
+    const blockedByTransition = isLevelTransitioning;
+    const { currentLevelId: contextCurrentLevelId = currentLevelId, nextLevelId: contextNextLevelId = null, actionLabel = "continue" } = context;
+
+    console.debug(tag, {
+      blockedByInputLock,
+      isLevelTransitioning: blockedByTransition,
+      currentLevelId: contextCurrentLevelId,
+      nextLevelId: contextNextLevelId,
+    });
+
+    if (blockedByInputLock || blockedByTransition) {
+      const blockedReason = blockedByInputLock ? "input-lock" : "transitioning";
+      console.debug("[continue-click-blocked]", { reason: blockedReason, actionLabel });
       return;
     }
-    console.debug(tag, { hash: typeof window !== "undefined" ? window.location.hash : "" });
+
+    if (actionLabel === "startLevelById") {
+      console.debug("[continue-click-allowed] invoking startLevelById(nextLevelId)", { nextLevelId: contextNextLevelId });
+    }
     action();
   }
 
@@ -3651,14 +3667,14 @@ export default function App() {
             </div>
             <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
               {hasNextLevel ? (
-                <button onClick={(event) => handleContinueClick(event, () => { console.debug("[continue-click]", nextLevelId, typeof window !== "undefined" ? window.location.hash : ""); startLevelById(nextLevelId); }, "[continue-clicked]")}
+                <button onClick={(event) => handleContinueClick(event, () => { startLevelById(nextLevelId); }, "[continue-clicked]", { currentLevelId, nextLevelId, actionLabel: "startLevelById" })}
                   onKeyDown={handleCompleteActionKeyDown}
                   disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
                   {completeInputLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
                 </button>
               ) : (
-                <button onClick={(event) => handleContinueClick(event, () => { console.debug("[continue-click]", "level-1", typeof window !== "undefined" ? window.location.hash : ""); startDemo(); }, "[continue-clicked]")}
+                <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
                   onKeyDown={handleCompleteActionKeyDown}
                   disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
@@ -3688,7 +3704,7 @@ export default function App() {
               <span>🐘 <span>{finalResults?.lives ?? 0}</span></span>
               <span>⏱ <span>{formatElapsed(finalResults?.elapsedMs ?? 0)}</span></span>
             </div>
-            <button onClick={(event) => handleContinueClick(event, () => { console.debug("[continue-click]", "level-1", typeof window !== "undefined" ? window.location.hash : ""); startDemo(); }, "[continue-clicked]")}
+            <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
               onKeyDown={handleCompleteActionKeyDown}
               disabled={isCompleteScreenInputLocked()}
               className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
