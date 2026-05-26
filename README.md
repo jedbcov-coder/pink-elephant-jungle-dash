@@ -85,6 +85,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - Added a focused `[complete-screen-state]` debug log in `src/App.jsx` that only fires when the complete screen first opens (false → true) or when the level ID changes while complete is active.
 - Captures current/next level names and IDs, transition flags, final reward flag, lock timestamp, and lock-state result without per-frame console noise.
 
+### Latest complete-screen continue button state cleanup (2026-05-26)
+
+- Updated `src/App.jsx` complete-screen button render logic to compute `completeInputLocked` and `completeButtonDisabled` once before JSX.
+- Replaced inline lock checks in the complete-screen continue/restart buttons with those precomputed values for deterministic, easier-to-debug behavior.
+- Kept gameplay behavior the same (same lock timing, same transition guard, same button labels).
+
 ### Features/Changelog note
 
 - Level configurations are now checked against the game's schema before they are used, so invalid level data is caught early and the game can safely fall back instead of crashing.
