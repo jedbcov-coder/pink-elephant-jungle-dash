@@ -208,9 +208,6 @@ function AudioControls({ audioState, onToggle, compact = false }) {
     event.stopPropagation();
   };
 
-  const completeInputLocked = isCompleteScreenInputLocked();
-  const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
-
   return (
     <div className={wrapClass} onPointerDown={stopGestureStart} onKeyDown={stopGestureStart}>
       <button
@@ -376,6 +373,8 @@ export default function App() {
   const hasNextLevelConfigMismatch = Boolean(hasNextLevel && (!nextLevelId || !nextLevelConfig));
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
+  const completeInputLocked = isCompleteScreenInputLocked();
+  const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
 
   useEffect(() => {
     const didOpenComplete = !prevCompleteRef.current && complete;

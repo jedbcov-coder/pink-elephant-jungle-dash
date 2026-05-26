@@ -110,6 +110,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - Replaced inline lock checks in the complete-screen continue/restart buttons with those precomputed values for deterministic, easier-to-debug behavior.
 - Kept gameplay behavior the same (same lock timing, same transition guard, same button labels).
 
+### Latest continue-button scope bug fix (2026-05-26)
+
+- Fixed `src/App.jsx` so complete-screen button lock/disabled state is computed inside the `App` component (where those values are actually used).
+- Removed the same state calculation from `AudioControls`, which prevented accidental out-of-scope usage.
+- This keeps continue/restart button blocking rules consistent (`input lock` + `isLevelTransitioning`) and avoids false blocking behavior from bad scope.
+
 ### Features/Changelog note
 
 - Level configurations are now checked against the game's schema before they are used, so invalid level data is caught early and the game can safely fall back instead of crashing.
