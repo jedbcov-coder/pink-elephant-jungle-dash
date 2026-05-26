@@ -377,10 +377,6 @@ export default function App() {
     update();
     media?.addEventListener?.("change", update);
     return () => media?.removeEventListener?.("change", update);
-  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
-    immersiveRequestedRef.current = true;
-    if (fromUserGesture) requestImmersiveMobileMode();
-    setImmersiveReady(true);
   }, []);
 
   const currentLevelConfig = getLevelConfig(currentLevelId);
