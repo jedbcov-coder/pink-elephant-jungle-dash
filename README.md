@@ -8,6 +8,13 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+### Latest chunk type constants addition (2026-05-26)
+
+- Added `src/game/chunks/chunkTypes.js` as a standalone constants module for chunk section names.
+- Exported named constants for teaching, fruit-guide, jump-log, slide-vines, smash-blocks, river-crocs, enemy-patrol, reward, breather, combo, and gate.
+- Added `ALL_CHUNK_TYPES` as a frozen list to make test assertions simpler and consistent.
+
+
 ### Latest level loader helper extension (2026-05-26)
 
 - Extended `src/game/levels/levelLoader.js` with `isChunkLevel(levelId)` so chunk-mode levels can be checked safely.
