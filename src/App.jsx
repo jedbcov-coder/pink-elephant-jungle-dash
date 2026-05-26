@@ -3679,7 +3679,7 @@ export default function App() {
                   <li>Next level id: {nextLevelId ?? "(none)"}</li>
                   <li>Has next level: {String(hasNextLevel)}</li>
                   <li>Transitioning: {String(isLevelTransitioning)}</li>
-                  <li>Input locked: {String(completeInputLocked)}</li>
+                  <li>Input locked: {String(completeActionLocked)}</li>
                 </ul>
                 {hasNextLevelConfigMismatch && (
                   <div className="mt-1 text-[11px] font-semibold text-amber-200">Next level config missing.</div>
@@ -3709,16 +3709,16 @@ export default function App() {
               {hasPlayableNextLevel ? (
                 <button onClick={(event) => handleContinueClick(event, () => { startLevelById(nextLevelId); }, "[continue-clicked]", { currentLevelId, nextLevelId, actionLabel: "startLevelById" })}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={completeButtonDisabled}
+                  disabled={completeActionButtonDisabled}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
-                  {completeInputLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
+                  {completeActionLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
                 </button>
               ) : (
                 <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={completeButtonDisabled}
+                  disabled={completeActionButtonDisabled}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  {completeInputLocked ? "Get Ready..." : "Restart the Trail"}
+                  {completeActionLocked ? "Get Ready..." : "Restart the Trail"}
                 </button>
               )}
             </div>

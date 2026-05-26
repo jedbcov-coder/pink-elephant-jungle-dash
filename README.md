@@ -852,3 +852,9 @@ Notes:
 - Updated `src/App.jsx` to move complete/game-over input locking to React state so the lock automatically expires after 900 ms.
 - Continue and Try Again buttons now use the same state-driven lock, so they switch from `Get Ready...` to active actions without requiring extra re-render triggers.
 - Kept existing level chain and gameplay behavior unchanged; this is a focused UI input-lock reliability fix.
+
+### Latest Level 1→2 crash guard update (2026-05-26)
+
+- Renamed complete-screen lock state in `src/App.jsx` to `completeActionLocked` to avoid any possible shadowing/minification initialization conflicts.
+- Kept a single state-based lock source for complete/game-over buttons and handlers.
+- Added a focused `[complete-screen-lock]` debug log to confirm lock state during complete/game-over transitions.
