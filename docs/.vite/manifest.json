@@ -15,6 +15,7 @@
     "name": "three"
   },
   "index.html": {
+    "file": "assets/index-JBoABfUF.js",
     "file": "assets/index-BgOyCisW.js",
     "name": "index",
     "src": "index.html",
@@ -31,6 +32,7 @@
     ]
   },
   "src/App.jsx": {
+    "file": "assets/App-vYJSViIz.js",
     "file": "assets/App-C5Xx0Yc5.js",
     "name": "App",
     "src": "src/App.jsx",

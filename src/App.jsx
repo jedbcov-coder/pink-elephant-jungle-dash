@@ -379,18 +379,18 @@ export default function App() {
     return () => media?.removeEventListener?.("change", update);
   }, []);
 
+  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
+    immersiveRequestedRef.current = true;
+    if (fromUserGesture) requestImmersiveMobileMode();
+    setImmersiveReady(true);
+  }, []);
+
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfigStrict(nextLevelId) : null;
   const hasNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
-
-  const tryImmersiveMode = useCallback((fromUserGesture = false) => {
-    immersiveRequestedRef.current = true;
-    if (fromUserGesture) requestImmersiveMobileMode();
-    setImmersiveReady(true);
-  }, []);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
@@ -920,7 +920,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    function beginTitleThemeFromGesture() {
+    function beginTitleThemeFromGesture(event) {
+      if (event?.type === "keydown" && event.code === "F12") return;
       startTitleTheme();
     }
 
