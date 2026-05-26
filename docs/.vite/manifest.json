@@ -15,9 +15,7 @@
     "name": "three"
   },
   "index.html": {
-    "file": "assets/index-BiTUDjME.js",
-    "file": "assets/index-CtSxn056.js",
-    "file": "assets/index-Cv4D6RxB.js",
+    "file": "assets/index-RzrHaWyM.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -33,9 +31,7 @@
     ]
   },
   "src/App.jsx": {
-    "file": "assets/App-Mt66vrot.js",
-    "file": "assets/App-C4pwR5W_.js",
-    "file": "assets/App-CV7g30ek.js",
+    "file": "assets/App-Bu6gi39F.js",
     "name": "App",
     "src": "src/App.jsx",
     "isDynamicEntry": true,

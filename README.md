@@ -35,6 +35,12 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
    ```
 5. Open the local URL shown in the terminal (usually `http://localhost:5173`).
 
+### Latest Level 1 → Level 2 transition parse-fix update (2026-05-26)
+
+- Fixed `src/App.jsx` duplicate/dead code introduced in complete-screen state and button markup that could break production parsing/minification during level transitions.
+- Kept the change minimal and scoped to transition/complete action rendering only (no gameplay or level-data changes).
+
+
 ### Latest completion UI interaction safety update (2026-05-26)
 
 - Updated `src/styles/game-ui.css` so `.complete-overlay`, `.complete-card`, `.complete-actions`, and `.complete-primary-action` explicitly allow pointer interaction.

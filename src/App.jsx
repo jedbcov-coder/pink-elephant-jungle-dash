@@ -444,8 +444,7 @@ export default function App() {
 
     prevCompleteRef.current = complete;
     if (complete) prevCompleteLevelIdRef.current = currentLevelId;
-  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeActionLocked]);
-  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeInputLocked]);
+  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeActionLocked, completeInputLocked]);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
@@ -481,8 +480,7 @@ export default function App() {
     event.preventDefault();
     event.stopPropagation();
 
-    const blockedByInputLock = completeActionLocked;
-    const blockedByInputLock = completeInputLocked;
+    const blockedByInputLock = completeActionLocked || completeInputLocked;
     const blockedByTransition = isLevelTransitioning;
     const { currentLevelId: contextCurrentLevelId = currentLevelId, nextLevelId: contextNextLevelId = null, actionLabel = "continue" } = context;
 
@@ -3825,11 +3823,6 @@ export default function App() {
               disabled={completeActionButtonDisabled}
               className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
               {completeActionLocked ? "Get Ready..." : "Try Again"}
-              className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              {completeActionLocked ? "Get Ready..." : "Try Again"}
-              disabled={completeButtonDisabled}
-              className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              {completeInputLocked ? "Get Ready..." : "Try Again"}
             </button>
           </div>
         </section>
