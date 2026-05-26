@@ -74,6 +74,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - Confirmed `createCourseGeometry()` returns `safeHalfWidth` and `App.jsx` destructures it before all later uses.
 - Re-ran `npm run check`, `npm run build`, and `npm run build:pages` to verify startup and GitHub Pages output build cleanly.
 
+
+### Latest scene error reset update (2026-05-26)
+
+- Updated `src/App.jsx` so `startNewGame()` clears `sceneError` before starting/restarting Level 1.
+- Updated `src/App.jsx` so `startLevelById(levelId)` clears `sceneError` before level transition setup.
+- Kept this as a minimal stale-overlay reset only (no gameplay or level data logic changes).
+
 ## Deployment note
 - The live game is deployed with **GitHub Pages** at the link above.
 - The current playable demo is **3 levels**.

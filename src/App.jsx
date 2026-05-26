@@ -3408,6 +3408,7 @@ export default function App() {
   }, [currentLevelId, saveSystemReady]);
 
   function startNewGame() {
+    setSceneError(null);
     resetCompleteScreenInputLock();
     closeSettingsPanel();
     stopTitleTheme(0.18);
@@ -3428,6 +3429,8 @@ export default function App() {
   function startLevelById(levelId) {
     const nextConfig = levelId ? getLevelConfigStrict(levelId) : null;
     if (!nextConfig || isLevelTransitioning) return;
+
+    setSceneError(null);
 
     console.debug("[start-level]", levelId);
     closeSettingsPanel();
