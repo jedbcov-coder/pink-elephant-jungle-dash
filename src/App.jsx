@@ -64,6 +64,11 @@ import {
 } from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
 import { APP_BUILD_LABEL, APP_UPDATE_NOTE, APP_VERSION } from "./appInfo.js";
+import { createCourseGeometry, createTrackRibbonGeometry } from "./game/scene/createCourseGeometry.js";
+import { createRenderer } from "./game/scene/createRenderer.js";
+import { createSceneBasics } from "./game/scene/createSceneBasics.js";
+import { createSceneCleanup } from "./game/scene/createSceneCleanup.js";
+import { createSharedResources } from "./game/scene/createSharedResources.js";
 
 const nl = String.fromCharCode(10);
 // Development-only helper: turn this on locally to inspect generated texture canvases.
@@ -289,33 +294,6 @@ function StatusMarker() {
       <div>Update: {APP_UPDATE_NOTE}</div>
     </div>
   );
-}
-
-function createTrackRibbonGeometry(innerLocalX, outerLocalX, startZ = 14, endZ = -824, step = 3.2) {
-  const vertices = [];
-  const uvs = [];
-  const indices = [];
-  const rows = Math.floor((startZ - endZ) / step) + 1;
-
-  for (let i = 0; i <= rows; i++) {
-    const z = Math.max(endZ, startZ - i * step);
-    const angle = trackAngle(z);
-    const normalX = Math.cos(angle);
-    const centerX = trackCenter(z);
-    vertices.push(centerX + innerLocalX * normalX, 0, z, centerX + outerLocalX * normalX, 0, z);
-    uvs.push(0, i * 0.18, 1, i * 0.18);
-    if (i < rows) {
-      const a = i * 2;
-      indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
-    }
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  return geometry;
 }
 
 export default function App() {
@@ -984,50 +962,23 @@ export default function App() {
     let fps = 60;
     const perfState = { frameWindowMs: 0, frameWindowCount: 0, windowFps: 60, effectQuality: 1, nearbyObstacleCount: 0 };
 
-    const scene = new THREE.Scene();
-    const activeCourse = currentLevelConfig.course ?? {};
-    const activeTheme = currentLevelConfig.theme ?? {};
-    const courseFloorLength = activeCourse.floorLength ?? CONFIG.floorLength;
-    const courseFinishZ = activeCourse.finishLineZ ?? CONFIG.finishLineZ;
-    const courseVisualEndZ = Math.min(-824, courseFinishZ - 32);
+    const { scene, camera, sun, activeCourse, activeTheme, courseFloorLength, courseFinishZ, courseVisualEndZ } = createSceneBasics({ mount, currentLevelConfig });
     const levelSpeed = currentLevelConfig.speed ?? MOVEMENT;
     const levelMaxSpeed = levelSpeed.maxSpeed ?? MOVEMENT.maxSpeed;
-    const themeBackground = activeTheme.background ?? "#87c1ab";
-    scene.background = new THREE.Color(themeBackground);
-    scene.fog = new THREE.Fog(activeTheme.fog ?? themeBackground, 35, 160);
-
-    const camera = new THREE.PerspectiveCamera(CAMERA_FEEDBACK.cameraFov, mount.clientWidth / Math.max(1, mount.clientHeight), 0.1, 360);
-    camera.position.set(0, 8, 16);
 
     let renderer;
+    let rendererPixelRatio;
+    let postProcessing;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    } catch (error) {
-      const message = error?.message || "WebGL is unavailable in this browser.";
-      console.error("Pink Elephant WebGL renderer failed to start", error);
-      setSceneError(message);
+      ({ renderer, rendererPixelRatio, postProcessing } = createRenderer({
+        mount,
+        scene,
+        camera,
+        createPostProcessing,
+        setSceneError,
+      }));
+    } catch {
       return undefined;
-    }
-    setSceneError(null);
-    const rendererPixelRatio = () => Math.min(window.devicePixelRatio || 1, 1.5);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.45;
-    renderer.setPixelRatio(rendererPixelRatio());
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-    mount.appendChild(renderer.domElement);
-
-    let postProcessing = null;
-    try {
-      postProcessing = createPostProcessing(renderer, scene, camera, {
-        width: mount.clientWidth,
-        height: Math.max(1, mount.clientHeight),
-        pixelRatio: rendererPixelRatio(),
-      });
-    } catch (error) {
-      console.warn("Pink Elephant post-processing failed; falling back to direct rendering", error);
     }
 
     const renderFrame = () => {
@@ -1038,29 +989,6 @@ export default function App() {
       renderer.render(scene, camera);
     };
 
-    scene.add(new THREE.AmbientLight(activeTheme.ambient ?? "#ffffff", 0.9));
-    const sun = new THREE.DirectionalLight(activeTheme.key ?? "#fff4e6", 2.2);
-    sun.position.set(-8, 24, 18);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
-    sun.shadow.camera.left = -34;
-    sun.shadow.camera.right = 34;
-    sun.shadow.camera.top = 34;
-    sun.shadow.camera.bottom = -34;
-    scene.add(sun);
-
-    if (activeTheme.moon) {
-      const moon = new THREE.Mesh(
-        new THREE.SphereGeometry(activeTheme.moon.radius ?? 3.8, 24, 24),
-        new THREE.MeshBasicMaterial({ color: activeTheme.moon.color ?? "#ffffff", fog: false })
-      );
-      moon.position.set(activeTheme.moon.x ?? -22, activeTheme.moon.y ?? 23, activeTheme.moon.z ?? -88);
-      scene.add(moon);
-
-      const moonGlow = new THREE.PointLight(activeTheme.moon.glow ?? "#d9ccff", 0.9, 140, 2);
-      moonGlow.position.copy(moon.position);
-      scene.add(moonGlow);
-    }
 
     const textures = createSceneTextures();
 
@@ -1088,31 +1016,7 @@ export default function App() {
     canopyMesh.position.set(0, -10, jungle.position.z);
     scene.add(canopyMesh);
 
-    const pathGroup = new THREE.Group();
-    scene.add(pathGroup);
-    const pathMat = makeMaterial("#b87938", { map: textures.pathCracks, normalMap: textures.pathCrackNormal, normalScale: [0.32, 0.32], roughness: 0.95 });
-    const shoulderMat = makeMaterial("#6f4a27", { roughness: 1 });
-    const bankMat = makeMaterial("#174026", { roughness: 1 });
-    const lipMat = makeMaterial("#d5a25b", { roughness: 0.92 });
-    const safeHalfWidth = CONFIG.corridorHalfWidth + 0.62;
-    const pathSurface = new THREE.Mesh(createTrackRibbonGeometry(-safeHalfWidth, safeHalfWidth, 14, courseVisualEndZ, 3.2), pathMat);
-    pathSurface.position.y = 0.055;
-    pathSurface.receiveShadow = true;
-    pathGroup.add(pathSurface);
-
-    [
-      [-safeHalfWidth - 0.86, -safeHalfWidth, shoulderMat, 0.045],
-      [safeHalfWidth, safeHalfWidth + 0.86, shoulderMat, 0.045],
-      [-safeHalfWidth - 1.22, -safeHalfWidth - 0.86, bankMat, 0.16],
-      [safeHalfWidth + 0.86, safeHalfWidth + 1.22, bankMat, 0.16],
-      [-safeHalfWidth - 0.12, -safeHalfWidth + 0.08, lipMat, 0.105],
-      [safeHalfWidth - 0.08, safeHalfWidth + 0.12, lipMat, 0.105],
-    ].forEach(([inner, outer, material, y]) => {
-      const ribbon = new THREE.Mesh(createTrackRibbonGeometry(inner, outer, 14, courseVisualEndZ, 3.2), material);
-      ribbon.position.y = y;
-      ribbon.receiveShadow = true;
-      pathGroup.add(ribbon);
-    });
+    const { pathGroup } = createCourseGeometry({ scene, textures, courseVisualEndZ });
 
     const colliders = [], pickups = [], crocs = [], particles = [], pops = [];
     const activeObstacles = [];
@@ -1120,57 +1024,13 @@ export default function App() {
     const branchHazardAccents = [];
     const branchCueTriggered = new Set();
     const enemies = [], collectibleMeshes = [];
-    const particlePool = [];
-    const popPools = new Map();
-    const pooledParticleGeometry = new THREE.SphereGeometry(1, 8, 8);
-    const sharedGeometries = {
-      treeTrunk: new THREE.CylinderGeometry(0.22, 0.38, 1, 7),
-      treeLeaves: new THREE.DodecahedronGeometry(1, 0),
-      bushClump: new THREE.DodecahedronGeometry(1, 0),
-      canopy: new THREE.DodecahedronGeometry(1, 0),
-      fruit: new THREE.SphereGeometry(0.36, 20, 16),
-      fruitLobe: new THREE.SphereGeometry(0.22, 16, 12),
-      fruitLeaf: new THREE.ConeGeometry(0.1, 0.24, 6),
-      fruitStem: new THREE.CylinderGeometry(0.018, 0.02, 0.16, 5),
-      unitBox: new THREE.BoxGeometry(1, 1, 1),
-      cane: new THREE.CylinderGeometry(0.1, 0.13, 1.45, 12),
-      caneNode: new THREE.TorusGeometry(0.14, 0.026, 8, 14),
-      caneLeaf: new THREE.ConeGeometry(0.08, 0.34, 6),
-      caneFrond: new THREE.CylinderGeometry(0.018, 0.045, 0.44, 6),
-      monkeyBody: new THREE.SphereGeometry(0.72, 14, 10),
-      monkeyHead: new THREE.SphereGeometry(0.52, 14, 10),
-      monkeyEar: new THREE.SphereGeometry(0.24, 10, 8),
-      monkeyMuzzle: new THREE.SphereGeometry(0.24, 10, 8),
-      monkeyEye: new THREE.SphereGeometry(0.11, 10, 8),
-      monkeyTailSegment: new THREE.CylinderGeometry(0.065, 0.075, 0.44, 8),
-      monkeySpike: new THREE.ConeGeometry(0.14, 0.45, 5),
-      pineappleBody: new THREE.SphereGeometry(0.38, 16, 14),
-      pineappleScale: new THREE.ConeGeometry(0.065, 0.11, 4),
-      pineappleLeaf: new THREE.ConeGeometry(0.075, 0.3, 6),
-      cueLeaf: new THREE.DodecahedronGeometry(1, 0),
-      cueRipple: new THREE.TorusGeometry(1, 0.035, 5, 14),
-      cueGlint: new THREE.OctahedronGeometry(0.18, 0),
-      edgeStone: new THREE.DodecahedronGeometry(0.42, 0),
-      edgeFlower: new THREE.SphereGeometry(0.16, 8, 6),
-      edgeStem: new THREE.CylinderGeometry(0.035, 0.045, 0.5, 5),
-      edgeTorchPost: new THREE.CylinderGeometry(0.055, 0.075, 1.0, 6),
-      edgeTorchFlame: new THREE.ConeGeometry(0.18, 0.42, 7),
-      broadBananaLeaf: createBroadBananaLeafGeometry(),
-      hangingVine: new THREE.CylinderGeometry(0.026, 0.044, 1, 6),
-      mossClump: createMossClumpGeometry(),
-      foregroundRock: createLargeForegroundRockGeometry(),
-      ruinBlockCluster: createRuinBlockClusterGeometry(),
-      jungleBaseMist: new THREE.CircleGeometry(1, 18),
-      telegraphArrow: new THREE.ConeGeometry(0.38, 0.82, 3),
-    };
-    const sharedTreeGeometries = {
-      trunk: sharedGeometries.treeTrunk,
-      leaves: sharedGeometries.treeLeaves,
-      bushClump: sharedGeometries.bushClump,
-      broadLeaf: sharedGeometries.broadBananaLeaf,
-      vine: sharedGeometries.hangingVine,
-      baseMist: sharedGeometries.jungleBaseMist,
-    };
+    const { particlePool, popPools, pooledParticleGeometry, sharedGeometries, sharedTreeGeometries } = createSharedResources({
+      scene,
+      createBroadBananaLeafGeometry,
+      createMossClumpGeometry,
+      createLargeForegroundRockGeometry,
+      createRuinBlockClusterGeometry,
+    });
     const MAX_PICKUP_POINT_LIGHTS = 4;
     let pickupPointLights = 0;
     const createLimitedPickupLight = (color, intensity, distance) => {
@@ -3470,79 +3330,27 @@ export default function App() {
     return () => {
       if (cleanupDone) return;
       cleanupDone = true;
-      console.debug("[scene-cleanup-start]", currentLevelId);
       disposed = true;
-      try {
-        cancelAnimationFrame(frame);
-        window.removeEventListener("keydown", keyDown);
-        window.removeEventListener("keyup", keyUp);
-        window.removeEventListener("blur", handleWindowBlur);
-        document.removeEventListener("visibilitychange", handleDocumentHidden);
-        window.removeEventListener("pagehide", handlePageHide);
-        window.removeEventListener("focus", handleWindowFocus);
-        window.removeEventListener("resize", resize);
-        resetGameRef.current = null;
-
-        const seenGeometries = new Set();
-        const seenMaterials = new Set();
-        const seenTextures = new Set();
-
-      const collectTexture = (value) => {
-        if (!value) return;
-        if (Array.isArray(value)) {
-          value.forEach(collectTexture);
-          return;
-        }
-        if (value.isTexture && typeof value.dispose === "function") {
-          seenTextures.add(value);
-          return;
-        }
-        if (value.value && value.value !== value) collectTexture(value.value);
-      };
-
-      const collectMaterial = (material) => {
-        if (!material) return;
-        if (Array.isArray(material)) {
-          material.forEach(collectMaterial);
-          return;
-        }
-        if (seenMaterials.has(material)) return;
-        seenMaterials.add(material);
-        Object.values(material).forEach(collectTexture);
-        if (material.uniforms) Object.values(material.uniforms).forEach(collectTexture);
-      };
-
-      const collectObjectResources = (object) => {
-        if (object.geometry && typeof object.geometry.dispose === "function") {
-          seenGeometries.add(object.geometry);
-        }
-        collectMaterial(object.material);
-      };
-
-        collectTexture(scene.background);
-        collectTexture(scene.environment);
-        Object.values(textures).forEach(collectTexture);
-        scene.traverse(collectObjectResources);
-
-        seenGeometries.forEach((geometry) => geometry.dispose());
-        seenMaterials.forEach((material) => material.dispose?.());
-        seenTextures.forEach((texture) => texture.dispose());
-        postProcessing?.dispose();
-        console.debug("[renderer-dom-parent]", renderer?.domElement?.parentNode);
-        safeRemoveRendererDomElement(renderer, mount);
-        renderer.renderLists?.dispose?.();
-        renderer.dispose();
-        try {
-          renderer.forceContextLoss?.();
-        } catch (error) {
-          console.warn("[scene-cleanup] forceContextLoss failed", error);
-        }
-        scene.clear();
-        audioManagerRef.current?.dispose();
-      } catch (error) {
-        console.warn("[scene-cleanup] Non-fatal cleanup error", error);
-      }
-      console.debug("[scene-cleanup-end]", currentLevelId);
+      createSceneCleanup({
+        currentLevelId,
+        cancelAnimationFrame,
+        frame,
+        keyDown,
+        keyUp,
+        handleWindowBlur,
+        handleDocumentHidden,
+        handlePageHide,
+        handleWindowFocus,
+        resize,
+        resetGameRef,
+        scene,
+        textures,
+        postProcessing,
+        renderer,
+        mount,
+        safeRemoveRendererDomElement,
+        audioManagerRef,
+      });
     };
   }, [currentLevelId, saveSystemReady]);
 
