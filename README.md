@@ -8,6 +8,14 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
 
+### Latest chunk schema validation helper addition (2026-05-26)
+
+- Added `src/game/chunks/chunkSchema.js` with lightweight validation helpers for chunk definitions.
+- Added `getChunkValidationErrors(chunk)` to return clear validation error messages for chunk shape and field types.
+- Added `validateChunkDefinition(chunk)` boolean helper based on the error list length.
+- Kept this disconnected from live gameplay flow for now (no runtime wiring changes).
+
+
 ### Latest chunk type constants addition (2026-05-26)
 
 - Added `src/game/chunks/chunkTypes.js` as a standalone constants module for chunk section names.
