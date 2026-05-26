@@ -1,7 +1,6 @@
 const CACHE_PREFIX = "jungle-dash-offline";
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
-const BUILD_MANIFEST_URL = "./.vite/manifest.json";
 
 const STATIC_FILES = [
   "./",
@@ -21,23 +20,6 @@ self.addEventListener("install", (event) => {
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(STATIC_FILES);
 
-    try {
-      const response = await fetch(BUILD_MANIFEST_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Failed to fetch build manifest: ${response.status}`);
-
-      const buildManifest = await response.json();
-      const buildFiles = new Set();
-
-      for (const entry of Object.values(buildManifest)) {
-        if (entry.file) buildFiles.add(`./${entry.file}`);
-        if (Array.isArray(entry.css)) entry.css.forEach((file) => buildFiles.add(`./${file}`));
-        if (Array.isArray(entry.assets)) entry.assets.forEach((file) => buildFiles.add(`./${file}`));
-      }
-
-      await cache.addAll([...buildFiles]);
-    } catch (error) {
-      console.warn("Offline pre-cache manifest fetch failed.", error);
-    }
   })());
 });
 

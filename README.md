@@ -55,6 +55,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - Added an allowed-path log before level continuation to confirm when `startLevelById(nextLevelId)` is being invoked.
 
 
+
+
+### Latest cache refresh + startup sync fix (2026-05-26)
+
+- Updated `public/service-worker.js` to bump offline cache version so browsers drop older cached bundles that could still reference outdated app chunks.
+- Simplified service-worker install pre-cache to avoid fetching `./.vite/manifest.json` at runtime, which can 404 on GitHub Pages and cause offline pre-cache warnings.
+- Updated `src/appInfo.js` release marker to `1.0.5` for this deploy so clients can pick up the new service worker URL and assets.
 ### Latest startup safeHalfWidth wiring fix (2026-05-26)
 
 - Updated `src/game/scene/createCourseGeometry.js` to return `safeHalfWidth` from `createCourseGeometry()`.
