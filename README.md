@@ -858,3 +858,8 @@ Notes:
 - Renamed complete-screen lock state in `src/App.jsx` to `completeActionLocked` to avoid any possible shadowing/minification initialization conflicts.
 - Kept a single state-based lock source for complete/game-over buttons and handlers.
 - Added a focused `[complete-screen-lock]` debug log to confirm lock state during complete/game-over transitions.
+
+### Latest transition race-safety update (2026-05-26)
+
+- Updated `src/App.jsx` continue action flow so Level Complete "Continue" defers `startLevelById(...)` by one animation frame.
+- This keeps the existing lock/UI behavior but avoids same-tick overlay transition races that could trigger fragile startup timing in minified builds.
