@@ -35,6 +35,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
    ```
 5. Open the local URL shown in the terminal (usually `http://localhost:5173`).
 
+
+### Latest continue-click observability update (2026-05-26)
+
+- Updated `src/App.jsx` continue-click debug logging to emit one structured entry with click tag, input-lock state, transition state, current level ID, and next level ID when available.
+- Added explicit blocked-reason logging (`input-lock` vs `transitioning`) for faster troubleshooting of ignored clicks.
+- Added an allowed-path log before level continuation to confirm when `startLevelById(nextLevelId)` is being invoked.
+
 ## Deployment note
 - The live game is deployed with **GitHub Pages** at the link above.
 - The current playable demo is **3 levels**.
