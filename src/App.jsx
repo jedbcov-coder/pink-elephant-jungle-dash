@@ -208,6 +208,9 @@ function AudioControls({ audioState, onToggle, compact = false }) {
     event.stopPropagation();
   };
 
+  const completeInputLocked = isCompleteScreenInputLocked();
+  const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
+
   return (
     <div className={wrapClass} onPointerDown={stopGestureStart} onKeyDown={stopGestureStart}>
       <button
@@ -3650,16 +3653,16 @@ export default function App() {
               {hasNextLevel ? (
                 <button onClick={(event) => handleContinueClick(event, () => { console.debug("[continue-click]", nextLevelId, typeof window !== "undefined" ? window.location.hash : ""); startLevelById(nextLevelId); }, "[continue-clicked]")}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={isLevelTransitioning || isCompleteScreenInputLocked()}
+                  disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
-                  {isCompleteScreenInputLocked() ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
+                  {completeInputLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
                 </button>
               ) : (
                 <button onClick={(event) => handleContinueClick(event, () => { console.debug("[continue-click]", "level-1", typeof window !== "undefined" ? window.location.hash : ""); startDemo(); }, "[continue-clicked]")}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={isCompleteScreenInputLocked()}
+                  disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  {isCompleteScreenInputLocked() ? "Get Ready..." : "Restart the Trail"}
+                  {completeInputLocked ? "Get Ready..." : "Restart the Trail"}
                 </button>
               )}
             </div>
