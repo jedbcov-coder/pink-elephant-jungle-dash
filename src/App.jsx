@@ -339,7 +339,6 @@ export default function App() {
   const [touchControlsMode, setTouchControlsMode] = useState(() => normalizeTouchControlsMode(loadSettings()?.display?.touchControlsMode));
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [isLevelTransitioning, setIsLevelTransitioning] = useState(false);
-  const [completeActionLocked, setCompleteActionLocked] = useState(false);
   const [completeInputLocked, setCompleteInputLocked] = useState(false);
   const [immersiveReady, setImmersiveReady] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(() => getVisualViewportHeight());
@@ -375,33 +374,7 @@ export default function App() {
   const hasNextLevelConfigMismatch = Boolean(hasNextLevel && (!nextLevelId || !nextLevelConfig));
   const isGameplayActive = started && !paused && !complete && !gameOver;
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
-  const completeActionButtonDisabled = isLevelTransitioning || completeActionLocked;
 
-  useEffect(() => {
-    if (!complete && !gameOver) {
-      setCompleteActionLocked(false);
-      return undefined;
-    }
-
-    setCompleteActionLocked(true);
-
-    const timer = window.setTimeout(() => {
-      setCompleteActionLocked(false);
-    }, COMPLETE_SCREEN_INPUT_LOCK_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [complete, gameOver]);
-
-  useEffect(() => {
-    if (!complete && !gameOver) return;
-    console.debug("[complete-screen-lock]", {
-      complete,
-      gameOver,
-      completeActionLocked,
-      currentLevelId,
-      nextLevelId,
-    });
-  }, [complete, gameOver, completeActionLocked, currentLevelId, nextLevelId]);
   const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
 
   useEffect(() => {
@@ -438,13 +411,12 @@ export default function App() {
       showFinalReward,
       isLevelTransitioning,
       completeScreenOpenedAt: completeScreenOpenedAtRef.current,
-      completeScreenInputLocked: completeActionLocked,
       completeScreenInputLocked: completeInputLocked,
     });
 
     prevCompleteRef.current = complete;
     if (complete) prevCompleteLevelIdRef.current = currentLevelId;
-  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeActionLocked, completeInputLocked]);
+  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeInputLocked]);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
@@ -452,7 +424,6 @@ export default function App() {
 
   function handleCompleteActionKeyDown(event) {
     if (!["Enter", " ", "Spacebar"].includes(event.key)) return;
-    if (!completeActionLocked) return;
     if (!completeInputLocked) return;
     event.preventDefault();
     event.stopPropagation();
@@ -480,7 +451,7 @@ export default function App() {
     event.preventDefault();
     event.stopPropagation();
 
-    const blockedByInputLock = completeActionLocked || completeInputLocked;
+    const blockedByInputLock = completeInputLocked;
     const blockedByTransition = isLevelTransitioning;
     const { currentLevelId: contextCurrentLevelId = currentLevelId, nextLevelId: contextNextLevelId = null, actionLabel = "continue" } = context;
 
@@ -3754,7 +3725,7 @@ export default function App() {
                   <li>Next level id: {nextLevelId ?? "(none)"}</li>
                   <li>Has next level: {String(hasNextLevel)}</li>
                   <li>Transitioning: {String(isLevelTransitioning)}</li>
-                  <li>Input locked: {String(completeActionLocked)}</li>
+                  <li>Input locked: {String(completeInputLocked)}</li>
                 </ul>
                 {hasNextLevelConfigMismatch && (
                   <div className="mt-1 text-[11px] font-semibold text-amber-200">Next level config missing.</div>
@@ -3784,16 +3755,16 @@ export default function App() {
               {hasPlayableNextLevel ? (
                 <button onClick={(event) => handleContinueClick(event, () => { startLevelById(nextLevelId); }, "[continue-clicked]", { currentLevelId, nextLevelId, actionLabel: "startLevelById" })}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={completeActionButtonDisabled}
+                  disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-emerald-200 px-8 py-3 font-black text-emerald-950 transition hover:scale-105 active:scale-95">
-                  {completeActionLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
+                  {completeInputLocked ? "Get Ready..." : `Continue to ${nextLevelConfig?.name ?? "Next Level"}`}
                 </button>
               ) : (
                 <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
                   onKeyDown={handleCompleteActionKeyDown}
-                  disabled={completeActionButtonDisabled}
+                  disabled={completeButtonDisabled}
                   className="complete-primary-action rounded-full bg-amber-200 px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-                  {completeActionLocked ? "Get Ready..." : "Restart the Trail"}
+                  {completeInputLocked ? "Get Ready..." : "Restart the Trail"}
                 </button>
               )}
             </div>
@@ -3821,9 +3792,9 @@ export default function App() {
             </div>
             <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
               onKeyDown={handleCompleteActionKeyDown}
-              disabled={completeActionButtonDisabled}
+              disabled={completeButtonDisabled}
               className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              {completeActionLocked ? "Get Ready..." : "Try Again"}
+              {completeInputLocked ? "Get Ready..." : "Try Again"}
             </button>
           </div>
         </section>

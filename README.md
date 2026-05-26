@@ -887,3 +887,8 @@ Notes:
 
 - Added targeted scene-creation failure handling in `src/App.jsx` around `createSceneBasics`, `createCourseGeometry`, and `createSharedResources`.
 - On setup failure, the app now logs `[scene-create-failed]` with level id + stack, clears transition state, clears pending level start, and shows the error message for easier source-map debugging.
+
+### Latest complete-screen input-lock build fix (2026-05-26)
+
+- Fixed `src/App.jsx` complete-screen input-lock wiring so the lock state is declared once, used consistently by complete/game-over action buttons, and no duplicate lock key/debug declarations remain.
+- Kept the change minimal and scoped to complete-screen interaction/build stability only (no scene or gameplay refactor).
