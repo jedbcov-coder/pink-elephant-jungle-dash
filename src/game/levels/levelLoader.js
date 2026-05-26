@@ -68,5 +68,11 @@ export function getNextLevelId(levelId) {
 }
 
 export function hasNextLevel(levelId) {
-  return getNextLevelId(levelId) !== null;
+  const nextLevelId = getNextLevelId(levelId);
+  return typeof nextLevelId === 'string' && nextLevelId.trim().length > 0;
+}
+
+export function isChunkLevel(levelId) {
+  const config = loadLevelConfigStrict(levelId);
+  return config?.chunkMode === true;
 }
