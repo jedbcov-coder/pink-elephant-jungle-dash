@@ -1,9 +1,3 @@
-
-### Latest level lookup validation hardening (2026-05-26)
-
-- Updated level registry lookup to validate each candidate level config at read-time before it is treated as usable.
-- Invalid level entries now log a clear warning including the level id and failing schema fields.
-- Kept fallback behavior unchanged: `getLevelConfig` still falls back to Level 1, and strict lookup still returns null for unknown ids.
 # Pink Elephant Jungle Dash
 
 ## Play the game
@@ -13,6 +7,13 @@ Live playable version: https://jedbcov-coder.github.io/pink-elephant-jungle-dash
 
 Pink Elephant Jungle Dash is a beginner-friendly 3D browser game where you run as a pink elephant, collect fruit, dodge jungle hazards, and try to survive as long as possible.
 
+
+### Latest level build validation safety update (2026-05-26)
+
+- Added level-config validation inside `src/game/level.js` before level build logic runs.
+- `buildLevelById(levelId)` now validates the resolved config too.
+- If validation fails, the game warns in console and falls back to `level-1`.
+- The game now only throws if both the requested config and fallback config are invalid.
 
 ### Latest level loader safety update (2026-05-26)
 

@@ -2,8 +2,34 @@ import { CONFIG } from "./config.js";
 import { LEVEL_SECTIONS, sectionDifficulty, sectionMetadata } from "./levelPromptMetadata.js";
 import { lerp } from "./math.js";
 import { getLevelConfig } from "./levels/index.js";
+import { getLevelValidationErrors } from "./levels/levelSchema.js";
 
 export { LEVEL_SECTIONS } from "./levelPromptMetadata.js";
+
+const FALLBACK_LEVEL_ID = "level-1";
+
+function resolveValidLevelConfig(levelConfig, sourceLabel = "unknown") {
+  const validationErrors = getLevelValidationErrors(levelConfig);
+  if (validationErrors.length === 0) {
+    return levelConfig;
+  }
+
+  console.warn(
+    `[level] Invalid level config for "${sourceLabel}". Validation errors: ${validationErrors.join("; ")}`,
+  );
+
+  const fallbackConfig = getLevelConfig(FALLBACK_LEVEL_ID);
+  const fallbackErrors = getLevelValidationErrors(fallbackConfig);
+
+  if (fallbackErrors.length === 0) {
+    console.warn(`[level] Falling back to "${FALLBACK_LEVEL_ID}".`);
+    return fallbackConfig;
+  }
+
+  throw new Error(
+    `[level] Unable to build a valid level. Fallback "${FALLBACK_LEVEL_ID}" is also invalid: ${fallbackErrors.join("; ")}`,
+  );
+}
 
 function addFruitLine(fruits, startZ, endZ, count, localXFn, yFn, metadata = {}) {
   for (let i = 0; i < count; i++) {
@@ -14,12 +40,13 @@ function addFruitLine(fruits, startZ, endZ, count, localXFn, yFn, metadata = {})
 }
 
 export function buildLevel(levelConfig) {
+  const safeLevelConfig = resolveValidLevelConfig(levelConfig, levelConfig?.id ?? "buildLevel input");
   const fruits = [], health = [], logs = [], crates = [], branches = [], rivers = [], enemies = [], collectibles = [];
-  const { loops, loopPlans } = levelConfig;
+  const { loops, loopPlans } = safeLevelConfig;
   const course = {
-    gateZ: levelConfig.course?.gateZ ?? CONFIG.gateZ,
-    finishLineZ: levelConfig.course?.finishLineZ ?? CONFIG.finishLineZ,
-    endOfCourseZ: levelConfig.course?.endOfCourseZ ?? CONFIG.endOfCourseZ,
+    gateZ: safeLevelConfig.course?.gateZ ?? CONFIG.gateZ,
+    finishLineZ: safeLevelConfig.course?.finishLineZ ?? CONFIG.finishLineZ,
+    endOfCourseZ: safeLevelConfig.course?.endOfCourseZ ?? CONFIG.endOfCourseZ,
   };
 
   loops.forEach((offset, index) => {
@@ -174,7 +201,9 @@ export function buildLevel(levelConfig) {
 }
 
 export function buildLevelById(levelId) {
-  return buildLevel(getLevelConfig(levelId));
+  const resolvedConfig = getLevelConfig(levelId);
+  const safeConfig = resolveValidLevelConfig(resolvedConfig, String(levelId));
+  return buildLevel(safeConfig);
 }
 
 export const LEVEL = buildLevelById("level-1");
