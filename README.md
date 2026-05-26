@@ -672,3 +672,8 @@ Notes:
 - Confirmed `Touch: Always` mode forces touch controls visible during gameplay across desktop/laptop, touch 2-in-1, and phone/tablet layouts.
 - Confirmed keyboard input handling remains active and unchanged for gameplay input.
 - Ran `npm run test` and `npm run build` successfully.
+
+
+## Developer notes
+
+- Added level schema validation helpers in `src/game/levels/levelSchema.js` to validate and normalize level configuration objects.
