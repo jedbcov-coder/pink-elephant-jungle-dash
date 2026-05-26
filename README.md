@@ -1,3 +1,9 @@
+
+### Latest level lookup validation hardening (2026-05-26)
+
+- Updated level registry lookup to validate each candidate level config at read-time before it is treated as usable.
+- Invalid level entries now log a clear warning including the level id and failing schema fields.
+- Kept fallback behavior unchanged: `getLevelConfig` still falls back to Level 1, and strict lookup still returns null for unknown ids.
 # Pink Elephant Jungle Dash
 
 ## Play the game
