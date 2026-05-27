@@ -2603,7 +2603,7 @@ export default function App() {
         releaseTouchInputs();
         completeScreenOpenedAtRef.current = performance.now();
         console.debug("[complete-screen-opened] game-over overlay opened", { at: completeScreenOpenedAtRef.current });
-        setCompleteActionLocked(true);
+        setCompleteInputLocked(true);
         setCompleteInputLocked(true);
         setGameOver(true);
       }
@@ -2639,7 +2639,7 @@ export default function App() {
       releaseTouchInputs();
       completeScreenOpenedAtRef.current = performance.now();
       console.debug("[complete-screen-opened] complete overlay opened", { at: completeScreenOpenedAtRef.current });
-      setCompleteActionLocked(true);
+      setCompleteInputLocked(true);
       setCompleteInputLocked(true);
       setComplete(true);
     }

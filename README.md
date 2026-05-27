@@ -892,3 +892,9 @@ Notes:
 
 - Fixed `src/App.jsx` complete-screen input-lock wiring so the lock state is declared once, used consistently by complete/game-over action buttons, and no duplicate lock key/debug declarations remain.
 - Kept the change minimal and scoped to complete-screen interaction/build stability only (no scene or gameplay refactor).
+
+
+### Complete screen input-lock naming fix (2026-05-27)
+
+- Fixed a runtime error by standardizing the complete-screen lock state naming in `src/App.jsx` to `completeInputLocked` / `setCompleteInputLocked`.
+
