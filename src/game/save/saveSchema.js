@@ -13,6 +13,8 @@ export const defaultSettings = {
   accessibility: {
     highContrastEnabled: false,
     reduceMotionEnabled: false,
+    largeTextEnabled: false,
+    softFlashesEnabled: false,
   },
 };
 

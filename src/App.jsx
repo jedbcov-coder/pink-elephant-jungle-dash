@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { Icon } from "./components/Icon.jsx";
+import { CreditsOverlay } from "./components/game-ui/CreditsOverlay.jsx";
+import { LevelSelectOverlay } from "./components/game-ui/LevelSelectOverlay.jsx";
 import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
 import { SettingsPanel } from "./components/game-ui/SettingsPanel.jsx";
 import { TouchControls } from "./components/game-ui/TouchControls.jsx";
@@ -23,7 +25,7 @@ import {
 } from "./game/collisionHelpers.js";
 import { createKeys, isAllowedKey, setKeyState } from "./game/input.js";
 import { buildLevelById } from "./game/level.js";
-import { getLevelConfig, getLevelConfigStrict } from "./game/levels/index.js";
+import { getAllLevelConfigs, getLevelConfig, getLevelConfigStrict } from "./game/levels/index.js";
 import { promptForZ } from "./game/prompts.js";
 import { aabb, clamp, createSeededRandom, lerp } from "./game/math.js";
 import { DEFAULT_AUDIO_STATE, createAudioManager, normalizeAudioState } from "./game/audio/audioManager.js";
@@ -52,15 +54,24 @@ import {
   updatePlayerSteering,
 } from "./game/movement.js";
 import { applyComboScore, applyFruitLifeCounter } from "./game/fruitLife.js";
+import { evaluateRunAchievements } from "./game/achievements.js";
+import { deriveGameShellState } from "./game/gameStateMachine.js";
+import { triggerHapticFeedback, isHapticsSupported } from "./game/haptics.js";
+import { DEFAULT_INPUT_STATUS, createInputManager } from "./game/inputManager.js";
+import { GAME_TEMPLATE_CONFIG } from "./game/templateConfig.js";
 import { runSelfTests } from "./game/selfTests.js";
 import {
+  addProgressionEvent,
+  addScoreEntry,
   exportSaveData,
   importSaveData,
   initSaveSystem,
+  listAchievements,
   loadProfileSnapshot,
   loadSettings,
   resetAllSaveData,
   saveSettings,
+  unlockAchievement,
 } from "./game/save/saveManager.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./game/track.js";
 import { APP_BUILD_LABEL, APP_UPDATE_NOTE, APP_VERSION } from "./appInfo.js";
@@ -76,6 +87,13 @@ const SHOW_TEXTURE_PREVIEW = false;
 const JUNGLE_LAYOUT_SEED = 0x5eed2026;
 const AUDIO_PREFS_KEY = "pink-elephant-audio-state";
 const TOUCH_CONTROLS_MODES = ["always", "auto", "off"];
+const DEFAULT_ACCESSIBILITY_SETTINGS = {
+  highContrastEnabled: false,
+  reduceMotionEnabled: false,
+  largeTextEnabled: false,
+  softFlashesEnabled: false,
+};
+const HAPTICS_DEFAULT_ENABLED = true;
 // Before adding Level 2, ensure Level 1 is loaded from level config (this is that checkpoint).
 
 function normalizeTouchControlsMode(mode) {
@@ -202,6 +220,31 @@ function writeStoredAudioState(state, canPersist = true) {
   }
 }
 
+function normalizeAccessibilitySettings(settings = {}) {
+  return {
+    ...DEFAULT_ACCESSIBILITY_SETTINGS,
+    ...(settings && typeof settings === "object" ? settings : {}),
+  };
+}
+
+function readStoredAccessibilitySettings() {
+  if (typeof window === "undefined") return { ...DEFAULT_ACCESSIBILITY_SETTINGS };
+  try {
+    return normalizeAccessibilitySettings(loadSettings()?.accessibility);
+  } catch {
+    return { ...DEFAULT_ACCESSIBILITY_SETTINGS };
+  }
+}
+
+function readStoredHapticsEnabled() {
+  if (typeof window === "undefined") return HAPTICS_DEFAULT_ENABLED;
+  try {
+    return loadSettings()?.controls?.vibrationEnabled ?? HAPTICS_DEFAULT_ENABLED;
+  } catch {
+    return HAPTICS_DEFAULT_ENABLED;
+  }
+}
+
 function AudioControls({ audioState, onToggle, compact = false }) {
   const allMuted = audioState.muted;
   const musicMuted = audioState.muted || audioState.musicMuted;
@@ -316,6 +359,8 @@ export default function App() {
   const resumeSafetyUntilRef = useRef(0);
   const audioManagerRef = useRef(null);
   if (!audioManagerRef.current) audioManagerRef.current = createAudioManager();
+  const inputManagerRef = useRef(null);
+  const hapticsEnabledRef = useRef(readStoredHapticsEnabled());
   const resetGameRef = useRef(null);
   const stampedeRef = useRef({ nextStepTime: 0 });
   const gameStartTimeRef = useRef(null);
@@ -343,12 +388,19 @@ export default function App() {
   const [showSaveDebugTools, setShowSaveDebugTools] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsContext, setSettingsContext] = useState("title");
+  const [levelSelectOpen, setLevelSelectOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [isStandaloneApp, setIsStandaloneApp] = useState(false);
   const [finalResults, setFinalResults] = useState(null);
   const [showFinalReward, setShowFinalReward] = useState(false);
   const [audioState, setAudioState] = useState(readStoredAudioState);
   const [touchControlsVisible, setTouchControlsVisible] = useState(false);
   const [touchControlsMode, setTouchControlsMode] = useState(() => normalizeTouchControlsMode(loadSettings()?.display?.touchControlsMode));
+  const [gamepadStatus, setGamepadStatus] = useState({ ...DEFAULT_INPUT_STATUS });
+  const [hapticsEnabled, setHapticsEnabled] = useState(hapticsEnabledRef.current);
+  const [achievementRecords, setAchievementRecords] = useState([]);
+  const [achievementToast, setAchievementToast] = useState(null);
+  const [accessibilitySettings, setAccessibilitySettings] = useState(readStoredAccessibilitySettings);
   const [currentLevelId, setCurrentLevelId] = useState("level-1");
   const [isLevelTransitioning, setIsLevelTransitioning] = useState(false);
   const [completeInputLocked, setCompleteInputLocked] = useState(false);
@@ -363,6 +415,11 @@ export default function App() {
   const [saveSystemReady, setSaveSystemReady] = useState(false);
   const prevCompleteRef = useRef(false);
   const prevCompleteLevelIdRef = useRef("level-1");
+  const achievementToastTimerRef = useRef(null);
+
+  if (!inputManagerRef.current) {
+    inputManagerRef.current = createInputManager({ onStatusChange: setGamepadStatus });
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -382,6 +439,7 @@ export default function App() {
   const currentLevelConfig = getLevelConfig(currentLevelId);
   const nextLevelId = currentLevelConfig.nextLevel;
   const nextLevelConfig = nextLevelId ? getLevelConfigStrict(nextLevelId) : null;
+  const levelSelectOptions = getAllLevelConfigs();
   const hasNextLevel = Boolean(nextLevelId);
   const hasPlayableNextLevel = Boolean(nextLevelId && nextLevelConfig);
   const hasNextLevelConfigMismatch = Boolean(hasNextLevel && (!nextLevelId || !nextLevelConfig));
@@ -389,6 +447,24 @@ export default function App() {
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
 
   const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
+  const accessibilityClassNames = [
+    accessibilitySettings.highContrastEnabled ? "accessibility-high-contrast" : "",
+    accessibilitySettings.reduceMotionEnabled ? "accessibility-reduce-motion" : "",
+    accessibilitySettings.largeTextEnabled ? "accessibility-large-text" : "",
+    accessibilitySettings.softFlashesEnabled ? "accessibility-soft-flashes" : "",
+  ].filter(Boolean).join(" ");
+  const gameShellState = deriveGameShellState({
+    saveSystemReady,
+    sceneError,
+    isLevelTransitioning,
+    started,
+    paused,
+    complete,
+    gameOver,
+    settingsOpen,
+    levelSelectOpen,
+    creditsOpen,
+  });
 
   currentLevelIdRef.current = currentLevelId;
   isLevelTransitioningRef.current = isLevelTransitioning;
@@ -486,8 +562,133 @@ export default function App() {
 
   function openSettings(context) {
     if (completeRef.current || gameOverRef.current || isLevelTransitioning) return;
+    pulseHaptic("ui");
+    setLevelSelectOpen(false);
+    setCreditsOpen(false);
     setSettingsContext(context);
     setSettingsOpen(true);
+  }
+
+  function openLevelSelect() {
+    pulseHaptic("ui");
+    closeSettingsPanel();
+    setCreditsOpen(false);
+    setLevelSelectOpen(true);
+  }
+
+  function closeLevelSelect() {
+    setLevelSelectOpen(false);
+  }
+
+  function openCredits() {
+    pulseHaptic("ui");
+    closeSettingsPanel();
+    setLevelSelectOpen(false);
+    setCreditsOpen(true);
+  }
+
+  function closeCredits() {
+    setCreditsOpen(false);
+  }
+
+  function handleLevelSelectStart(levelId) {
+    pulseHaptic("action");
+    closeLevelSelect();
+    closeCredits();
+    startLevelById(levelId);
+  }
+
+  function updateAccessibilitySetting(key, enabled) {
+    setAccessibilitySettings((current) => {
+      const next = normalizeAccessibilitySettings({ ...current, [key]: Boolean(enabled) });
+      const existing = loadSettings() ?? {};
+      saveSettings({ ...existing, accessibility: next });
+      return next;
+    });
+  }
+
+  function updateHapticsEnabled(enabled) {
+    const nextEnabled = Boolean(enabled);
+    const existing = loadSettings() ?? {};
+    saveSettings({ ...existing, controls: { ...(existing.controls ?? {}), vibrationEnabled: nextEnabled } });
+    hapticsEnabledRef.current = nextEnabled;
+    setHapticsEnabled(nextEnabled);
+    if (nextEnabled) triggerHapticFeedback("ui", { enabled: true });
+  }
+
+  function pulseHaptic(type) {
+    triggerHapticFeedback(type, { enabled: hapticsEnabledRef.current });
+  }
+
+  function showAchievement(record) {
+    if (!record) return;
+    setAchievementToast(record);
+    if (achievementToastTimerRef.current) window.clearTimeout(achievementToastTimerRef.current);
+    achievementToastTimerRef.current = window.setTimeout(() => setAchievementToast(null), 3800);
+  }
+
+  async function refreshAchievements() {
+    if (!saveSystemReadyRef.current) return;
+    try {
+      const records = await listAchievements();
+      setAchievementRecords(records);
+    } catch (error) {
+      console.warn("Failed to load achievements.", error);
+    }
+  }
+
+  async function recordRunOutcome(outcome, results, context = {}) {
+    if (!saveSystemReadyRef.current || !results) return;
+    const levelId = context.levelId ?? currentLevelIdRef.current;
+    const levelConfig = getLevelConfig(levelId);
+    const levelName = context.levelName ?? levelConfig?.name ?? levelId;
+    const hasNext = context.hasNextLevel ?? Boolean(levelConfig?.nextLevel && getLevelConfigStrict(levelConfig.nextLevel));
+    const createdAt = Date.now();
+
+    try {
+      await Promise.all([
+        addScoreEntry({
+          levelId,
+          levelName,
+          score: results.score ?? 0,
+          fruit: results.fruit ?? 0,
+          crates: results.crates ?? 0,
+          lives: results.lives ?? 0,
+          elapsedMs: results.elapsedMs ?? 0,
+          completed: outcome === "complete",
+          createdAt,
+        }),
+        addProgressionEvent({
+          type: outcome,
+          levelId,
+          levelName,
+          score: results.score ?? 0,
+          completed: outcome === "complete",
+          createdAt,
+        }),
+      ]);
+
+      if (outcome !== "complete") {
+        await refreshAchievements();
+        return;
+      }
+
+      const existingRecords = await listAchievements();
+      const existingIds = new Set(existingRecords.map((record) => record.achievementId ?? record.id));
+      const unlocked = evaluateRunAchievements({
+        results,
+        levelId,
+        levelName,
+        hasNextLevel: hasNext,
+        audioState: audioManagerRef.current?.getAudioState?.() ?? audioState,
+      }).filter((record) => !existingIds.has(record.achievementId));
+
+      for (const record of unlocked) await unlockAchievement(record);
+      if (unlocked.length > 0) showAchievement(unlocked[0]);
+      await refreshAchievements();
+    } catch (error) {
+      console.warn("Failed to record run outcome.", error);
+    }
   }
 
   function handleContinueClick(event, action, tag, context = {}) {
@@ -562,6 +763,7 @@ export default function App() {
       }
       pauseStartedAtRef.current = null;
     }
+    pulseHaptic(shouldPause ? "ui" : "action");
     setPaused(shouldPause);
   }
 
@@ -913,18 +1115,19 @@ export default function App() {
 
   function handleTouchControlChange(code, isPressed) {
     if (pausedRef.current || completeRef.current || gameOverRef.current) {
-      setKeyState(keyRef.current, code, false);
+      setKeyState(keyRef.current, code, false, "touch");
       return;
     }
-    setKeyState(keyRef.current, code, isPressed);
+    setKeyState(keyRef.current, code, isPressed, "touch");
   }
 
   function releaseTouchInputs() {
-    setKeyState(keyRef.current, "ArrowUp", false);
-    setKeyState(keyRef.current, "ArrowLeft", false);
-    setKeyState(keyRef.current, "ArrowRight", false);
-    setKeyState(keyRef.current, "Space", false);
-    setKeyState(keyRef.current, "KeyF", false);
+    setKeyState(keyRef.current, "ArrowUp", false, "touch");
+    setKeyState(keyRef.current, "ArrowLeft", false, "touch");
+    setKeyState(keyRef.current, "ArrowRight", false, "touch");
+    setKeyState(keyRef.current, "Space", false, "touch");
+    setKeyState(keyRef.current, "KeyF", false, "touch");
+    inputManagerRef.current?.release(keyRef.current);
   }
 
   useEffect(() => {
@@ -1009,6 +1212,11 @@ export default function App() {
         const savedSettings = loadSettings();
         const savedAudioState = savedSettings?.audio;
         if (savedAudioState) setAudioState(normalizeAudioState(savedAudioState));
+        const savedHapticsEnabled = savedSettings?.controls?.vibrationEnabled ?? HAPTICS_DEFAULT_ENABLED;
+        hapticsEnabledRef.current = savedHapticsEnabled;
+        setHapticsEnabled(savedHapticsEnabled);
+        setAccessibilitySettings(normalizeAccessibilitySettings(savedSettings?.accessibility));
+        setAchievementRecords(await listAchievements());
         profileSnapshotRef.current = loadProfileSnapshot();
       } catch (error) {
         console.warn("Save system init failed. Continuing with defaults.", error);
@@ -1023,8 +1231,13 @@ export default function App() {
     initializeSaveSystem();
     return () => {
       disposed = true;
+      if (achievementToastTimerRef.current) window.clearTimeout(achievementToastTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    hapticsEnabledRef.current = hapticsEnabled;
+  }, [hapticsEnabled]);
 
   useEffect(() => {
     function beginTitleThemeFromGesture(event) {
@@ -2246,6 +2459,15 @@ export default function App() {
           sideShoot.receiveShadow = true;
           group.add(sideShoot);
         }
+        if (i % 3 === 2) {
+          const leafTassel = new THREE.Mesh(sharedGeometries.broadBananaLeaf, branchLeafMat);
+          leafTassel.position.set(x + (i % 2 === 0 ? 0.18 : -0.18), branchBottomY + 0.95 + (i % 4) * 0.16, vine.position.z + 0.18);
+          leafTassel.scale.set(0.48, 0.58, 1);
+          leafTassel.rotation.set(-0.48, i * 0.42, vine.rotation.z + (i % 2 === 0 ? -0.42 : 0.42));
+          leafTassel.castShadow = true;
+          leafTassel.receiveShadow = true;
+          group.add(leafTassel);
+        }
       }
       scene.add(group);
       colliders.push({ type: "branch", active: true, mesh: group, x: posOnPath.x, y: branch.yOffset, z: posOnPath.z, w: branch.width, h: branch.height, d: branch.depth });
@@ -2734,9 +2956,11 @@ export default function App() {
         popText("RECOVERING!", body.x, body.y + 4.6, body.z, "#b7ffb7");
       }
       playTone("hurt");
+      pulseHaptic("impact");
       if (body.lives <= 0 && !gameOverRef.current) {
         gameOverRef.current = true;
         const results = snapshotResults();
+        void recordRunOutcome("game-over", results, { levelId: currentLevelId, levelName: currentLevelConfig?.name, hasNextLevel: hasPlayableNextLevel });
         setFinalResults(results);
         closeSettingsPanel();
         setSettingsContext("title");
@@ -2760,6 +2984,7 @@ export default function App() {
       burst(body.x, body.y + 1.1, body.z, croc ? "#53a653" : "#ff3f58", PARTICLES.defaultBurstCount, PARTICLES.hurtBurstScale);
       popText(croc ? "SNAP!" : "OOPS!", body.x, body.y + 3.2, body.z, croc ? "#9aff99" : "#ff8794");
       playTone(croc ? "croc" : "hurt");
+      pulseHaptic("impact");
       if (body.health <= 0) loseLife();
     }
 
@@ -2773,6 +2998,8 @@ export default function App() {
       body.speed = 0;
       popText("JUNGLE GATE!", body.x, body.y + 3, popZ - 2, "#fff1a6");
       playTone("gate");
+      pulseHaptic("success");
+      void recordRunOutcome("complete", results, { levelId: currentLevelId, levelName: currentLevelConfig?.name, hasNextLevel: hasPlayableNextLevel });
       setFinalResults(results);
       setShowFinalReward(!hasPlayableNextLevel);
       closeSettingsPanel();
@@ -2798,6 +3025,7 @@ export default function App() {
       popText(`CRATE BONUS +${pts}`, obs.x, obs.y + 2.2, obs.z, "#ffe08a");
       if (nextMultiplierPreview > 1) popText(`${nextMultiplierPreview}x STREAK`, obs.x, obs.y + 3.35, obs.z, "#ffcf66");
       playTone("crateSmash");
+      pulseHaptic("impact");
     }
 
     function collectScore(basePoints, comboWindowSeconds = SCORING.comboWindowSeconds) {
@@ -2817,6 +3045,7 @@ export default function App() {
       for (let i = 0; i < livesAwarded; i++) {
         popText("BONUS ELEPHANT!", body.x, body.y + 3.4, body.z, "#b7ffb7");
         playTone("bonusLife");
+        pulseHaptic("success");
       }
     }
 
@@ -2955,16 +3184,19 @@ export default function App() {
         if (event === "ground") {
           burst(body.x, 0.2, body.z, "#d6c399", 5, 0.2);
           playTone("jump");
+          pulseHaptic("action");
         } else if (event === "double") {
           burst(body.x, body.y + 0.6, body.z, "#ff89d2", 8, 0.2);
           popText("BIG Bounce!", body.x, body.y + 2.8, body.z, "#ffc3ed");
           playTone("double");
+          pulseHaptic("action");
         }
       }
 
       function playSlideEvent() {
         burst(body.x, 0.2, body.z, "#d6c399", 6, 0.2);
         playTone("slideStart");
+        pulseHaptic("action");
       }
 
       if (k.KeyF && triggerPlayerSmash(body, playing)) {
@@ -2975,9 +3207,10 @@ export default function App() {
       if (k.KeyE && triggerPlayerSpin(body, playing)) {
         burst(body.x, body.y + 0.8, body.z, "#ff89d2", 12, 0.22);
         burst(body.x, body.y + 0.8, body.z, "#ffd34a", 6, 0.18);
-        popText("SPIN ATTACK!", body.x, body.y + 2.8, body.z, "#ffcf66");
-        playTone("double");
-      }
+          popText("SPIN ATTACK!", body.x, body.y + 2.8, body.z, "#ffcf66");
+          playTone("double");
+          pulseHaptic("action");
+        }
 
       for (const event of updateJumpAndSlideInput(body, k, dt, playing)) {
         if (event === "slide") playSlideEvent();
@@ -3072,11 +3305,13 @@ export default function App() {
             const pts = collectScore(SCORING.fruitPoints);
             burst(item.x, item.y, item.z, "#ffd34a", PARTICLES.fruitCollectCount, 0.2);
             playTone("fruit");
+            pulseHaptic("pickup");
           } else {
             body.health = Math.min(100, body.health + PICKUPS.healthRestore);
             burst(item.x, item.y, item.z, "#4ade80", PARTICLES.healBurstCount, 0.22);
             popText("SUGAR CANE!", item.x, item.y + 1.4, item.z, "#a7ffbf");
             playTone("heal");
+            pulseHaptic("pickup");
           }
         }
       }
@@ -3122,6 +3357,7 @@ export default function App() {
           burst(col.x, col.y + 1, col.z, "#fff8e7", PARTICLES.pineappleSparkleCount, 0.18);
           popText(`GOLDEN PINEAPPLE! +${pts}`, col.x, col.y + 2.4, col.z, "#f5a623");
           playTone("gate");
+          pulseHaptic("success");
         }
       }
 
@@ -3564,10 +3800,15 @@ export default function App() {
         perfState.frameWindowCount = 0;
       }
       if (pausedRef.current) {
+        inputManagerRef.current?.poll(keyRef.current, { active: false });
         renderFrame();
         frame = requestAnimationFrame(animate);
         return;
       }
+      inputManagerRef.current?.poll(keyRef.current, {
+        active: startedRef.current && !completeRef.current && !gameOverRef.current && !settingsOpen,
+        onPauseRequest: () => setPausedState(true),
+      });
       updatePhysics(dt);
       updateMeshes(dt, now);
       updateCamera(dt);
@@ -3749,7 +3990,7 @@ export default function App() {
     if (typeof window === "undefined") return;
 
     const debugLevelId = new URLSearchParams(window.location.search).get("debugLevel");
-    if (debugLevelId !== "level-1" && debugLevelId !== "level-2") return;
+    if (!getLevelConfigStrict(debugLevelId)) return;
 
     debugLevelBootedRef.current = true;
     console.debug("[debug-level-boot]", { debugLevelId });
@@ -3757,7 +3998,7 @@ export default function App() {
   }, [saveSystemReady]);
 
   return (
-    <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} ${touchControlsVisible ? "touch-controls-active" : ""} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
+    <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} ${accessibilityClassNames} ${touchControlsVisible ? "touch-controls-active" : ""} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-game-state={gameShellState} data-template-title={GAME_TEMPLATE_CONFIG.title} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>
       <div className="app-frame" data-orientation={isPortrait ? "portrait" : "landscape"} style={{ paddingTop: "var(--hud-safe-top)", paddingRight: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-right)", paddingBottom: "var(--hud-safe-bottom)", paddingLeft: layoutMode === "phone-landscape" ? "0px" : "var(--hud-safe-left)" }}>
         <div className="game-frame-stage" aria-hidden="true" />
         <div ref={mountRef} className={`absolute inset-0 h-full w-full ${isGameplayActive ? "gameplay-touch-zone" : ""}`} />
@@ -3915,6 +4156,14 @@ export default function App() {
             <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-amber-50/75">
               Charge, jump, slide, and smash through the jungle. Watch for trail signs, dodge obstacles, collect fruit crates, and chase your best score.
             </p>
+            <section className="mx-auto mt-4 max-w-md rounded-2xl border border-amber-100/20 bg-black/25 px-4 py-3 text-left" aria-label="Level briefing">
+              <div className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200/80">Level Briefing</div>
+              <h3 className="mt-1 text-base font-black text-amber-100">{currentLevelConfig.name}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-amber-50/70">
+                Objective: reach the Jungle Gate with fruit, lives, and score intact.
+              </p>
+              <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-pink-200/80">Difficulty: Intro Trail</p>
+            </section>
             <div className="title-main-actions mt-7 flex flex-col items-center gap-3">
               <button onClick={startDemo}
               className="title-begin-action rounded-full px-10 py-4 text-base font-black text-slate-950 transition hover:scale-105 active:scale-95"
@@ -3922,6 +4171,10 @@ export default function App() {
               Begin the Trail
               </button>
               <button type="button" onClick={() => openSettings("title")} className="title-settings-action hud-settings-button rounded-full px-6 py-3 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Settings</button>
+              <div className="title-secondary-actions">
+                <button type="button" onClick={openLevelSelect} className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Level Select</button>
+                <button type="button" onClick={openCredits} className="hud-settings-button rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition hover:scale-105 active:scale-95">Credits</button>
+              </div>
             </div>
             <div className="title-primary-controls mt-6 text-left text-xs text-amber-50/70" aria-label="Primary controls">
               {[["↑", "Build Charge"], ["← / →", "Steer"], ["Tap Space", "Jump"], ["Hold Space", "Slide"], ["Shift", "Trunk Smash"], ["M", "Mute"]].map(([key, label]) => (
@@ -4003,6 +4256,9 @@ export default function App() {
                   {completeInputLocked ? "Get Ready..." : "Restart the Trail"}
                 </button>
               )}
+              <button type="button" onClick={openLevelSelect} disabled={completeButtonDisabled} className="jungle-focus-ring jungle-menu-button-secondary text-sm">
+                Level Select
+              </button>
             </div>
           </div>
         </section>
@@ -4026,12 +4282,17 @@ export default function App() {
               <span>🐘 <span>{finalResults?.lives ?? 0}</span></span>
               <span>⏱ <span>{formatElapsed(finalResults?.elapsedMs ?? 0)}</span></span>
             </div>
-            <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
-              onKeyDown={handleCompleteActionKeyDown}
-              disabled={completeButtonDisabled}
-              className="mt-8 rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
-              {completeInputLocked ? "Get Ready..." : "Try Again"}
-            </button>
+            <div className="complete-actions mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button onClick={(event) => handleContinueClick(event, () => { startDemo(); }, "[continue-clicked]", { currentLevelId, nextLevelId: "level-1", actionLabel: "startDemo" })}
+                onKeyDown={handleCompleteActionKeyDown}
+                disabled={completeButtonDisabled}
+                className="rounded-full bg-white px-8 py-3 font-black text-slate-950 transition hover:scale-105 active:scale-95">
+                {completeInputLocked ? "Get Ready..." : "Try Again"}
+              </button>
+              <button type="button" onClick={openLevelSelect} disabled={completeButtonDisabled} className="jungle-focus-ring jungle-menu-button-secondary text-sm">
+                Level Select
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -4052,6 +4313,14 @@ export default function App() {
               <button type="button" onClick={() => openSettings("pause")}
                 className="jungle-focus-ring jungle-menu-button-secondary text-sm">
                 Settings
+              </button>
+              <button type="button" onClick={openLevelSelect}
+                className="jungle-focus-ring jungle-menu-button-secondary text-sm">
+                Level Select
+              </button>
+              <button type="button" onClick={openCredits}
+                className="jungle-focus-ring jungle-menu-button-secondary text-sm">
+                Credits
               </button>
               <button type="button" onClick={restartGame}
                 className="jungle-focus-ring jungle-menu-button-warning text-sm">
@@ -4083,6 +4352,12 @@ export default function App() {
           saveSettings({ ...existing, display: { ...(existing.display ?? {}), touchControlsMode: normalizedValue } });
           setTouchControlsMode(normalizedValue);
         }}
+        gamepadStatus={gamepadStatus}
+        hapticsEnabled={hapticsEnabled}
+        hapticsSupported={isHapticsSupported()}
+        onHapticsChange={updateHapticsEnabled}
+        accessibilitySettings={accessibilitySettings}
+        onAccessibilityChange={updateAccessibilitySetting}
         isStandalone={isStandaloneApp}
         canInstall={canShowInstallPrompt}
         showInstallCard={showInstallCard}
@@ -4093,8 +4368,34 @@ export default function App() {
         onExportSave={handleExportSaveData}
         onImportSave={handleImportSaveData}
         onResetSave={handleResetSaveData}
+        achievementRecords={achievementRecords}
+        onOpenCredits={openCredits}
         appVersion={APP_VERSION}
       />
+
+      <LevelSelectOverlay
+        open={levelSelectOpen}
+        levels={levelSelectOptions}
+        currentLevelId={currentLevelId}
+        isBusy={isLevelTransitioning}
+        onClose={closeLevelSelect}
+        onStartLevel={handleLevelSelectStart}
+      />
+
+      <CreditsOverlay
+        open={creditsOpen}
+        appVersion={APP_VERSION}
+        appBuildLabel={APP_BUILD_LABEL}
+        onClose={closeCredits}
+      />
+
+      {achievementToast && (
+        <div className="achievement-toast" role="status" aria-live="polite">
+          <div className="achievement-toast-kicker">Achievement Unlocked</div>
+          <div className="achievement-toast-title">{achievementToast.title}</div>
+          <div className="achievement-toast-copy">{achievementToast.description}</div>
+        </div>
+      )}
 
       <RotateOverlay visible={showRotateOverlay} />
 

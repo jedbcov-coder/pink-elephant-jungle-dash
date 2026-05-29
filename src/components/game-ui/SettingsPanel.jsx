@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 
+import { AchievementsPanel } from "./AchievementsPanel.jsx";
 import { PwaInstallCard } from "./PwaInstallCard.jsx";
 import { SaveDebugTools } from "./SaveDebugTools.jsx";
 
@@ -16,6 +17,12 @@ export function SettingsPanel({
   onGraphicsQualityChange,
   touchControlsMode,
   onTouchControlsModeChange,
+  gamepadStatus,
+  hapticsEnabled,
+  hapticsSupported,
+  onHapticsChange,
+  accessibilitySettings,
+  onAccessibilityChange,
   isStandalone,
   canInstall,
   showInstallCard,
@@ -26,6 +33,8 @@ export function SettingsPanel({
   onExportSave,
   onImportSave,
   onResetSave,
+  achievementRecords,
+  onOpenCredits,
   appVersion,
 }) {
   useEffect(() => {
@@ -43,6 +52,13 @@ export function SettingsPanel({
   if (!open) return null;
 
   const modeLabel = isStandalone ? "Installed app mode" : "Browser tab mode";
+  const gamepadLabel = gamepadStatus?.gamepadConnected ? gamepadStatus.gamepadName : "No gamepad connected";
+  const accessibilityRows = [
+    ["reduceMotionEnabled", "Reduce Motion", "Calms transitions and decorative motion."],
+    ["softFlashesEnabled", "Soft Flashes", "Uses gentler end-screen and warning effects."],
+    ["highContrastEnabled", "High Contrast", "Strengthens menu and HUD contrast."],
+    ["largeTextEnabled", "Larger Text", "Makes menu text easier to read."],
+  ];
 
   return (
     <section className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-4 sm:px-6" style={{ background: "rgba(7,12,8,0.6)", backdropFilter: "blur(3px)" }} aria-modal="true" role="dialog" aria-labelledby="settings-title">
@@ -115,6 +131,30 @@ export function SettingsPanel({
                 ))}
               </div>
             </fieldset>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-amber-100/20 bg-black/20 p-3 text-xs text-amber-50/85">
+                <p className="text-sm font-black uppercase tracking-[0.14em] text-emerald-100">Gamepad</p>
+                <p className="mt-1">{gamepadStatus?.gamepadSupported ? gamepadLabel : "Gamepad API unavailable"}</p>
+                <p className="mt-1 text-amber-50/60">Left stick / D-pad move, A jumps, B/X/L/R smashes, Start pauses.</p>
+              </div>
+              <div className="rounded-xl border border-amber-100/20 bg-black/20 p-3 text-xs text-amber-50/85">
+                <div className="flex items-center justify-between gap-2">
+                  <span>
+                    <span className="block text-sm font-black uppercase tracking-[0.14em] text-emerald-100">Haptics</span>
+                    <span className="mt-1 block text-amber-50/65">{hapticsSupported ? "Phone vibration feedback" : "Not supported here"}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onHapticsChange(!hapticsEnabled)}
+                    aria-pressed={Boolean(hapticsEnabled)}
+                    disabled={!hapticsSupported}
+                    className={`${segmentedButtonClass} min-w-[74px] ${hapticsEnabled ? "border-emerald-200/70 bg-emerald-200/90 text-emerald-950" : ""}`}
+                  >
+                    {hapticsEnabled ? "ON" : "OFF"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div id="settings-display" className={sectionCardClass}>
@@ -134,6 +174,45 @@ export function SettingsPanel({
             </div>
           </div>
 
+          <div id="settings-accessibility" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Accessibility</h3>
+            <div className="mt-3 space-y-2">
+              {accessibilityRows.map(([key, label, description]) => {
+                const enabled = Boolean(accessibilitySettings?.[key]);
+                return (
+                  <div key={key} className="settings-toggle-row">
+                    <span>
+                      <span className="settings-toggle-label">{label}</span>
+                      <span className="settings-toggle-description">{description}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onAccessibilityChange(key, !enabled)}
+                      aria-pressed={enabled}
+                      className={`${segmentedButtonClass} min-w-[74px] ${enabled ? "border-emerald-200/70 bg-emerald-200/90 text-emerald-950" : ""}`}
+                    >
+                      {enabled ? "ON" : "OFF"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div id="settings-gameplay" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Gameplay</h3>
+            <dl className="mt-3 grid gap-2 text-xs text-amber-50/75">
+              <div className="rounded-xl border border-amber-100/15 bg-black/20 px-3 py-2">
+                <dt className="font-black uppercase tracking-[0.12em] text-emerald-100">Auto Pause</dt>
+                <dd className="mt-1">The run pauses on blur, tab hide, and app background.</dd>
+              </div>
+              <div className="rounded-xl border border-amber-100/15 bg-black/20 px-3 py-2">
+                <dt className="font-black uppercase tracking-[0.12em] text-emerald-100">Input Safety</dt>
+                <dd className="mt-1">Pause, complete, game over, and settings clear held keyboard/touch input.</dd>
+              </div>
+            </dl>
+          </div>
+
           <div id="settings-save" className={sectionCardClass}>
             <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Save Data</h3>
             <SaveDebugTools visible={showSaveTools} onToggle={onToggleSaveTools} onExport={onExportSave} onImport={onImportSave} onReset={onResetSave} />
@@ -141,6 +220,32 @@ export function SettingsPanel({
               <p>{modeLabel}</p>
               <PwaInstallCard visible={showInstallCard} canInstall={canInstall && !isStandalone} onInstall={onInstall} onDismiss={onDismissInstall} />
             </div>
+          </div>
+
+          <div id="settings-achievements" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Achievements</h3>
+            <AchievementsPanel records={achievementRecords} />
+          </div>
+
+          <div id="settings-credits" className={sectionCardClass}>
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Credits & Template</h3>
+            <dl className="mt-3 grid gap-2 text-xs text-amber-50/75">
+              <div className="rounded-xl border border-amber-100/15 bg-black/20 px-3 py-2">
+                <dt className="font-black uppercase tracking-[0.12em] text-emerald-100">Game</dt>
+                <dd className="mt-1">Pink Elephant Jungle Dash</dd>
+              </div>
+              <div className="rounded-xl border border-amber-100/15 bg-black/20 px-3 py-2">
+                <dt className="font-black uppercase tracking-[0.12em] text-emerald-100">Template Defaults</dt>
+                <dd className="mt-1">PWA install, offline cache, save tools, audio, touch controls, and release markers.</dd>
+              </div>
+              <div className="rounded-xl border border-amber-100/15 bg-black/20 px-3 py-2">
+                <dt className="font-black uppercase tracking-[0.12em] text-emerald-100">Attribution Slot</dt>
+                <dd className="mt-1">Replace this with project art, music, SFX, engine, and license credits.</dd>
+              </div>
+            </dl>
+            <button type="button" onClick={onOpenCredits} className="jungle-focus-ring jungle-menu-button-secondary mt-3 w-full text-sm">
+              Open Credits
+            </button>
           </div>
         </div>
 

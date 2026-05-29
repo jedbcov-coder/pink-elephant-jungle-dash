@@ -1,10 +1,11 @@
 const CACHE_PREFIX = "jungle-dash-offline";
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v14";
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
 
 const STATIC_FILES = [
   "./",
   "./index.html",
+  "./offline.html",
   "./manifest.webmanifest",
   "./favicon.png",
   "./pe-jungledash.jpg",
@@ -52,7 +53,7 @@ self.addEventListener("fetch", (event) => {
         cache.put("./index.html", networkResponse.clone());
         return networkResponse;
       } catch {
-        return (await caches.match("./index.html")) || Response.error();
+        return (await caches.match("./index.html")) || (await caches.match("./offline.html")) || Response.error();
       }
     })());
     return;

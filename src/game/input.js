@@ -11,7 +11,7 @@
 /**
  * Keyboard state consumed by gameplay systems. Arrow keys include virtual WASD mappings; Space is reserved for jump and hold-slide.
  *
- * @typedef {PressedKeys & { __pressed: PressedKeys }} GameKeys
+ * @typedef {PressedKeys & { __pressed: PressedKeys, __sources: Record<string, PressedKeys> }} GameKeys
  */
 
 /** @type {InputCode[]} */
@@ -64,6 +64,17 @@ function syncVirtualControls(keys) {
   keys.KeyM = Boolean(pressed.KeyM);
 }
 
+function createEmptyPressedMap() {
+  return /** @type {PressedKeys} */ (Object.fromEntries(ALLOWED_KEYS.map((code) => [code, false])));
+}
+
+function recomputePressed(keys) {
+  const sources = keys.__sources || {};
+  for (const code of ALLOWED_KEYS) {
+    keys.__pressed[code] = Object.values(sources).some((source) => Boolean(source?.[code]));
+  }
+}
+
 /**
  * Create the mutable key state object used by the app.
  *
@@ -90,7 +101,12 @@ export function createKeys() {
     Escape: false,
     KeyP: false,
     KeyM: false,
-    __pressed: /** @type {PressedKeys} */ (Object.fromEntries(ALLOWED_KEYS.map((code) => [code, false]))),
+    __pressed: createEmptyPressedMap(),
+    __sources: {
+      keyboard: createEmptyPressedMap(),
+      touch: createEmptyPressedMap(),
+      gamepad: createEmptyPressedMap(),
+    },
   };
   syncVirtualControls(keys);
   return keys;
@@ -102,11 +118,15 @@ export function createKeys() {
  * @param {GameKeys} keys
  * @param {string} code
  * @param {boolean} isPressed
+ * @param {string} [source]
  * @returns {GameKeys}
  */
-export function setKeyState(keys, code, isPressed) {
+export function setKeyState(keys, code, isPressed, source = "keyboard") {
   if (!isAllowedKey(code)) return keys;
-  keys.__pressed[code] = isPressed;
+  if (!keys.__sources) keys.__sources = { keyboard: createEmptyPressedMap() };
+  if (!keys.__sources[source]) keys.__sources[source] = createEmptyPressedMap();
+  keys.__sources[source][code] = isPressed;
+  recomputePressed(keys);
   syncVirtualControls(keys);
   return keys;
 }

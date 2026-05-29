@@ -38,3 +38,9 @@ export function getLevelConfig(levelId) {
 export function getLevelConfigStrict(levelId) {
   return getValidLevelConfigOrNull(levelId);
 }
+
+export function getAllLevelConfigs() {
+  return Object.keys(LEVEL_REGISTRY)
+    .map((levelId) => getValidLevelConfigOrNull(levelId))
+    .filter(Boolean);
+}

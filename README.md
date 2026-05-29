@@ -15,11 +15,16 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - **Slide:** `S` or Down arrow
 - **Pause:** `Esc` or `P`
 - **Touch devices:** Use the on-screen touch controls
+- **Gamepad:** Left stick or D-pad to move, A to jump, B/X/L/R to smash or spin, Start/Menu to pause
 
 ## Main features
 - 3 playable handcrafted levels with increasing challenge
 - Fruit collection, hazards, and level progression
 - Touch controls and keyboard controls
+- Basic gamepad support
+- Optional haptic feedback on supported devices
+- Unlockable achievements with saved progress
+- Reusable template pieces for state flow, settings, UI components, offline fallback, and error recovery
 - Installable PWA support for mobile-friendly play
 
 ## Run locally
@@ -36,6 +41,13 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 5. Open the local URL shown in the terminal (usually `http://localhost:5173`).
 
 
+### Latest template architecture defaults pass (2026-05-30)
+
+- Added a formal game-state machine and template config file for future PWA game projects.
+- Expanded the reusable game UI primitive library with buttons, sliders, tabs, tooltips, meters, level cards, dialogs, counters, and toasts.
+- Added a custom offline fallback page to the service worker cache and improved the startup error screen with restart, menu, and copy-debug actions.
+- Updated the release marker to `1.0.14` and bumped the service worker cache to `v14`.
+
 ### Latest startup viewport fix (2026-05-30)
 
 - Fixed the startup crash that showed `viewportWidth is not defined` after pressing **Begin the Trail** in local development.
@@ -47,6 +59,35 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - Added a post-build marker helper so `npm run build:pages` keeps `docs/.nojekyll` present for GitHub Pages.
 - Added `.env.example` and refreshed `SECURITY.md` with browser-game secret safety guidance.
 - Expanded `.gitignore` for local env files, logs, test output, and OS clutter while keeping deploy output rules unchanged.
+
+### Latest Snake Gate reference polish (2026-05-30)
+
+- Used the snake-gate reference image as the Game Studio prompt target.
+- Added denser side canopies, wrapped trunk vines, base stones, and a drooping snake silhouette to the belly-slide Snake Gate.
+- Kept collision, level data, controls, and slide timing unchanged.
+- Updated the release marker to `1.0.10` and bumped the service worker cache to `v10` for the next GitHub Pages build.
+
+### Latest input and rewards template pass (2026-05-30)
+
+- Added an InputManager-style gamepad helper with left stick/D-pad movement, jump, smash/spin, and Start/Menu pause mapping.
+- Added optional haptic feedback for actions, pickups, impacts, success moments, and UI taps, with a Settings toggle.
+- Added default achievement definitions, unlock persistence, a Settings achievements panel, and an unlock toast.
+- Added a starter asset manifest for music, SFX, images, levels, and recommended future asset folders.
+- Updated the release marker to `1.0.13` and bumped the service worker cache to `v13`.
+
+### Latest template screen defaults pass (2026-05-30)
+
+- Added a dedicated **Level Select** screen from the title, pause, complete, and game-over flows.
+- Added a dedicated **Credits & About** screen with slots for game, template, audio, engine, attribution, and build details.
+- Added saved Accessibility settings for reduced motion, softer flashes, high contrast, and larger menu text.
+- Updated the release marker to `1.0.12` and bumped the service worker cache to `v12`.
+
+### Latest template defaults pass (2026-05-30)
+
+- Added `TEMPLATE_DEFAULTS.md` with the PWA game-template checklist from the Game Studio prompt.
+- Added a start-screen Level Briefing card so the default shell shows level name, objective, and difficulty before play.
+- Added a Credits & Template section to Settings for game/template attribution placeholders.
+- Updated the release marker to `1.0.11` and bumped the service worker cache to `v11`.
 
 ### Latest startup movement assist update (2026-05-29)
 

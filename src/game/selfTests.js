@@ -13,13 +13,27 @@ import {
 import { applyComboScore, applyFruitLifeCounter } from "./fruitLife.js";
 import { createKeys, setKeyState } from "./input.js";
 import { isAudioCategoryMuted, normalizeAudioState, resolveTonePlayback } from "./audio/audioManager.js";
+import { evaluateRunAchievements } from "./achievements.js";
+import { ASSET_MANIFEST, getAssetManifestSummary } from "./assetManifest.js";
+import { HAPTIC_PATTERNS } from "./haptics.js";
+import { resolveGamepadControls } from "./inputManager.js";
+import {
+  GAME_STATES,
+  LEVEL_LIFECYCLE_HOOKS,
+  canTransitionGameState,
+  createGameStateMachine,
+  deriveGameShellState,
+  transitionGameState,
+} from "./gameStateMachine.js";
+import { GAME_TEMPLATE_CONFIG, isTemplateFeatureEnabled } from "./templateConfig.js";
 import { TITLE_THEME, noteNameToFrequency } from "./audio/titleTheme.js";
 import { trackAngle, trackCenter, worldPosition, worldX } from "./track.js";
 import { CONFIG, MOVEMENT, PICKUPS, SCORING } from "./config.js";
 import { buildLevelById, LEVEL } from "./level.js";
-import { LEVEL_REGISTRY, getLevelConfig, getLevelConfigStrict } from "./levels/index.js";
+import { LEVEL_REGISTRY, getAllLevelConfigs, getLevelConfig, getLevelConfigStrict } from "./levels/index.js";
 import { loadLevelConfig, loadLevelConfigStrict } from "./levels/levelLoader.js";
 import { validateLevelConfig } from "./levels/levelSchema.js";
+import { migrateSaveIfNeeded } from "./save/saveSchema.js";
 import { validateChunkDefinition } from "./chunks/chunkSchema.js";
 import { ALL_CHUNK_TYPES } from "./chunks/chunkTypes.js";
 import level2 from "./levels/level2.js";
@@ -101,6 +115,7 @@ export function runSelfTests() {
 
   const levelIds = Object.keys(LEVEL_REGISTRY);
   assert("all registered levels exist", levelIds.every((levelId) => Boolean(getLevelConfigStrict(levelId))));
+  assert("level select exposes all valid registered levels", getAllLevelConfigs().length === levelIds.length);
   assert(
     "level chain is exactly level-1 -> level-2 -> level-3 -> null",
     getLevelConfigStrict("level-1")?.nextLevel === "level-2"
@@ -373,6 +388,21 @@ export function runSelfTests() {
       && !isAudioCategoryMuted({ muted: false, musicMuted: false, sfxMuted: true }, "music"),
   );
 
+  const migratedAccessibility = migrateSaveIfNeeded({
+    settings: {
+      accessibility: {
+        highContrastEnabled: true,
+      },
+    },
+  }).settings.accessibility;
+  assert(
+    "accessibility defaults are present in migrated settings",
+    migratedAccessibility.highContrastEnabled === true
+      && migratedAccessibility.reduceMotionEnabled === false
+      && migratedAccessibility.largeTextEnabled === false
+      && migratedAccessibility.softFlashesEnabled === false,
+  );
+
   const denseFruitTimes = new Map([["fruit", 10]]);
   const denseFruitSkipped = resolveTonePlayback("fruit", 10.01, denseFruitTimes);
   const denseFruitSoftened = resolveTonePlayback("fruit", 10.05, denseFruitTimes);
@@ -581,6 +611,101 @@ export function runSelfTests() {
   setKeyState(keys, "ShiftRight", true);
   setKeyState(keys, "ShiftRight", false);
   assert("Space remains held independently of Shift", keys.Space);
+
+  const gamepadControls = resolveGamepadControls({
+    axes: [0.7, -0.8],
+    buttons: [
+      { pressed: true },
+      { pressed: false },
+      { pressed: true },
+      { pressed: false },
+      { pressed: false },
+      { pressed: false },
+      { pressed: false },
+      { pressed: false },
+      { pressed: false },
+      { pressed: true },
+    ],
+  });
+  assert(
+    "gamepad input manager maps stick buttons and pause",
+    gamepadControls.codes.includes("ArrowUp")
+      && gamepadControls.codes.includes("ArrowRight")
+      && gamepadControls.codes.includes("Space")
+      && gamepadControls.codes.includes("KeyE")
+      && gamepadControls.pausePressed,
+  );
+
+  const earnedAchievements = evaluateRunAchievements({
+    results: { score: 120, fruit: 30, crates: 3, lives: 5 },
+    levelId: "level-3",
+    levelName: "Night Run",
+    hasNextLevel: false,
+    audioState: { muted: false, musicMuted: false },
+  }).map((achievement) => achievement.achievementId);
+  assert(
+    "achievement evaluator awards default run achievements",
+    ["first-gate", "fruit-friend", "crate-cracker", "careful-herd", "sound-on", "jungle-champion"].every((achievementId) => earnedAchievements.includes(achievementId)),
+  );
+
+  assert(
+    "haptic patterns include action pickup impact and success feedback",
+    ["action", "pickup", "impact", "success"].every((patternName) => patternName in HAPTIC_PATTERNS),
+  );
+
+  const assetSummary = getAssetManifestSummary();
+  assert(
+    "asset manifest documents music sfx images levels and folders",
+    assetSummary.musicCount >= 4
+      && assetSummary.sfxCount >= 5
+      && assetSummary.imageCount >= 2
+      && assetSummary.levelCount === levelIds.length
+      && ASSET_MANIFEST.recommendedFolders.includes("/assets/audio/music"),
+  );
+
+  assert(
+    "game state machine allows the default boot to title flow",
+    canTransitionGameState(GAME_STATES.BOOT, GAME_STATES.LOADING)
+      && canTransitionGameState(GAME_STATES.LOADING, GAME_STATES.TITLE)
+      && canTransitionGameState(GAME_STATES.TITLE, GAME_STATES.LEVEL_INTRO),
+  );
+
+  assert(
+    "game state machine blocks impossible direct title to complete jumps",
+    !canTransitionGameState(GAME_STATES.TITLE, GAME_STATES.LEVEL_COMPLETE)
+      && transitionGameState(GAME_STATES.TITLE, GAME_STATES.LEVEL_COMPLETE).reason === "blocked-transition",
+  );
+
+  const stateMachine = createGameStateMachine();
+  stateMachine.transition(GAME_STATES.LOADING);
+  stateMachine.transition(GAME_STATES.TITLE);
+  const blockedMachineTransition = stateMachine.transition(GAME_STATES.LEVEL_COMPLETE);
+  assert(
+    "game state machine keeps current state after blocked transition",
+    stateMachine.getState() === GAME_STATES.TITLE && !blockedMachineTransition.changed,
+  );
+
+  assert(
+    "derived shell state prioritizes modal and error states",
+    deriveGameShellState({ saveSystemReady: false }) === GAME_STATES.LOADING
+      && deriveGameShellState({ started: true, paused: true }) === GAME_STATES.PAUSED
+      && deriveGameShellState({ started: true, settingsOpen: true }) === GAME_STATES.SETTINGS
+      && deriveGameShellState({ started: true, sceneError: new Error("boom") }) === GAME_STATES.ERROR,
+  );
+
+  assert(
+    "level lifecycle hook list covers reusable level events",
+    ["onLevelStart", "onLevelPause", "onLevelResume", "onLevelComplete", "onLevelFail", "onLevelExit"].every((hookName) => LEVEL_LIFECYCLE_HOOKS.includes(hookName)),
+  );
+
+  assert(
+    "template config exposes the default game shell switches",
+    GAME_TEMPLATE_CONFIG.defaultLevel === "level-1"
+      && GAME_TEMPLATE_CONFIG.startMusic === "title-theme"
+      && isTemplateFeatureEnabled("levelSelect")
+      && isTemplateFeatureEnabled("achievements")
+      && isTemplateFeatureEnabled("offlineMode"),
+  );
 
   return results;
 }

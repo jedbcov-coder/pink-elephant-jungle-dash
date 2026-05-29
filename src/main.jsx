@@ -12,6 +12,8 @@ import { setupServiceWorkerUpdatePrompt } from "./pwa/setupServiceWorkerUpdatePr
 import "./styles.css";
 import "./styles/game-ui.css";
 
+const APP_BASE_URL = import.meta.env.BASE_URL || "./";
+
 if (!window.__PEJD_BOOT__.versionLogged) {
   console.info(`Pink Elephant version: ${APP_VERSION} | ${APP_BUILD_LABEL} | ${APP_UPDATE_NOTE}`);
   window.__PEJD_BOOT__.versionLogged = true;
@@ -20,7 +22,7 @@ if (!window.__PEJD_BOOT__.versionLogged) {
 class AppErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, copiedDebugInfo: false, copyDebugInfoFailed: false };
   }
 
   static getDerivedStateFromError(error) {
@@ -30,6 +32,37 @@ class AppErrorBoundary extends React.Component {
   componentDidCatch(error, info) {
     console.error("Pink Elephant failed to render", error, info);
   }
+
+  buildDebugInfo() {
+    const error = this.state.error;
+    return JSON.stringify({
+      appVersion: APP_VERSION,
+      appBuildLabel: APP_BUILD_LABEL,
+      appUpdateNote: APP_UPDATE_NOTE,
+      message: error?.message || "Unknown app error",
+      stack: error?.stack || null,
+      location: window.location.href,
+      userAgent: navigator.userAgent,
+      boot: window.__PEJD_BOOT__ || {},
+    }, null, 2);
+  }
+
+  handleRestartGame = () => {
+    window.location.reload();
+  };
+
+  handleReturnToMenu = () => {
+    window.location.assign(APP_BASE_URL);
+  };
+
+  handleCopyDebugInfo = async () => {
+    try {
+      await navigator.clipboard.writeText(this.buildDebugInfo());
+      this.setState({ copiedDebugInfo: true, copyDebugInfoFailed: false });
+    } catch {
+      this.setState({ copiedDebugInfo: false, copyDebugInfoFailed: true });
+    }
+  };
 
   render() {
     if (this.state.error) {
@@ -42,6 +75,17 @@ class AppErrorBoundary extends React.Component {
           React.createElement("h1", null, "Pink Elephant could not start"),
           React.createElement("p", null, "The app hit a startup error instead of silently showing a blank jungle screen."),
           React.createElement("pre", null, message),
+          React.createElement("div", { className: "app-fallback-actions" },
+            React.createElement("button", { type: "button", className: "jungle-focus-ring jungle-menu-button-primary", onClick: this.handleRestartGame }, "Restart Game"),
+            React.createElement("button", { type: "button", className: "jungle-focus-ring jungle-menu-button-secondary", onClick: this.handleReturnToMenu }, "Return to Menu"),
+            React.createElement("button", { type: "button", className: "jungle-focus-ring jungle-menu-button-secondary", onClick: this.handleCopyDebugInfo }, "Copy Debug Info"),
+          ),
+          this.state.copiedDebugInfo
+            ? React.createElement("p", { className: "app-fallback-status" }, "Debug info copied.")
+            : null,
+          this.state.copyDebugInfoFailed
+            ? React.createElement("p", { className: "app-fallback-status" }, "Copy did not work in this browser. The short error message above is still visible.")
+            : null,
         ),
       );
     }
