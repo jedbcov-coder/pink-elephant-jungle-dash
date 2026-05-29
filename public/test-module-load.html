@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Module Load Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+    pre { background: #2a2a2a; padding: 10px; border-radius: 5px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Module Loading Diagnostic</h1>
+  <pre id="output"></pre>
+  
+  <script>
+    const output = document.getElementById('output');
+    function log(msg) {
+      output.textContent += msg + '\n';
+      console.log(msg);
+    }
+    
+    log('1. Page loaded');
+    log('2. Setting boot flag...');
+    window.__PEJD_BOOT__ = {
+      moduleStarted: false,
+      mounted: false,
+    };
+    log('3. Boot flag set');
+    log('4. About to import main.jsx...');
+    
+    setTimeout(() => {
+      log('5. [5000ms elapsed] Checking moduleStarted flag...');
+      log('   moduleStarted = ' + window.__PEJD_BOOT__.moduleStarted);
+      if (!window.__PEJD_BOOT__.moduleStarted) {
+        log('   ERROR: Module did not start!');
+      }
+    }, 5000);
+  </script>
+  
+  <script type="module">
+    const output = document.getElementById('output');
+    function log(msg) {
+      output.textContent += msg + '\n';
+      console.log(msg);
+    }
+    
+    try {
+      log('6. [Module Script] Starting...');
+      log('7. [Module Script] About to import src/main.jsx');
+      
+      import('/src/main.jsx').then(() => {
+        log('8. [Module Script] Import succeeded!');
+      }).catch((err) => {
+        log('9. [Module Script] Import FAILED: ' + err.message);
+        log('   Stack: ' + err.stack);
+      });
+      
+      log('10. [Module Script] Import call made (async)');
+    } catch (err) {
+      log('ERROR in module script: ' + err.message);
+      log(err.stack);
+    }
+  </script>
+</body>
+</html>

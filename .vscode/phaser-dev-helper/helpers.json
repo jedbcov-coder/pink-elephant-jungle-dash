@@ -1,0 +1,100 @@
+{
+  "helpers": [
+    {
+      "name": "resizeToFitScene",
+      "description": "Resize a sprite to match the current scene dimensions.",
+      "code": "sprite.setDisplaySize(this.scale.width, this.scale.height);",
+      "module": "Helpers",
+      "version": "3",
+      "tags": [
+        "resize",
+        "scene",
+        "display"
+      ]
+    },
+    {
+      "name": "createCropRectangle",
+      "description": "Generate and apply a crop rectangle from width/height fractions.",
+      "code": "const rect = new Phaser.Geom.Rectangle(0, 0, texture.width * 0.5, texture.height * 0.5);\\nsprite.setCrop(rect);",
+      "module": "Helpers",
+      "version": "3",
+      "tags": [
+        "crop",
+        "rectangle",
+        "image"
+      ]
+    },
+    {
+      "name": "createPhysicsSprite",
+      "description": "Create a physics sprite with world bounds enabled.",
+      "code": "const player = this.physics.add.sprite(${1:x}, ${2:y}, \"${3:key}\");\\nplayer.setCollideWorldBounds(true);",
+      "module": "Physics",
+      "version": "3",
+      "tags": [
+        "physics",
+        "sprite",
+        "boilerplate"
+      ]
+    },
+    {
+      "name": "createPlayerMovement",
+      "description": "Basic horizontal movement + jump handler with cursor keys.",
+      "code": "const cursors = this.input.keyboard.createCursorKeys();\\nif (cursors.left.isDown) player.setVelocityX(-160);\\nelse if (cursors.right.isDown) player.setVelocityX(160);\\nelse player.setVelocityX(0);\\nif (cursors.up.isDown && player.body.blocked.down) player.setVelocityY(-330);",
+      "module": "Input",
+      "version": "3",
+      "tags": [
+        "movement",
+        "player",
+        "input"
+      ]
+    },
+    {
+      "name": "cameraFollowPlayer",
+      "description": "Set camera bounds and start following player.",
+      "code": "this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);\\nthis.cameras.main.startFollow(player, true, 0.1, 0.1);",
+      "module": "Camera",
+      "version": "3",
+      "tags": [
+        "camera",
+        "follow",
+        "world"
+      ]
+    },
+    {
+      "name": "createCoinOverlap",
+      "description": "Collectible overlap callback with score update and destroy.",
+      "code": "this.physics.add.overlap(player, coins, (_player, coin) => {\\n  coin.destroy();\\n  score += 10;\\n  scoreText.setText('Score: ' + score);\\n});",
+      "module": "Physics",
+      "version": "3",
+      "tags": [
+        "overlap",
+        "collectible",
+        "score"
+      ]
+    },
+    {
+      "name": "pulseTween",
+      "description": "Apply repeating pulse tween to target object.",
+      "code": "this.tweens.add({\\n  targets: target,\\n  scale: 1.1,\\n  duration: 400,\\n  yoyo: true,\\n  repeat: -1\\n});",
+      "module": "Tweens",
+      "version": "3",
+      "tags": [
+        "tween",
+        "animation",
+        "ui"
+      ]
+    },
+    {
+      "name": "delayedRestart",
+      "description": "Restart current scene after delay.",
+      "code": "this.time.delayedCall(1000, () => this.scene.restart());",
+      "module": "Scene",
+      "version": "3",
+      "tags": [
+        "scene",
+        "restart",
+        "timer"
+      ]
+    }
+  ]
+}
