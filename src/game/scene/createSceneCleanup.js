@@ -19,8 +19,12 @@ export function createSceneCleanup({
   safeRemoveRendererDomElement,
   audioManagerRef,
   hardDispose = false,
+  transitionContext = null,
 }) {
   console.debug("[scene-cleanup-start]", currentLevelId);
+  if (transitionContext) {
+    console.debug("[level-transition-cleanup-start]", transitionContext);
+  }
   try {
     cancelAnimationFrame(frame);
     window.removeEventListener("keydown", keyDown);
@@ -68,10 +72,12 @@ export function createSceneCleanup({
       collectMaterial(object.material);
     };
 
-    collectTexture(scene.background);
-    collectTexture(scene.environment);
-    Object.values(textures).forEach(collectTexture);
-    scene.traverse(collectObjectResources);
+    if (scene) {
+      collectTexture(scene.background);
+      collectTexture(scene.environment);
+      scene.traverse(collectObjectResources);
+    }
+    Object.values(textures ?? {}).forEach(collectTexture);
 
     seenGeometries.forEach((geometry) => geometry.dispose());
     seenMaterials.forEach((material) => material.dispose?.());
@@ -79,17 +85,19 @@ export function createSceneCleanup({
     postProcessing?.dispose();
     console.debug("[renderer-dom-parent]", renderer?.domElement?.parentNode);
     safeRemoveRendererDomElement(renderer, mount);
-    renderer.renderLists?.dispose?.();
-    renderer.dispose();
+    renderer?.renderLists?.dispose?.();
+    renderer?.dispose?.();
     if (hardDispose) {
       try {
-        renderer.forceContextLoss?.();
+        renderer?.forceContextLoss?.();
       } catch (error) {
         console.warn("[scene-cleanup] forceContextLoss failed", error);
       }
     }
-    scene.clear();
-    audioManagerRef.current?.dispose();
+    scene?.clear?.();
+    if (hardDispose) {
+      audioManagerRef.current?.dispose();
+    }
   } catch (error) {
     console.warn("[scene-cleanup] Non-fatal cleanup error", error);
   }

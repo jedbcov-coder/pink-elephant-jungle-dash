@@ -101,6 +101,15 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
 - This ensures level transition state clears correctly (`isLevelTransitioning` and pending level start) when scene setup fails during Level 1 → Level 2 startup.
 - Kept the change minimal and scoped to transition error handling only.
 
+
+### Latest Level 1 → Level 2 transition safety update (2026-05-29)
+
+- Added one transition id across Level 1 → Level 2 debug logs so the Continue button, old-scene cleanup, new-scene creation, scene readiness, and pending start consumption can be traced together.
+- Wrapped scene setup in a transition-safe failure path so setup errors clear the transition state, show a useful scene error, and clean up partial renderer/scene resources instead of leaving the complete screen stuck.
+- Added local development direct boot checks: `?debugLevel=level-1` and `?debugLevel=level-2` start those levels after the save system is ready.
+- Kept Levels 1–3 on the existing `loopPlan` gameplay path; chunk mode remains planned-only for future Level 4+ work.
+- Updated the service worker cache to `v7` and kept JavaScript/CSS network-first so GitHub Pages does not keep serving stale Vite chunks after deploy.
+
 ## Deployment note
 - The live game is deployed with **GitHub Pages** at the link above.
 - The current playable demo is **3 levels**.

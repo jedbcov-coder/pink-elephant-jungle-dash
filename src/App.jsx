@@ -316,6 +316,12 @@ export default function App() {
   const touchInputDetectedRef = useRef(false);
   const immersiveRequestedRef = useRef(false);
   const pendingLevelStartRef = useRef(null);
+  const transitionCounterRef = useRef(0);
+  const levelTransitionWatchRef = useRef(null);
+  const isLevelTransitioningRef = useRef(false);
+  const currentLevelIdRef = useRef("level-1");
+  const sceneErrorRef = useRef(null);
+  const debugLevelBootedRef = useRef(false);
   const completeScreenOpenedAtRef = useRef(0);
   const activeLevelRef = useRef(buildLevelById("level-1"));
   const profileSnapshotRef = useRef(null);
@@ -376,6 +382,35 @@ export default function App() {
   const COMPLETE_SCREEN_INPUT_LOCK_MS = 900;
 
   const completeButtonDisabled = isLevelTransitioning || completeInputLocked;
+
+  currentLevelIdRef.current = currentLevelId;
+  isLevelTransitioningRef.current = isLevelTransitioning;
+  sceneErrorRef.current = sceneError;
+
+  function getLevelTransitionSnapshot(phase, overrides = {}) {
+    const pending = pendingLevelStartRef.current;
+    return {
+      transitionId: pending?.transitionId ?? overrides.transitionId ?? null,
+      fromLevelId: pending?.fromLevelId ?? overrides.fromLevelId ?? currentLevelIdRef.current,
+      toLevelId: pending?.levelId ?? overrides.toLevelId ?? currentLevelIdRef.current,
+      currentLevelId: currentLevelIdRef.current,
+      "pendingLevelStartRef.current": pending ? { ...pending } : null,
+      isLevelTransitioning: isLevelTransitioningRef.current,
+      sceneError: sceneErrorRef.current,
+      phase,
+      ...overrides,
+    };
+  }
+
+  function logLevelTransition(tag, phase, overrides = {}) {
+    const payload = getLevelTransitionSnapshot(phase, overrides);
+    if (tag === "[level-transition-failed]") {
+      console.error(tag, payload);
+    } else {
+      console.debug(tag, payload);
+    }
+    return payload;
+  }
 
   useEffect(() => {
     if (!complete && !gameOver) {
@@ -1025,33 +1060,67 @@ export default function App() {
     let fps = 60;
     const perfState = { frameWindowMs: 0, frameWindowCount: 0, windowFps: 60, effectQuality: 1, nearbyObstacleCount: 0 };
 
-    const failSceneCreate = (error) => {
-      console.error("[scene-create-failed]", {
+    let scene;
+    let camera;
+    let sun;
+    let activeCourse;
+    let activeTheme;
+    let courseFloorLength;
+    let courseFinishZ;
+    let courseVisualEndZ;
+    let renderer;
+    let postProcessing;
+    let textures;
+    let scenePhase = "basics";
+
+    const logScenePhase = (phase) => {
+      scenePhase = phase;
+      logLevelTransition("[level-transition-scene-phase]", phase, {
         currentLevelId,
-        error,
-        stack: error?.stack,
+        toLevelId: currentLevelId,
       });
-      setSceneError(error?.message ?? "Unknown scene creation error");
-      setIsLevelTransitioning(false);
-      pendingLevelStartRef.current = null;
     };
 
-    let sceneBasics;
-    try {
-      sceneBasics = createSceneBasics({ mount, currentLevelConfig });
-    } catch (error) {
-      failSceneCreate(error);
-      return undefined;
-    }
+    const failSceneCreate = (error) => {
+      sceneErrorRef.current = `Scene setup failed during ${scenePhase}: ${error?.message ?? "Unknown scene creation error"}`;
+      logLevelTransition("[level-transition-failed]", scenePhase, {
+        currentLevelId,
+        toLevelId: currentLevelId,
+        error: error?.message ?? String(error),
+        stack: error?.stack ?? null,
+      });
+      setSceneError(sceneErrorRef.current);
+      setIsLevelTransitioning(false);
+      isLevelTransitioningRef.current = false;
+      pendingLevelStartRef.current = null;
+      if (levelTransitionWatchRef.current) {
+        levelTransitionWatchRef.current.completed = true;
+      }
+      try {
+        safeRemoveRendererDomElement(renderer, mount);
+        renderer?.renderLists?.dispose?.();
+        renderer?.dispose?.();
+        scene?.clear?.();
+      } catch (cleanupError) {
+        console.warn("[scene-create-failed-cleanup] Partial scene cleanup failed", cleanupError);
+      }
+    };
 
-    const { scene, camera, sun, activeCourse, activeTheme, courseFloorLength, courseFinishZ, courseVisualEndZ } = sceneBasics;
-    const levelSpeed = currentLevelConfig.speed ?? MOVEMENT;
-    const levelMaxSpeed = levelSpeed.maxSpeed ?? MOVEMENT.maxSpeed;
+    logLevelTransition("[level-transition-scene-create-start]", "basics", {
+      currentLevelId,
+      toLevelId: currentLevelId,
+    });
 
-    let renderer;
-    let rendererPixelRatio;
-    let postProcessing;
     try {
+      logScenePhase("basics");
+      const sceneBasics = createSceneBasics({ mount, currentLevelConfig });
+
+      ({ scene, camera, sun, activeCourse, activeTheme, courseFloorLength, courseFinishZ, courseVisualEndZ } = sceneBasics);
+      const levelSpeed = currentLevelConfig.speed ?? MOVEMENT;
+      const levelMaxSpeed = levelSpeed.maxSpeed ?? MOVEMENT.maxSpeed;
+
+      let rendererPixelRatio;
+      logScenePhase("renderer");
       ({ renderer, rendererPixelRatio, postProcessing } = createRenderer({
         mount,
         scene,
@@ -1059,10 +1128,6 @@ export default function App() {
         createPostProcessing,
         setSceneError,
       }));
-    } catch (error) {
-      failSceneCreate(error);
-      return undefined;
-    }
 
     const renderFrame = () => {
       if (postProcessing) {
@@ -1073,8 +1138,10 @@ export default function App() {
     };
 
 
-    const textures = createSceneTextures();
+    logScenePhase("textures");
+    textures = createSceneTextures();
 
+    logScenePhase("course-geometry");
     const jungle = new THREE.Mesh(new THREE.BoxGeometry(CONFIG.floorWidth, 1.2, courseFloorLength), new THREE.MeshStandardMaterial({ map: textures.ground, roughness: 0.98 }));
     jungle.position.set(0, -0.62, -courseFloorLength / 2 + 20);
     jungle.receiveShadow = true;
@@ -1101,18 +1168,11 @@ export default function App() {
 
     let pathGroup;
     let safeHalfWidth;
-    try {
-      ({ pathGroup, safeHalfWidth } = createCourseGeometry({
-        scene,
-        textures,
-        courseVisualEndZ,
-      }));
-    } catch (error) {
-      failSceneCreate(error);
-      safeRemoveRendererDomElement(renderer, mount);
-      renderer?.dispose?.();
-      return undefined;
-    }
+    ({ pathGroup, safeHalfWidth } = createCourseGeometry({
+      scene,
+      textures,
+      courseVisualEndZ,
+    }));
 
     const colliders = [], pickups = [], crocs = [], particles = [], pops = [];
     const activeObstacles = [];
@@ -1125,20 +1185,14 @@ export default function App() {
     let pooledParticleGeometry;
     let sharedGeometries;
     let sharedTreeGeometries;
-    try {
-      ({ particlePool, popPools, pooledParticleGeometry, sharedGeometries, sharedTreeGeometries } = createSharedResources({
-        scene,
-        createBroadBananaLeafGeometry,
-        createMossClumpGeometry,
-        createLargeForegroundRockGeometry,
-        createRuinBlockClusterGeometry,
-      }));
-    } catch (error) {
-      failSceneCreate(error);
-      safeRemoveRendererDomElement(renderer, mount);
-      renderer?.dispose?.();
-      return undefined;
-    }
+    logScenePhase("shared-resources");
+    ({ particlePool, popPools, pooledParticleGeometry, sharedGeometries, sharedTreeGeometries } = createSharedResources({
+      scene,
+      createBroadBananaLeafGeometry,
+      createMossClumpGeometry,
+      createLargeForegroundRockGeometry,
+      createRuinBlockClusterGeometry,
+    }));
     const MAX_PICKUP_POINT_LIGHTS = 4;
     let pickupPointLights = 0;
     const createLimitedPickupLight = (color, intensity, distance) => {
@@ -1204,6 +1258,7 @@ export default function App() {
       side: THREE.DoubleSide,
     });
     const riverStoneMat = makeMaterial("#817e68", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.94 });
+    logScenePhase("rivers");
     activeLevelRef.current.rivers.forEach((river, riverIndex) => {
       const cx = trackCenter(river.z);
       const riverGroup = new THREE.Group();
@@ -1652,6 +1707,7 @@ export default function App() {
     const fruitLobeMat = makeMaterial("#ff9a73", { roughness: 0.54, emissive: "#ff9f6f", emissiveIntensity: 0.22 });
     const fruitLeafMat = makeMaterial("#4f9f46", { roughness: 0.56, emissive: "#e5c76b", emissiveIntensity: 0.36 });
     const fruitStemMat = makeMaterial("#825226", { roughness: 0.82, emissive: "#c79757", emissiveIntensity: 0.14 });
+    logScenePhase("fruits");
     activeLevelRef.current.fruits.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
       const fruit = new THREE.Group();
@@ -1678,6 +1734,7 @@ export default function App() {
     const caneMat = makeMaterial("#a9d678", { roughness: 0.54, emissive: "#ffde8f", emissiveIntensity: 0.38 });
     const caneNodeMat = makeMaterial("#ecd9aa", { roughness: 0.42, emissive: "#ffe2a0", emissiveIntensity: 0.4 });
     const caneLeafMat = makeMaterial("#4b9a42", { roughness: 0.5, emissive: "#dfc56e", emissiveIntensity: 0.26 });
+    logScenePhase("health");
     activeLevelRef.current.health.forEach((pos) => {
       const posOnPath = worldPosition(pos.localX, pos.z);
       const group = new THREE.Group();
@@ -1857,6 +1914,7 @@ export default function App() {
       registerObstacleTelegraph({ localX: 0, z: river.z, type: "river", distance: 11, width: river.width });
     });
 
+    logScenePhase("logs");
     activeLevelRef.current.logs.forEach((log) => {
       addMudSkidCue(log);
       registerObstacleTelegraph({ localX: log.localX, z: log.z, type: "log", distance: 8.8, width: log.width });
@@ -1936,6 +1994,7 @@ export default function App() {
       colliders.push({ type: "crate", active: true, mesh: group, x: posOnPath.x, y: crate.height / 2, z: posOnPath.z, w: crate.width, h: crate.height, d: crate.depth });
     });
 
+    logScenePhase("branches");
     activeLevelRef.current.branches.forEach((branch) => {
       addLeafShadowCue(branch);
       registerObstacleTelegraph({ localX: branch.localX, z: branch.z, type: "branch", distance: 7.8, width: branch.width });
@@ -2157,6 +2216,7 @@ export default function App() {
       });
     }
 
+    logScenePhase("enemies");
     activeLevelRef.current.enemies.forEach((en) => {
       addMonkeyEyeCue(en);
       const group = new THREE.Group();
@@ -2216,6 +2276,7 @@ export default function App() {
     const pineappleMat = makeMaterial("#f4b449", { map: textures.collectibleGlow, emissive: "#ffe08b", emissiveIntensity: 1.14, metalness: 0.1, roughness: 0.35, envMapIntensity: 1.24 });
     const pineappleScaleMat = makeMaterial("#d18a2a", { roughness: 0.48, emissive: "#f4c56d", emissiveIntensity: 0.44 });
     const pineappleLeafMat = makeMaterial("#4d9b45", { roughness: 0.56, emissive: "#e2c96e", emissiveIntensity: 0.34 });
+    logScenePhase("collectibles");
     activeLevelRef.current.collectibles.forEach((col) => {
       const posOnPath = worldPosition(col.localX, col.z);
       const group = new THREE.Group();
@@ -2252,6 +2313,7 @@ export default function App() {
       collectibleMeshes.push({ mesh: group, knot, active: true, x: posOnPath.x, y: col.y, z: posOnPath.z, radius: PICKUPS.pineappleRadius });
     });
 
+    logScenePhase("gate");
     gate.position.set(trackCenter(activeLevelRef.current.gate.z), 0, activeLevelRef.current.gate.z);
     gate.rotation.y = trackAngle(activeLevelRef.current.gate.z);
     const gateMat = makeMaterial("#d9b863", { map: textures.stoneBlocks, normalMap: textures.stoneBlockNormal, normalScale: [0.28, 0.28], roughness: 0.55, emissive: "#4d2f05", emissiveIntensity: 0.2, envMapIntensity: 1.15 });
@@ -2271,6 +2333,7 @@ export default function App() {
     scene.add(gate);
     colliders.push({ type: "gate", active: true, mesh: gate, x: trackCenter(activeLevelRef.current.gate.z), y: 3, z: activeLevelRef.current.gate.z, w: CONFIG.corridorHalfWidth * 2 + 6, h: 6, d: CONFIG.finishTriggerDepth });
 
+    logScenePhase("player");
     const player = new THREE.Group();
     player.scale.set(1.035, 1.035, 1.035);
     scene.add(player);
@@ -2495,12 +2558,25 @@ export default function App() {
       setPaused(false);
     }
 
+    logScenePhase("reset-function-ready");
     resetGameRef.current = resetGame;
     if (pendingLevelStartRef.current && pendingLevelStartRef.current.levelId === currentLevelId) {
-      const { start } = pendingLevelStartRef.current;
+      const pendingStart = pendingLevelStartRef.current;
+      const { start } = pendingStart;
       pendingLevelStartRef.current = null;
       resetGame({ start });
       setIsLevelTransitioning(false);
+      isLevelTransitioningRef.current = false;
+      if (levelTransitionWatchRef.current?.transitionId === pendingStart.transitionId) {
+        levelTransitionWatchRef.current.completed = true;
+      }
+      logLevelTransition("[level-transition-pending-start-consumed]", "reset-function-ready", {
+        transitionId: pendingStart.transitionId,
+        fromLevelId: pendingStart.fromLevelId,
+        toLevelId: pendingStart.levelId,
+        "pendingLevelStartRef.current": null,
+        isLevelTransitioning: false,
+      });
     }
 
     function activateParticle(x, y, z, colour, scale = 0.28, life = 1, velocity = {}) {
@@ -3435,6 +3511,11 @@ export default function App() {
       frame = requestAnimationFrame(animate);
     }
 
+    logLevelTransition("[level-transition-scene-ready]", "reset-function-ready", {
+      currentLevelId,
+      toLevelId: currentLevelId,
+    });
+    logScenePhase("animation-started");
     console.debug("[scene-create]", currentLevelId);
     resize();
     frame = requestAnimationFrame(animate);
@@ -3463,8 +3544,16 @@ export default function App() {
         safeRemoveRendererDomElement,
         audioManagerRef,
         hardDispose: false,
+        transitionContext: getLevelTransitionSnapshot("cleanup", {
+          currentLevelId,
+          toLevelId: pendingLevelStartRef.current?.levelId ?? currentLevelId,
+        }),
       });
     };
+    } catch (error) {
+      failSceneCreate(error);
+      return undefined;
+    }
   }, [currentLevelId, saveSystemReady]);
 
   function startNewGame() {
@@ -3488,9 +3577,22 @@ export default function App() {
 
   function startLevelById(levelId) {
     const nextConfig = levelId ? getLevelConfigStrict(levelId) : null;
-    if (!nextConfig || isLevelTransitioning) return;
+    const fromLevelId = currentLevelIdRef.current;
+    const transitionId = `level-transition-${Date.now()}-${++transitionCounterRef.current}`;
+
+    if (!nextConfig || isLevelTransitioningRef.current) {
+      logLevelTransition("[level-transition-failed]", "request", {
+        transitionId,
+        fromLevelId,
+        toLevelId: levelId,
+        error: !nextConfig ? "Missing level config" : "A level transition is already running",
+        stack: null,
+      });
+      return;
+    }
 
     setSceneError(null);
+    sceneErrorRef.current = null;
 
     console.debug("[start-level]", levelId);
     closeSettingsPanel();
@@ -3506,17 +3608,67 @@ export default function App() {
 
     stopTitleTheme(0.18);
     startAudio();
-    if (levelId === currentLevelId) {
+
+    pendingLevelStartRef.current = { levelId, start: true, transitionId, fromLevelId };
+    isLevelTransitioningRef.current = true;
+    setIsLevelTransitioning(true);
+    logLevelTransition("[level-transition-request]", "request", {
+      transitionId,
+      fromLevelId,
+      toLevelId: levelId,
+      currentLevelId: fromLevelId,
+      isLevelTransitioning: true,
+    });
+
+    if (import.meta.env.DEV && levelId === "level-2") {
+      levelTransitionWatchRef.current = { transitionId, completed: false };
+      window.setTimeout(() => {
+        const watch = levelTransitionWatchRef.current;
+        if (!watch || watch.transitionId !== transitionId || watch.completed) return;
+        const errorMessage = "Level transition assertion timed out before the pending start was consumed or failed.";
+        logLevelTransition("[level-transition-failed]", "assertion-timeout", {
+          transitionId,
+          fromLevelId,
+          toLevelId: levelId,
+          error: errorMessage,
+          stack: new Error(errorMessage).stack,
+        });
+        pendingLevelStartRef.current = null;
+        isLevelTransitioningRef.current = false;
+        setIsLevelTransitioning(false);
+        setSceneError(errorMessage);
+      }, 15000);
+    }
+
+    if (levelId === fromLevelId) {
       resetGameRef.current?.({ start: true });
       pendingLevelStartRef.current = null;
+      isLevelTransitioningRef.current = false;
       setIsLevelTransitioning(false);
+      logLevelTransition("[level-transition-pending-start-consumed]", "same-level-reset", {
+        transitionId,
+        fromLevelId,
+        toLevelId: levelId,
+        "pendingLevelStartRef.current": null,
+        isLevelTransitioning: false,
+      });
       return;
     }
 
-    setIsLevelTransitioning(true);
-    pendingLevelStartRef.current = { levelId, start: true };
     setCurrentLevelId(levelId);
   }
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || !saveSystemReady || debugLevelBootedRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const debugLevelId = new URLSearchParams(window.location.search).get("debugLevel");
+    if (debugLevelId !== "level-1" && debugLevelId !== "level-2") return;
+
+    debugLevelBootedRef.current = true;
+    console.debug("[debug-level-boot]", { debugLevelId });
+    window.requestAnimationFrame(() => startLevelById(debugLevelId));
+  }, [saveSystemReady]);
 
   return (
     <main className={`app-shell layout-${layoutMode} touch-mode-${touchControlsMode} ${touchControlsVisible ? "touch-controls-active" : ""} relative h-screen w-screen overflow-hidden bg-[#04140a] text-white ${immersiveReady ? "immersive-ready" : ""} ${paused ? "pause-overlay-active" : ""}`} data-orientation={isPortrait ? "portrait" : "landscape"} style={{ fontFamily: "system-ui, -apple-system, sans-serif", width: "100%", maxWidth: "100%", height: "100dvh", minHeight: viewportHeight ? `${Math.round(viewportHeight)}px` : "100dvh" }}>

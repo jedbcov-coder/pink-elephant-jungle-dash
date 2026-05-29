@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "jungle-dash-offline";
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7";
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
 
 const STATIC_FILES = [
@@ -73,7 +73,7 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       } catch {
-        return (await caches.match(event.request, { ignoreSearch: true })) || Response.error();
+        return (await caches.match(event.request)) || Response.error();
       }
     }
 
