@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "jungle-dash-offline";
-const CACHE_VERSION = "v5";
+const CACHE_VERSION = "v6";
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
 
 const STATIC_FILES = [
@@ -11,15 +11,17 @@ const STATIC_FILES = [
   "./service-worker.js",
 ];
 
-const ASSET_CACHE_EXTENSIONS = [
-  ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico", ".json", ".webmanifest", ".woff", ".woff2", ".mp3", ".wav", ".ogg", ".m4a", ".glb", ".gltf",
+const NETWORK_FIRST_EXTENSIONS = [".js", ".css"];
+
+const CACHE_FIRST_EXTENSIONS = [
+  ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico", ".json", ".webmanifest", ".woff", ".woff2", ".mp3", ".wav", ".ogg", ".m4a", ".glb", ".gltf",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(STATIC_FILES);
-
+    await self.skipWaiting();
   })());
 });
 
@@ -56,31 +58,37 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  const isCacheableAsset = ASSET_CACHE_EXTENSIONS.some((ext) => url.pathname.endsWith(ext));
-  if (!isCacheableAsset) return;
+  const isNetworkFirstAsset = NETWORK_FIRST_EXTENSIONS.some((ext) => url.pathname.endsWith(ext));
+  const isCacheFirstAsset = CACHE_FIRST_EXTENSIONS.some((ext) => url.pathname.endsWith(ext));
+  if (!isNetworkFirstAsset && !isCacheFirstAsset) return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const cached = await caches.match(event.request, { ignoreSearch: true });
 
-    const networkFetch = fetch(event.request)
-      .then((networkResponse) => {
+    if (isNetworkFirstAsset) {
+      try {
+        const networkResponse = await fetch(event.request);
         if (networkResponse.ok) {
           cache.put(event.request, networkResponse.clone());
         }
         return networkResponse;
-      })
-      .catch(() => null);
-
-    if (cached) {
-      networkFetch.catch(() => {
-        // Ignore background refresh failures while offline.
-      });
-      return cached;
+      } catch {
+        return (await caches.match(event.request, { ignoreSearch: true })) || Response.error();
+      }
     }
 
-    const networkResponse = await networkFetch;
-    return networkResponse || Response.error();
+    const cached = await caches.match(event.request, { ignoreSearch: true });
+    if (cached) return cached;
+
+    try {
+      const networkResponse = await fetch(event.request);
+      if (networkResponse.ok) {
+        cache.put(event.request, networkResponse.clone());
+      }
+      return networkResponse;
+    } catch {
+      return Response.error();
+    }
   })());
 });
 

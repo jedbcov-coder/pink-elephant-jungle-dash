@@ -35,6 +35,14 @@ Pink Elephant Jungle Dash is a beginner-friendly 3D browser runner game where yo
    ```
 5. Open the local URL shown in the terminal (usually `http://localhost:5173`).
 
+
+### Latest Level 1 → Level 2 PWA cache refresh (2026-05-29)
+
+- Updated the service worker cache from `v5` to `v6` so installed PWA users get a clean cache refresh instead of older cached game files.
+- Changed JavaScript and CSS files to load network-first, with cache fallback only when offline. This helps GitHub Pages serve the newest game bundle after deployment.
+- Updated the app release marker to `1.0.6` and made service-worker registration use that app marker so future releases request the newest service worker URL.
+- Added a small live transition debug marker on the complete screen showing `currentLevelId`, `nextLevelId`, `isLevelTransitioning`, and `sceneError` for easier Level 1 → Level 2 checks.
+
 ### Latest Level 1 → Level 2 transition parse-fix update (2026-05-26)
 
 - Fixed `src/App.jsx` duplicate/dead code introduced in complete-screen state and button markup that could break production parsing/minification during level transitions.

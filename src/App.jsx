@@ -412,11 +412,12 @@ export default function App() {
       isLevelTransitioning,
       completeScreenOpenedAt: completeScreenOpenedAtRef.current,
       completeScreenInputLocked: completeInputLocked,
+      sceneError,
     });
 
     prevCompleteRef.current = complete;
     if (complete) prevCompleteLevelIdRef.current = currentLevelId;
-  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeInputLocked]);
+  }, [complete, currentLevelId, currentLevelConfig?.name, nextLevelId, nextLevelConfig?.name, hasNextLevel, showFinalReward, isLevelTransitioning, completeInputLocked, sceneError]);
 
   function resetCompleteScreenInputLock() {
     completeScreenOpenedAtRef.current = 0;
@@ -3714,24 +3715,21 @@ export default function App() {
                 ? "The Pink Elephant has completed the jungle trail."
                 : `Great run! You're ready for ${nextLevelConfig?.name ?? "the next level"}.`}
             </p>
-            {import.meta.env.DEV && (
-              <section
-                className="mx-auto mt-4 max-w-sm rounded-xl border border-amber-100/20 bg-black/20 px-3 py-2 text-left text-[11px] text-amber-100/70"
-                aria-label="Development complete-screen state"
-              >
-                <div className="font-semibold">DEV state</div>
-                <ul className="mt-1 space-y-0.5">
-                  <li>Current level: {currentLevelId}</li>
-                  <li>Next level id: {nextLevelId ?? "(none)"}</li>
-                  <li>Has next level: {String(hasNextLevel)}</li>
-                  <li>Transitioning: {String(isLevelTransitioning)}</li>
-                  <li>Input locked: {String(completeInputLocked)}</li>
-                </ul>
-                {hasNextLevelConfigMismatch && (
-                  <div className="mt-1 text-[11px] font-semibold text-amber-200">Next level config missing.</div>
-                )}
-              </section>
-            )}
+            <section
+              className="mx-auto mt-4 max-w-sm rounded-xl border border-amber-100/20 bg-black/20 px-3 py-2 text-left text-[11px] text-amber-100/70"
+              aria-label="Complete-screen transition debug marker"
+            >
+              <div className="font-semibold">Transition debug</div>
+              <ul className="mt-1 space-y-0.5">
+                <li>currentLevelId: {currentLevelId}</li>
+                <li>nextLevelId: {nextLevelId ?? "(none)"}</li>
+                <li>isLevelTransitioning: {String(isLevelTransitioning)}</li>
+                <li>sceneError: {sceneError ?? "(none)"}</li>
+              </ul>
+              {hasNextLevelConfigMismatch && (
+                <div className="mt-1 text-[11px] font-semibold text-amber-200">Next level config missing.</div>
+              )}
+            </section>
             {showFinalReward && (
               <section className="final-reward-screen mt-5 rounded-2xl border border-amber-200/35 bg-black/30 p-4 text-left">
                 <h3 className="text-sm font-black uppercase tracking-[0.18em] text-amber-100">Reward sequence unlocked</h3>

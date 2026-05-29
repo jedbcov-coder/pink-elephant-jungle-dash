@@ -73,6 +73,6 @@ createRoot(rootElement).render(
 );
 
 setupServiceWorkerUpdatePrompt({
-  appVersion: __APP_VERSION__,
+  appVersion: APP_VERSION,
   baseUrl: import.meta.env.BASE_URL,
 });
