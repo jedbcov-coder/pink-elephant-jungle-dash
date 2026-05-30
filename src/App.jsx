@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { Icon } from "./components/Icon.jsx";
 import { RotateOverlay } from "./components/game-ui/RotateOverlay.jsx";
@@ -4106,6 +4107,7 @@ export default function App() {
       )}
       </div>
       <SpeedInsights />
+      <Analytics />
     </main>
   );
 }
