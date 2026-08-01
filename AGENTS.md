@@ -2,8 +2,8 @@
 > [!NOTE]
 > **DevHut Meta-Repository Context**
 > This project is a constituent subproject of the **DevHut** meta-repository.
-> - **Product Exports**: All compiled releases and packaging output (`.exe`, `.msi`, `.vsix`, `.paf.exe`, etc.) must be exported directly to the centralized directory `D:\Products\software\pink-elephant-jungle-dash\releases\v<version>\`. Storing product outputs within the local project workspace is forbidden.
-> - **Shared Knowledge**: Coding agents are instructed to borrow, reuse, and align with design tokens, architectural patterns, SQLite schemas, Svelte/Tauri integration, and engineering practices from sibling projects in `10-workshop/software/` and `60-tool-rack/`.
+> - **Product Exports**: All compiled releases and packaging output (`.exe`, `.msi`, `.vsix`, `.paf.exe`, etc.) must be exported directly to the centralized directory `D:\Products\games\pink-elephant-jungle-dash\releases\v<version>\`. Storing product outputs within the local project workspace is forbidden.
+> - **Shared Knowledge**: Coding agents are instructed to borrow, reuse, and align with design tokens, architectural patterns, SQLite schemas, Svelte/Tauri integration, and engineering practices from sibling projects in `10-workshop/games/`, `10-workshop/software/`, and `60-tool-rack/`.
 > - **Portable Tool Preference**: When selecting tools for diagnostics, file inspection, or build support, prefer portable versions available on `D:\Tools\` over any equivalent installed on `C:\`. This keeps the SSD self-sufficient when moved between laptops. Only fall back to `C:\` tools when `D:\Tools\` does not provide the needed capability.
 
 These instructions apply to the whole repository unless a deeper `AGENTS.md` file gives more specific rules.

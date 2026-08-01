@@ -18,7 +18,7 @@ homepage_parent: "../../../00-system/devhut-home.md"
 
 > Beginner-friendly 3D browser runner game.
 
-[**Open Workspace**](vscode://file/D:/DevHut/10-workshop/software/pink-elephant-jungle-dash/pink-elephant-jungle-dash.code-workspace) · [Back To DevHut Home](../../../00-system/devhut-home.md) · [README](README.md) · [Project Status](PROJECT_STATUS.md) · [Roadmap](ROADMAP.md) · [Agent Instructions](AGENTS.md) · [Security](SECURITY.md) · [DEVLOG](DEVLOG.md)
+[**Open Workspace**](vscode://file/D:/DevHut/10-workshop/games/pink-elephant-jungle-dash/pink-elephant-jungle-dash.code-workspace) · [Back To DevHut Home](../../../00-system/devhut-home.md) · [README](README.md) · [Project Status](PROJECT_STATUS.md) · [Roadmap](ROADMAP.md) · [Agent Instructions](AGENTS.md) · [Security](SECURITY.md) · [DEVLOG](DEVLOG.md)
 
 ## Overview
 

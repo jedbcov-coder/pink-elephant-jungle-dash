@@ -2,7 +2,7 @@
 
 ## Project Identity
 *   **Role:** 2D browser side-scroller game prototype.
-*   **Path:** `10-workshop/software/pink-elephant-jungle-dash`
+*   **Path:** `10-workshop/games/pink-elephant-jungle-dash`
 *   **Primary Stack:** React 19, Vite 8, HTML5 Canvas, Three.js, TypeScript.
 
 ## Current State
