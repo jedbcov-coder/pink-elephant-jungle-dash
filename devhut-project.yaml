@@ -1,0 +1,47 @@
+﻿schema_version: 1
+
+project:
+  id: pink-elephant-jungle-dash
+  name: 'Pink Elephant Jungle Dash'
+  category: games
+  profile: governance
+  lifecycle: maintenance
+  maturity: concept
+  visibility: private
+
+purpose:
+  summary: 'Browser runner game and release pipeline.'
+
+repository:
+  provider: github
+  full_name: 'Sum-Method/pink-elephant-jungle-dash'
+  default_branch: 'main'
+  ownership: independent
+  boundary: nested
+
+location:
+  workshop_relative_path: 10-workshop/games/pink-elephant-jungle-dash
+
+documentation:
+  readme: README.md
+  agents: AGENTS.md
+  security: SECURITY.md
+  status: PROJECT_STATUS.md
+  roadmap: ROADMAP.md
+  devlog: DEVLOG.md
+
+release:
+  produces_products: false
+  product_category: null
+  product_id: null
+  profile: null
+
+security:
+  classification: L1_PRIVATE_WORKING
+  cloud_ai: allowed-with-policy
+  secrets: external-only
+
+observatory:
+  register: true
+  public_safe: false
+  featured: false
