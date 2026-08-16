@@ -1,4 +1,4 @@
-﻿schema_version: 1
+schema_version: 1
 
 project:
   id: pink-elephant-jungle-dash
@@ -26,9 +26,9 @@ documentation:
   readme: README.md
   agents: AGENTS.md
   security: SECURITY.md
-  status: PROJECT_STATUS.md
-  roadmap: ROADMAP.md
-  devlog: DEVLOG.md
+  status: project-status.md
+  roadmap: roadmap.md
+  devlog: devlog.md
 
 release:
   produces_products: false
@@ -45,3 +45,4 @@ observatory:
   register: true
   public_safe: false
   featured: false
+

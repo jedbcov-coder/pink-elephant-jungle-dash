@@ -5,9 +5,10 @@ Documentation index for Pink Elephant Jungle Dash.
 ## Index
 
 - [Project README](../README.md)
-- [Project Status](../PROJECT_STATUS.md)
-- [Roadmap](../ROADMAP.md)
+- [Project Status](../project-status.md)
+- [Roadmap](../roadmap.md)
 - [Agent Instructions](../AGENTS.md)
 - [Security](../SECURITY.md)
 
 Use this directory for release notes, offline testing references, gameplay documentation, and device QA records.
+

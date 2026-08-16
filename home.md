@@ -10,7 +10,7 @@ tags:
   - devhut
   - workspace-home
 cssclass: obsidian-homepage
-status_source: "PROJECT_STATUS.md"
+status_source: "project-status.md"
 homepage_parent: "../../../00-system/devhut-home.md"
 ---
 
@@ -18,10 +18,11 @@ homepage_parent: "../../../00-system/devhut-home.md"
 
 > Beginner-friendly 3D browser runner game.
 
-[**Open Workspace**](vscode://file/D:/DevHut/10-workshop/games/pink-elephant-jungle-dash/pink-elephant-jungle-dash.code-workspace) · [Back To DevHut Home](../../../00-system/devhut-home.md) · [README](README.md) · [Project Status](PROJECT_STATUS.md) · [Roadmap](ROADMAP.md) · [Agent Instructions](AGENTS.md) · [Security](SECURITY.md) · [DEVLOG](DEVLOG.md)
+[**Open Workspace**](vscode://file/D:/DevHut/10-workshop/games/pink-elephant-jungle-dash/pink-elephant-jungle-dash.code-workspace) · [Back To DevHut Home](../../../00-system/devhut-home.md) · [README](README.md) · [Project Status](project-status.md) · [Roadmap](roadmap.md) · [Agent Instructions](AGENTS.md) · [Security](SECURITY.md) · [DEVLOG](devlog.md)
 
 ## Overview
 
 Guide a pink elephant through jungle paths, collect fruit, avoid hazards, and progress through three levels with skippable cut scenes. Built with React, Vite, Three.js, and Phaser.
 
 **Live playable:** https://jedbcov-coder.github.io/pink-elephant-jungle-dash/
+
