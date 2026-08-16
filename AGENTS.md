@@ -168,3 +168,31 @@ Uncaught TypeError: Cannot assign to read only property 'open' of object '#<Wind
 For game assets compression, sprite sheets optimization, and haptics/audio tuning, refer to the SSD's global tool registry in [D:\Tools\README.md](file:///D:/Tools/README.md). Specific tools useful for this project include:
 *   **FFmpeg** (`D:\Tools\bin\ffmpeg.exe`): Terminal client for compressing background music loops and audio files.
 *   **XnConvert Portable** (`D:\Tools\portableapps\PortableApps\XnConvertPortable\`): Batch converter for resizing, format conversions (PNG to WebP), and optimizing sprite assets.
+
+<!-- DEVHUT:ESTATE-ROUTING:BEGIN -->
+## Estate Routing
+
+This project is repository-bounded but estate-aware. Git ownership boundaries
+do not replace DevHut functional routing.
+
+Use `docs/developer/` for project-specific exploratory or reference material
+that should remain local, untracked and non-authoritative.
+
+Use the wider estate according to function:
+
+| Destination | Purpose |
+|---|---|
+| `D:\Products\` | Deliberately published, versioned usable artefacts, including published prototypes and accepted releases |
+| `D:\Scratch\working\` | Disposable staging, extraction, conversion and transient operational work |
+| `D:\Scratch\downloads\` | Temporary incoming/downloaded material awaiting use, validation or routing |
+| `D:\Scratch\exports\` | Bulk or non-curated generated output |
+| `D:\Backups\` | Recovery copies, snapshots and rollback state |
+| `D:\Tools\` | Installed utilities, runtimes and portable tools |
+| `D:\Models\` | Local model files and model caches |
+| `D:\SecureVault\` | Secrets and sealed sensitive material |
+| `D:\ArchiveCold\` | Deliberately retained inactive material |
+
+Do not treat a development build as a published Product automatically.
+Product-producing projects must follow their release profile and the DevHut
+product release policy before publishing to `Products`.
+<!-- DEVHUT:ESTATE-ROUTING:END -->
